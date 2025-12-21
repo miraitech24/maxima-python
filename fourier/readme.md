@@ -11,8 +11,3 @@ $\int_{0}^{\infty }{{\% e}^{-\left( a {{x}^{2}}\right) }} \cos{\left( b x\right)
 
 $\frac{\sqrt{\ensuremath{\pi} } {{\% e}^{-\left( \frac{{{b}^{2}}}{4 a}\right) }}}{2 \sqrt{a}}$
 <img width="548" height="268" alt="Figure 2025-12-21 140602" src="https://github.com/user-attachments/assets/c0d06b2e-52b2-422c-89dc-10e937711871" />
-
-<<<<<<< HEAD
-<img width="548" height="268" alt="Figure 2025-12-21 140602" src="https://github.com/user-attachments/assets/573b86b3-d6a0-4666-8ac6-b133607b0610" />
-=======
->>>>>>> 6834b64047e05b9159a4cec43d4d8eae86ae10e5

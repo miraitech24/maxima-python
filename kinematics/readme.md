@@ -62,14 +62,9 @@ scipy.integrate.odeint または solve_ivp を用いて、初期角 $170^\circ$�
 1. **wxMaxima:** 運動方程式の最終的な出力画面
 
 2. **Python:** 角度 $\theta$ が時間の経過とともに激しく振れる（または回転する）グラフ
+
 <img width="663" height="337" alt="kinematics" src="https://github.com/user-attachments/assets/fa6ae2a9-5e7d-405b-b3e2-a27fbbc69a39" />
+
 <img width="440" height="322" alt="kinematics2" src="https://github.com/user-attachments/assets/ca7f6ea6-5893-4b16-8856-f0dabdebbbcd" />
 
-<<<<<<< HEAD
 
-
-<img width="663" height="337" alt="kinematics" src="https://github.com/user-attachments/assets/a77c17f1-c3e9-49ce-8903-7506ab24e89e" />
-
-<img width="440" height="322" alt="kinematics2" src="https://github.com/user-attachments/assets/2119ef25-4f0c-404d-9c51-5023ceec88bd" />
-=======
->>>>>>> 6834b64047e05b9159a4cec43d4d8eae86ae10e5
