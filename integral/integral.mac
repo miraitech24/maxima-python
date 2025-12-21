@@ -1,0 +1,40 @@
+/* [wxMaxima: input   start ] */
+/* =========================================================
+   [本日のwxMaximaとpythonのカップリング課題]
+   ・仕様：x^2 * sin(x) の不定積分を厳密に解く
+   ・数式表記：display2dを制御し、出力は美しく、ファイルはプレーンに
+   ・不足分補完：Python側で数値計算・グラフ化を行うためファイル出力
+   ・引き渡し：data_bridge.py を Python側で import する
+   ========================================================= */
+
+/* 1. 数式の定義と積分実行 */
+f: x^2 * sin(x)$
+sol: integrate(f, x)$
+
+/* 2. 美しい数式表示（wxMaxima上での確認用） */
+print("【計算結果の確認】")$
+print(sol)$
+tex(sol)$
+
+/* 3. Python連携用のファイル出力（修正版） */
+block(
+    [py_file: "data_bridge.py", str_sol],
+    /* XMLタグ等を含まない 1次元文字列にする設定 */
+    display2d: false,
+    
+    /* 数式を文字列に変換 */
+    str_sol: string(sol),
+    
+    /* ファイル書き込み実行：Pythonの変数定義の形にする */
+    with_stdout (py_file, 
+        print(sconcat("maxima_expr = '", str_sol, "'"))
+    ),
+    
+    /* 設定を戻す */
+    display2d: true,
+    print("--- Python用ファイル (data_bridge.py) を出力しました ---")
+)$
+/* [wxMaxima: input   end   ] */
+
+
+

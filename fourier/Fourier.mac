@@ -1,0 +1,32 @@
+/* [wxMaxima: input   start ] */
+/* 本日のwxMaximaとpythonのカップリング課題
+ ・美しいmaximaの数式表記
+ ・出来るだけmaximaで解き不足はpythonで解く
+ ・引き渡しはファイル 'result.txt' で行う
+ ・問題仕様はwMaximaの中にコメントで盛り込む
+*/
+
+/* 1. 解析解の導出 */
+assume(a > 0)$
+expr : exp(-a*x^2) * cos(b*x)$
+sol : integrate(expr, x, 0, inf);
+
+/* 2. 数値代入（a=1, b=2） */
+a_val : 1.0$
+b_val : 2.0$
+numerical_sol : float(subst([a=a_val, b=b_val], sol))$
+
+/* 3. 美しい表記での確認 */
+print("【問題】次の定積分の厳密解を求める")$
+disp( 'integrate(exp(-a*x^2)*cos(b*x), x, 0, inf) )$
+print("【厳密解】")$
+disp(sol)$
+
+/* 4. Pythonへの引き渡し（ファイル出力） */
+/* printf を使い、~f (float型) で数値のみを書き出すことでXML化を防ぐ  */
+with_stdout ("result.txt", printf(false, "~f", numerical_sol))$
+print("ファイル 'result.txt' に解析解を書き出しました。")$
+/* [wxMaxima: input   end   ] */
+
+
+
