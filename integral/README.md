@@ -9,4 +9,4 @@
 
 $2\,x\,\sin x+\left(2-x^2\right)\,\cos x$
 
-
+![](/home/iwamura/snap/marktext/9/.config/marktext/images/2025-12-21-15-26-47-image.png)

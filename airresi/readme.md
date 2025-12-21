@@ -42,8 +42,6 @@ close(s)$
 
 出力された `trajectory.csv` を読み込み、アニメーションを表示・保存します。
 
-
-
 ## 4. 実行方法 (How to Use)
 
 1. **wxMaxima** で `solver.wxmx` を実行し、`trajectory.csv` を生成します。
@@ -52,14 +50,4 @@ close(s)$
 
 3. 同一ディレクトリ内に `motion.gif` が生成されます。
 
-
-
-
-
-
-
-
-
-
-
-
+![](/home/iwamura/snap/marktext/9/.config/marktext/images/2025-12-21-15-19-32-image.png)

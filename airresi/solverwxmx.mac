@@ -1,0 +1,47 @@
+/* [wxMaxima: input   start ] */
+/* 1. 運動方程式の定義 */
+eq_x: m*'diff(x(t),t,2) = -b*'diff(x(t),t);
+eq_y: m*'diff(y(t),t,2) = -m*g - b*'diff(y(t),t);
+
+/* 2. 初期条件の設定 (t=0 のとき) */
+atvalue(x(t), t=0, 0);
+atvalue('diff(x(t),t), t=0, v0*cos(th));
+atvalue(y(t), t=0, 0);
+atvalue('diff(y(t),t), t=0, v0*sin(th));
+
+/* 3. ラプラス変換を用いて微分方程式を解く */
+sol: desolve([eq_x, eq_y], [x(t), y(t)]);
+
+/* 4. Pythonで使いやすいように整理して表示 */
+ratsimp(sol);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/* 数値解を求める (m=0.5, g=9.8, b=0.2, v0=30, th=pi/4 と仮定) */
+params: [m=0.5, g=9.8, b=0.2, v0=30, th=%pi/4];
+result: rk([v0*cos(th)*exp(-b*t/m), (v0*sin(th)+m*g/b)*exp(-b*t/m)-m*g/b], 
+           [x, y], [0, 0], [t, 0, 5, 0.1]), params;
+
+/* CSVとして保存 (Pythonで読み込む用) */
+with_stdout ("trajectory.csv", 
+    for i in result do print(apply(concat, intersperse(",", i)))
+);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+/* 数値リストをCSV形式の文字列に変換して保存 */
+output_file: "trajectory.csv"$
+stream: openw(output_file)$
+
+for row in result do (
+    /* rowは [t, x, y] のリスト */
+    printf(stream, "~f, ~f, ~f~%", row[1], row[2], row[3])
+)$
+
+close(stream)$
+/* [wxMaxima: input   end   ] */
+
+
+

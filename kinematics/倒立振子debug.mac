@@ -1,0 +1,37 @@
+/* [wxMaxima: input   start ] */
+/* --- 1. 数式処理 --- */
+depends(theta, t)$
+T: 1/2 * m * l^2 * diff(theta, t)^2$
+U: - m * g * l * cos(theta)$
+E: T + U$
+eq: diff(diff(T-U, diff(theta, t)), t) - diff(T-U, theta) = 0$
+sol: solve(eq, diff(theta, t, 2))$
+
+/* --- 2. Python用に成形（^ を ** に変換するために一度文字列にするか、substを重ねる） --- */
+/* 実は Maxima の fortran() は関数の外に出すのが得意なので、printf で強引に作ります */
+
+acc_res: subst([theta=theta, theta(t)=theta], rhs(sol[1]))$
+eng_res: subst([diff(theta,t)=omega_val, theta=theta_val], E)$
+
+/* --- 3. ファイル書き出し --- */
+s: openw("kinematics.py")$
+printf(s, "import numpy as np~%from numpy import sin, cos~%~%")$
+
+printf(s, "def get_accel(theta, m, l, g):~%")$
+/* ここで fortran 形式の文字列として流し込む */
+printf(s, "    return ~a~%~%", acc_res)$
+
+printf(s, "def get_energy(theta_val, omega_val, m, l, g):~%")$
+printf(s, "    return ~a~%", eng_res)$
+
+close(s)$
+
+/* --- 4. 最後に重要：Python側で手動修正するか、以下の「全自動置換」をMaximaで実行 --- */
+/* ファイル内の ^ を ** に一括置換する（強引ですが確実です） */
+system("sed -i 's/\\^/**/g' kinematics.py")$
+
+print("--- kinematics.py FIXED with ** operator ---")$
+/* [wxMaxima: input   end   ] */
+
+
+
