@@ -32,5 +32,6 @@ wxMaxima と Spyder の連成サンプル（質量-ばね-ダンパ系）
 - params.txt は Maxima が直接読み込める形（`name: value;`）になっていますが、必要なら別フォーマット（JSON 等）にして両方のパーサを調整できます。
 - Maxima からより詳細な解析式（完全な解析解テキスト）を直接出力して Python で評価することも可能です（このサンプルでは安定して動くように wn, zeta のみを書き出しています）。
 - Spyder 上でプロットが表示されない場合は、Matplotlib のバックエンド設定を確認してください（%matplotlib inline / qt5 など）。
-
 ```
+
+<img width="569" height="281" alt="質量-ばね-ダンパFigure" src="https://github.com/user-attachments/assets/9c436bb9-4588-4c08-8f60-b5a7c698b9a4" />

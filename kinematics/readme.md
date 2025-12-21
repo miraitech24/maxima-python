@@ -1,5 +1,4 @@
 ---
-
 ## 本日の課題：倒立振子の運動方程式の導出と数値計算
 
 ### 【背景】
@@ -64,6 +63,8 @@ scipy.integrate.odeint または solve_ivp を用いて、初期角 $170^\circ$�
 
 2. **Python:** 角度 $\theta$ が時間の経過とともに激しく振れる（または回転する）グラフ
 
-![](/home/iwamura/snap/marktext/9/.config/marktext/images/2025-12-21-15-31-14-image.png)
 
-![](/home/iwamura/snap/marktext/9/.config/marktext/images/2025-12-21-15-31-27-image.png)
+
+<img width="663" height="337" alt="kinematics" src="https://github.com/user-attachments/assets/a77c17f1-c3e9-49ce-8903-7506ab24e89e" />
+
+<img width="440" height="322" alt="kinematics2" src="https://github.com/user-attachments/assets/2119ef25-4f0c-404d-9c51-5023ceec88bd" />
