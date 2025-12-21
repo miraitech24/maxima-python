@@ -50,4 +50,4 @@ close(s)$
 
 3. 同一ディレクトリ内に `motion.gif` が生成されます。
 
-![](/home/iwamura/snap/marktext/9/.config/marktext/images/2025-12-21-15-19-32-image.png)
+<img width="497" height="322" alt="image" src="https://github.com/user-attachments/assets/be95d97c-c42e-44d8-b268-9fc31e10785a" />
