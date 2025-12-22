@@ -1,0 +1,28 @@
+/* [wxMaxima: input   start ] */
+/* gravity.mac */
+load(itensor)$
+setup_itensor()$
+
+/* 座標定義 (t, r) - 簡略化した2次元時空 */
+coords: [t, r]$
+
+/* 重力場を模した計量テンソル g_ij */
+/* 質量Mの天体による時空の歪みを簡易表現 */
+/* g[1,1]は時間の進み、g[2,2]は空間の伸び */
+M: 0.5$ 
+g: matrix([-(1 - 2*M/r), 0], [0, 1/(1 - 2*M/r)])$
+
+print("--- 設定された時空の計量 (Metric) ---")$
+disp(g)$
+
+/* リッチテンソル成分の抽出 (Pythonへの引き渡し用) */
+/* 今回は、計量の成分そのものを渡して、Python側で「時間の遅れ」を計算させます */
+g_time: -(1 - 2*M/r)$
+
+file: openw("gravity_result.txt")$
+printf(file, "~a", g_time)$
+close(file)$
+/* [wxMaxima: input   end   ] */
+
+
+
