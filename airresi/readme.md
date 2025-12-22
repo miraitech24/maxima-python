@@ -27,7 +27,7 @@ wxMaximaの `desolve` 関数を用いて導出された解は以下の通りで�
 数値計算（ルンゲ＝クッタ法）を行い、CSVとして出力するためのコードです。
 
 /* 運動方程式の数値解法 */
-result: rk([v0*cos(th)*exp(-b*t/m), (v0*sin(th)+m*g/b)*exp(-b*t/m)-m*g/b], 
+result: $rk([v0*cos(th)*exp(-b*t/m), (v0*sin(th)+m*g/b)*exp(-b*t/m)-m*g/b], 
            [x, y], [0, 0], [t, 0, 5, 0.05])$
 
 /* CSV出力 (Pythonで読み込みやすい形式) */

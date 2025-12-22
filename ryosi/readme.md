@@ -30,6 +30,4 @@
 
    これにより、$α=sqrt(m*omega/hbar)=1$ となり、計算が極めてシンプルになる。
 
-
 <img width="492" height="324" alt="wave" src="https://github.com/user-attachments/assets/ee4a077b-76f5-49af-b9f3-e2f880ad6fa3" />
-
