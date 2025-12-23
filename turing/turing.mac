@@ -1,0 +1,25 @@
+/* [wxMaxima: input   start ] */
+/* 1. 美しい数式表示 */
+display2d: true$
+
+/* 2. 定常状態の導出 */
+eq1: a - u + u^2 * v = 0$
+eq2: b - u^2 * v = 0$
+sol: solve([eq1, eq2], [u, v]);
+
+/* 3. 平衡点の抽出 */
+u_ans: subst(sol[1], u)$
+v_ans: subst(sol[1], v)$
+
+/* 4. JSONファイルの書き出し */
+stream: openw("params.json")$
+/* a=0.1, b=0.9 を代入 */
+printf(stream, "{\"u_star\": \"~a\", \"v_star\": \"~a\", \"a\": 0.1, \"b\": 0.9}", u_ans, v_ans)$
+close(stream)$
+
+print("--- Maxima: Calculation Completed ---")$
+disp(sol)$
+/* [wxMaxima: input   end   ] */
+
+
+
