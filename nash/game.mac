@@ -1,0 +1,18 @@
+/* [wxMaxima: input   start ] */
+/* 美しい数式表記 */
+display2d: true$
+print("--- Nash Equilibrium Analysis (Prisoner's Dilemma) ---")$
+tex(u[i](s[i]^"*", s[-i]^"*") >= u[i](s[i], s[-i]^"*"))$
+
+/* 利得行列の定義 */
+payoff_matrix: [[[-1, -1], [-10, 0]], [[0, -10], [-5, -5]]]$
+
+/* ファイルへの書き出し */
+filename: "game_data.txt"$
+stream: openw(filename)$
+printf(stream, "~a", payoff_matrix)$
+close(stream)$
+/* [wxMaxima: input   end   ] */
+
+
+

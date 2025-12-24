@@ -1,0 +1,25 @@
+/* [wxMaxima: input   start ] */
+/* 演算子の修正と数式表示 */
+display2d: true$
+print("--- Academic Award Debugging Logic ---")$
+
+/* 社会的純益の定義（数式としての表示） */
+/* NB: Net Benefit, K: Knowledge, U: Utility, B: Bias, M: Maintenance */
+tex_formula: NB = (alpha*K + beta*U) - (gamma*B + delta*M)$
+tex(tex_formula)$
+
+/* データの定義（リスト形式） */
+/* [K, U, B, M] */
+nobel_econ: [0.95, 0.15, 0.90, 0.60]$  /* 理論強め、実利弱め、偏り大、維持費高 */
+fields_math: [1.00, 0.05, 0.10, 0.15]$ /* 純粋、実利無視、偏り低、維持費低 */
+practical_st: [0.30, 0.95, 0.20, 0.10]$ /* 実務・統計、実利強め、偏り低、維持費低 */
+
+/* ファイルへの書き出し */
+filename: "award_data.txt"$
+stream: openw(filename)$
+printf(stream, "[~a, ~a, ~a]", nobel_econ, fields_math, practical_st)$
+close(stream)$
+/* [wxMaxima: input   end   ] */
+
+
+
