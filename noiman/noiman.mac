@@ -1,0 +1,32 @@
+/* [wxMaxima: input   start ] */
+/* --- 1. 物理式の厳密展開 --- */
+Q_0: 1361$ sigma: 5.67e-8$ C_ocean: 500$ phi: 65*%pi/180$
+Phi_eps : (cos(phi)*sin(epsilon) + (%pi/2 - phi)*sin(phi)*cos(epsilon)) / %pi $
+
+/* 日射量ポテンシャル Q_orb */
+Q_orb : expand(Q_0 * Phi_eps * (1 + e * cos(omega))^2) ;
+
+/* 微分係数式 (RHS) */
+dTdt_expr : ( (1-alpha)*Q_orb + dF_total - sigma*(T+288.15)^4 ) / C_ocean $
+
+/* --- 2. Python 変換ルーチン --- */
+py_convert(ex) := block([s],
+    s : string(ex),
+    s : ssubst("np.pi", "%pi", s),
+    s : ssubst("**", "^", s),
+    s : ssubst("np.sin", "sin", s),
+    s : ssubst("np.cos", "cos", s),
+    return(s)
+)$
+
+/* --- 3. formula.py への流し込み --- */
+s : openw("formula.py") $
+printf(s, "import numpy as np~%~%") $
+printf(s, "def get_dTdt(T, e, epsilon, omega, dF_total, alpha):~%") $
+printf(s, "    Q_orb = ~a~%", py_convert(Q_orb)) $
+printf(s, "    return ~a~%", py_convert(dTdt_expr)) $
+close(s) $
+/* [wxMaxima: input   end   ] */
+
+
+
