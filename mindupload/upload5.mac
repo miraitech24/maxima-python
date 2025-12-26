@@ -1,0 +1,25 @@
+/* [wxMaxima: input   start ] */
+/* 1. 出力設定（エラー防止） */
+display2d: false$
+
+/* 2. パラメータ定義 (μsスケール) */
+V_peak: 100.0$    /* スパイク最大値 */
+V_inf: 80.0$      /* 最後のニューロンが到達する飽和電位 */
+tau_last: 25.0$   /* 最後のニューロンのなだらかさを決める時定数 */
+
+/* 3. Pythonへの引き渡し */
+with_stdout ("params.py",
+    print(sconcat("V_PEAK = ", float(V_peak))),
+    print(sconcat("V_INF = ", float(V_inf))),
+    print(sconcat("TAU_LAST = ", float(tau_last)))
+)$
+
+/* 4. 美しい数式表示 */
+display2d: true$
+print("--- Final Neuron Saturation Model ---")$
+V_last(t) := V_inf * (1 - exp(-t/tau_last));
+tex(V_last(t));
+/* [wxMaxima: input   end   ] */
+
+
+
