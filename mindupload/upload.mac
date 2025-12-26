@@ -1,0 +1,31 @@
+/* [wxMaxima: input   start ] */
+/* analysis.mac */
+/* 1. 美しい数式表示設定 */
+display2d: true$
+stardisp: true$
+
+/* 物理定数 */
+g_L: 0.3$
+E_L: -70.0$
+I_ext: 1.5$
+
+/* 2. 平衡点の導出 (dV/dt = 0) */
+eq_rest: 0 = I_ext - g_L*(V_rest - E_L);
+sol_v: solve(eq_rest, V_rest);
+V_val: float(rhs(sol_v[1]));
+
+/* 美しい数式表記を出力（標準出力用） */
+print("--- Resulting Analytical Formula ---")$
+tex(sol_v[1]);
+
+/* 3. Pythonへの引き渡し用ファイル出力 */
+/* XML出力を防ぐため一時的に2次元表示をオフにする */
+display2d: false$
+with_stdout ("params.py",
+    print(sconcat("E_L_computed = ", V_val))
+)$
+display2d: true$
+/* [wxMaxima: input   end   ] */
+
+
+

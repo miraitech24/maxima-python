@@ -1,0 +1,3 @@
+V_PEAK = 100.0 
+V_INF = 80.0 
+TAU_LAST = 25.0 
