@@ -1,0 +1,21 @@
+/* [wxMaxima: input   start ] */
+/* 回路方程式の定義 */
+eq1: V = I1 * Z1 - %i*w*M * I2;
+eq2: 0 = I2 * (Z2 + ZL) - %i*w*M * I1;
+
+/* I2について解く */
+sol: solve([eq1, eq2], [I1, I2])$
+I2_expr: radcan(rhs(sol[1][2]));
+
+/* 効率etaの定義 (負荷電力 / 入力電力) */
+eta: (abs(I2)^2 * ZL) / (realpart(V * I1));
+
+/* Pythonへ渡すための文字列変換とLaTeX表示 */
+print("--- LaTeX Output ---");
+tex(I2_expr);
+/* ファイル保存例 */
+stringout("formula.txt", I2_expr);
+/* [wxMaxima: input   end   ] */
+
+
+
