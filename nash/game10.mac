@@ -1,0 +1,28 @@
+/* [wxMaxima: input   start ] */
+/* AI抑止モデル：10倍ペナルティの導入 */
+display2d: true$
+print("--- AI-Enhanced Deterrence Analysis ---")$
+
+/* 利得行列の再定義 
+  元の行列: [[[-1, -1], [-10, 0]], [[0, -10], [-5, -5]]]
+  AI介入後: 全ての裏切り（D）アクションに -50 のペナルティを付与
+*/
+
+/* [協調, 協調], [協調, 裏切り+P] */
+/* [裏切り+P, 協調], [裏切り+P, 裏切り+P] */
+penalty : -50$
+payoff_matrix: [
+    [[-1, -1], [-10, 0 + penalty]], 
+    [[0 + penalty, -10], [-5 + penalty, -5 + penalty]]
+]$
+
+/* ファイルへの書き出し */
+filename: "game_data.txt"$
+stream: openw(filename)$
+printf(stream, "~a", payoff_matrix)$
+close(stream)$
+print("Success: game_data.txt has been updated with AI Penalty.")$
+/* [wxMaxima: input   end   ] */
+
+
+
