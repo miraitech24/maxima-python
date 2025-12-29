@@ -1,0 +1,16 @@
+
+    R : 3.0;
+    T : 5.0;
+    P : 1.0;
+    V_coop : R / (1 - d);
+    V_betray : T + (d * P) / (1 - d);
+    sol : solve(V_coop = V_betray, d);
+
+    /* 厳密解(1/2)を小数(0.5)に変換 */
+    ans : float(rhs(sol[1]));
+
+    dest : openw("maxima_out.txt");
+    printf(dest, "~f", ans);
+    close(dest);
+    quit();
+    
