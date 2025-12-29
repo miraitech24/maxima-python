@@ -1,0 +1,37 @@
+/* [wxMaxima: input   start ] */
+/* 1. 市場パラメータと成長関数の定義 */
+GDP_base : 550.0;
+r_initial : 0.35; /* 現状の国民負担率 */
+r_target : 0.20;  /* 改革後の目標負担率 */
+
+/* 5年かけて段階的に減税するスケジュール */
+tax_rate(year) := if year < 5 then r_initial - (r_initial - r_target) * (year / 5) else r_target;
+
+/* 成長率：負担率が下がるほどGDP成長率が加速すると仮定 (簡略化した経済モデル) */
+growth_rate(year) := 0.01 + (r_initial - tax_rate(year)) * 0.2;
+
+/* 2. 20年間のシミュレーション実行 */
+results : [];
+curr_gdp : GDP_base;
+cum_tax : 0.0;
+
+for y : 0 step 1 thru 20 do (
+    tax_rev : curr_gdp * tax_rate(y),
+    cum_tax : cum_tax + tax_rev,
+    results : endcons([y, curr_gdp, tax_rev, cum_tax], results),
+    /* 翌年のGDP更新 */
+    curr_gdp : curr_gdp * (1 + growth_rate(y))
+);
+
+/* 3. CSVファイルとして出力 (Pythonが読みやすい形式) */
+dest : openw("reform_results.csv");
+printf(dest, "year,gdp,tax_revenue,cumulative_tax~%");
+for row in results do (
+    printf(dest, "~d,~f,~f,~f~%", row[1], row[2], row[3], row[4])
+);
+close(dest);
+quit();
+/* [wxMaxima: input   end   ] */
+
+
+

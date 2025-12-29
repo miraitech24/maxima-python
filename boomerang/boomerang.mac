@@ -1,0 +1,14 @@
+/* [wxMaxima: input   start ] */
+/* 1. パラメータ設定 */
+R: 3.0$ T: 5.0$ P: 1.0$
+/* 2. 方程式を解く */
+sol: float(rhs(solve(R/(1-d) = T + d*P/(1-d), d)[1]))$
+/* 3. 結果をJSON風のフォーマットで書き出し */
+dest: openw("bridge.dat")$
+printf(dest, "threshold_d:~f~%target_T:~f~%target_P:~f", sol, T, P)$
+close(dest)$
+quit()$
+/* [wxMaxima: input   end   ] */
+
+
+
