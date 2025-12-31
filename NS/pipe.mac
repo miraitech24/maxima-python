@@ -1,0 +1,17 @@
+/* [wxMaxima: input   start ] */
+/* NS方程式の定義 (2次元) */
+u_eq: u*diff(u,x) + v*diff(u,y) = -1/rho*diff(p,x) + nu*(diff(u,x,2) + diff(u,y,2));
+v_eq: u*diff(v,x) + v*diff(v,y) = -1/rho*diff(p,y) + nu*(diff(v,x,2) + diff(v,y,2));
+
+/* 中央差分による近似 (概念的) */
+/* Maximaの subst 関数を使って、diffを差分形式に置換し、Pythonコード化する */
+
+/* ファイル出力 */
+with_stdout ("flow_equations.py", 
+    print("def get_u_next(u, v, p, dx, dy, rho, nu):"),
+    print("    return", fortindent(rhs(solve(u_eq, diff(u,x,2))[1]))) /* 実際には離散化後の式を出す */
+);
+/* [wxMaxima: input   end   ] */
+
+
+

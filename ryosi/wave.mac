@@ -1,0 +1,59 @@
+/* [wxMaxima: input   start ] */
+/* ==========================================================================
+   仕様書：量子調和振動子の波動関数導出 (Python連携用)
+   ==========================================================================
+   【目的】
+   シュレーディンガー方程式を解き、Pythonでの可視化に適した無次元化された
+   波動関数 ψ_n(x) を導出する。
+   
+   【物理的背景】
+   ポテンシャル V(x) = 1/2 * m * ω^2 * x^2 における粒子の状態。
+   解はエルミート多項式 H_n(ξ) を含み、以下の形式をとる：
+   ψ_n(x) = N_n * H_n(αx) * exp(-α^2 * x^2 / 2)
+   
+   【計算の前提条件（無次元化）】
+   計算を簡略化するため、以下の定数系を採用する（原子単位系に近い設定）：
+   m = 1 (質量)
+   hbar = 1 (プランク定数)
+   omega = 1 (角振動数)
+   これにより、α = sqrt(m*omega/hbar) = 1 となり、計算が極めてシンプルになる。
+   ========================================================================== */;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+kill(all)$
+m: 1$ hbar: 1$ omega: 1$ alpha: sqrt(m*omega/hbar)$
+
+/* 波動関数の定義 */
+N(n) := (2^n * factorial(n) * sqrt(%pi / alpha^2))^(-1/2)$
+psi(n, x) := ratsimp(N(n) * hermite(n, alpha*x) * exp(-(alpha*x)^2 / 2))$
+
+/* 画面表示（美しい数式を確認） */
+print("--- 導出された波動関数の厳密解 ---")$
+for i:0 thru 3 do disp(concat("psi_", i), psi(i, x))$
+
+/* Pythonファイル書き出し */
+with_stdout ("wave_functions.py",
+    printf(true, "import numpy as np~%"),
+    printf(true, "from numpy import sqrt, pi~%~%"),
+    for i:0 step 1 thru 3 do (
+        block([s],
+            /* string()で文字列化 */
+            s: string(psi(i, x)),
+            /* 1. Maximaの定数・演算子をPython用に置換 */
+            s: ssubst("pi", "%pi", s),
+            s: ssubst("np.exp", "exp", s),  /* exp()関数をnp.exp()へ */
+            s: ssubst("np.e", "%e", s),    /* 指数肩の%eをnp.eへ */
+            s: ssubst("**", "^", s),       /* べき乗を**へ */
+            
+            /* 2. Python関数として書き出し */
+            printf(true, "def psi_~d(x):~%    return ~a~%~%", i, s)
+        )
+    )
+)$
+print("Success: 'wave_functions.py' has been fixed.")$
+/* [wxMaxima: input   end   ] */
+
+
+

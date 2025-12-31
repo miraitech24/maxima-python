@@ -1,0 +1,43 @@
+/* [wxMaxima: input   start ] */
+/* 1. 美しい数式表示のための設定 */
+display2d: true$
+
+/* 2. 座標変換の定義 (S字パイプを模した例) */
+/* x = xi + sin(zeta), y = eta, z = zeta */
+x_expr: xi + A*sin(k*zeta)$
+y_expr: eta$
+z_expr: zeta$
+
+/* 3. ヤコビ行列の計算 (3次元) */
+J: matrix(
+    [diff(x_expr, xi), diff(x_expr, eta), diff(x_expr, zeta)],
+    [diff(y_expr, xi), diff(y_expr, eta), diff(y_expr, zeta)],
+    [diff(z_expr, xi), diff(z_expr, eta), diff(z_expr, zeta)]
+)$
+
+/* 4. NS方程式の基本形（x成分） */
+depends([u, v, w, p], [xi, eta, zeta])$
+rho: 1.225$
+nu: 1.5e-5$
+
+/* 離散化の置換ルール (エラー修正版: = を正しく使用) */
+/* subst([diff(u,xi) = (u_next-u_prev)/(2*dxi)], ...) の形式で使用する */
+
+rule_grad: [
+    diff(u,xi) = (u_i_plus_1 - u_i_minus_1)/(2*dxi)
+]$
+
+/* 方程式の表示 */
+NS_x: u*diff(u,xi) = -1/rho*diff(p,xi) + nu*diff(u,xi,2)$
+print("--- 導出されたNS方程式（x成分） ---")$
+print(NS_x)$
+
+/* 5. Python用に関数を書き出し */
+with_stdout ("flow_equations.py",
+    print("def calc_step(u, p, dxi, rho, nu):"),
+    printf(true, "    return ~a", subst(rule_grad, rhs(solve(NS_x, diff(u,xi,2))[1])))
+)$
+/* [wxMaxima: input   end   ] */
+
+
+

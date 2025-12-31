@@ -1,0 +1,1 @@
+<math><st>wn:</st><st> </st><mn>3.16227766016838</mn><st> </st></math><math><st>zeta:</st><st> </st><mn>0.03162277660168379</mn><st> </st></math><math><st>discriminant:</st><st> </st><mo>-</mo><mn>39.96</mn><st> </st></math>

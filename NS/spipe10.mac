@@ -1,0 +1,32 @@
+/* [wxMaxima: input   start ] */
+/* 1. 数式表示の設定（美しい出力を有効にする） */
+display2d: true$
+
+/* 2. 物理量と依存関係の定義（産業用配管を想定） */
+depends([u, v, w, p], [x, y, z])$
+rho: 1.225$ /* 流体密度 */
+nu: 1.5e-5$  /* 動粘性係数 */
+
+/* 3. ナビエ・ストークス方程式（x成分）の定義 */
+eq_x: u*diff(u,x) + v*diff(u,y) + w*diff(u,z) = -1/rho*diff(p,x) + nu*(diff(u,x,2) + diff(u,y,2) + diff(u,z,2))$
+
+/* 4. 離散化ルールの定義（代入は : を使用、置換式には = を使用） */
+my_rules: [
+    diff(u,x) = (u_next - u_prev)/(2*dx),
+    diff(u,x,2) = (u_next - 2*u + u_prev)/(dx^2)
+]$
+
+/* 5. 離散化式の導出 */
+u_discretized: subst(my_rules, eq_x)$
+
+/* 6. Python用に関数を出力 */
+with_stdout ("flow_equations.py",
+    print("import numpy as np"),
+    print("def calc_u_velocity(u, u_prev, u_next, dx, rho, nu, p_grad):"),
+    /* solveの結果をPython形式で出力 */
+    printf(true, "    return ~a", grind(rhs(solve(u_discretized, u)[1])))
+)$
+/* [wxMaxima: input   end   ] */
+
+
+

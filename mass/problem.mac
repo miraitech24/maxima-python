@@ -1,0 +1,40 @@
+/* [wxMaxima: input   start ] */
+/* wxMaxima用スクリプト（開いて評価する、またはMaximaに読み込ませる） */
+
+/* 使い方：
+   - params.txt を同じフォルダに置く（中身は Maxima の代入式形式 m: 1.0; ...）。
+   - wxMaximaでこのファイルを開き，セルごとに評価してください。
+   - これにより analytic.txt が出力されます（wn, zeta）。
+*/
+
+load("stringproc")$ /* 安全のため string 処理を有効にしておく */
+
+/* params ファイルを読み込み（params.txt は Maxima の式形式になっていること） */
+batch("params.txt")$  /* params.txt 内の代入式 m:1.0; などが実行される */
+
+/* 物理量（解析） */
+wn : sqrt(k/m)$
+zeta : c/(2*sqrt(m*k))$
+
+/* 判別（表示） */
+discr : c^2 - 4*m*k$
+
+/* analytic.txt に書き出す（Python で読みやすい形） */
+with_stdout("analytic.txt",
+  block(
+    [],
+    print("wn:", float(wn)),
+    print("zeta:", float(zeta)),
+    print("discriminant:", float(discr))
+  )
+)$
+
+/* 画面にも出力 */
+print("Parameters loaded from params.txt")$
+print("wn = ", wn)$
+print("zeta = ", zeta)$
+print("discriminant = ", discr)$
+/* [wxMaxima: input   end   ] */
+
+
+

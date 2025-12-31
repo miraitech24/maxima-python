@@ -1,6 +1,6 @@
 # Maxima & Python Coupling Project: Projectile Motion
 
-このプロジェクトは、数式処理ソフト **wxMaxima** で物理的な解析解を導出し、そのデータを **Python** でアニメーション化する「連成（Coupling）」のデモンストレーションです。
+このプロジェクトは、数式処理ソフト **Maxima** で物理的な解析解を導出し、そのデータを **Python** でアニメーション化する「連成（Coupling）」のデモンストレーションです。
 
 ## 1. 物理モデル (Theoretical Model)
 
@@ -22,7 +22,7 @@ wxMaximaの `desolve` 関数を用いて導出された解は以下の通りで�
 
 ---
 
-## 2. wxMaxima スクリプト (`solver.wxmx`)
+## 2. Maxima スクリプト (`solver.mac`)
 
 数値計算（ルンゲ＝クッタ法）を行い、CSVとして出力するためのコードです。
 
@@ -44,7 +44,7 @@ close(s)$
 
 ## 4. 実行方法 (How to Use)
 
-1. **wxMaxima** で `solver.wxmx` を実行し、`trajectory.csv` を生成します。
+1. **Maxima** で `solver.max` を実行し、`trajectory.csv` を生成します。
 
 2. **Python** 環境で `main_csv.py` を実行します。
 
