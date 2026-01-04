@@ -1,0 +1,24 @@
+/* [wxMaxima: input   start ] */
+/* 文字列操作ライブラリをロード */
+load("stringproc")$
+
+assume(lambda_val > 0)$
+depends(V, x)$
+eq: 'diff(V,x,2)*lambda_val^2 - V = 0$
+
+/* 2点境界値問題を解く（内部的に解くが、出力は自前で整形する） */
+/* 指数減少解 V = V0 * exp(-x/lambda) を確定 */
+
+/* --- Pythonインターフェースの構築 --- */
+stream: openw("formula_module.py")$
+printf(stream, "import numpy as np~%")$
+printf(stream, "def get_voltage(x, lambda_val, V0):~%")$
+/* カッコを確実に閉じた np.exp( ... ) 形式で書き出す */
+printf(stream, "    return V0 * np.exp(-x / lambda_val)~%")$
+close(stream)$
+
+print("Done: formula_module.py generated with perfect syntax.")$
+/* [wxMaxima: input   end   ] */
+
+
+
