@@ -100,4 +100,16 @@ $\frac{\partial u}{\partial t} = \alpha \left( \frac{\partial^2 u}{\partial r^2}
 1. Maximaを用いて熱伝導方程式の基本解がガウス型になることを確認せよ。
 2. 埋め込みから5秒後の、半径1mm地点での温度上昇が 1K 以下であることをPythonのグラフから確認せよ。
 
-<img width="612" height="393" alt="visionchips2026-01-04" src="https://github.com/user-attachments/assets/532f6eb8-9e92-4086-970d-c6b58e613698" />
+<img width="642" height="393" alt="visionchips2026-01-04" src="https://github.com/user-attachments/assets/01fcab6c-b768-4639-9e8b-00d0d0f1ea4e" />
+
+### 原因の特定
+
+この 0.02K の超過は、以下のいずれかが原因です。
+
+1. **表面温度 T0​ が高すぎる**: チップの発熱が想定より大きい。
+
+2. **血流冷却 w が不十分**: 組織の排熱能力が追いついていない。
+
+3. **チップ半径 R0​ の影響**: 熱源のサイズに対して1mmという距離が近すぎる。
+
+---

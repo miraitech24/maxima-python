@@ -1,23 +1,26 @@
 /* [wxMaxima: input   start ] */
-/* 文字列操作ライブラリをロード */
+/* Thermal analysis in brain (Bio-heat equation) */
 load("stringproc")$
+assume(k > 0, w > 0, r > R0, R0 > 0)$
 
-assume(lambda_val > 0)$
-depends(V, x)$
-eq: 'diff(V,x,2)*lambda_val^2 - V = 0$
+/* Deriving the solution */
+T_expr: T0 * (R0/r) * exp(-sqrt(w/k)*(r-R0))$
 
-/* 2点境界値問題を解く（内部的に解くが、出力は自前で整形する） */
-/* 指数減少解 V = V0 * exp(-x/lambda) を確定 */
+/* --- Python protocol conversion (CRITICAL FIX) --- */
+py_str: string(T_expr)$
+/* %e^-(A) を np.exp(-(A)) に変換するための置換 */
+py_str: ssubst("np.exp(-", "%e^-", py_str)$
+py_str: ssubst("np.sqrt", "sqrt", py_str)$
 
-/* --- Pythonインターフェースの構築 --- */
-stream: openw("formula_module.py")$
+/* ファイル書き出し */
+stream: openw("thermal_module.py")$
 printf(stream, "import numpy as np~%")$
-printf(stream, "def get_voltage(x, lambda_val, V0):~%")$
-/* カッコを確実に閉じた np.exp( ... ) 形式で書き出す */
-printf(stream, "    return V0 * np.exp(-x / lambda_val)~%")$
+printf(stream, "def get_temp(r, T0, R0, w, k):~%")$
+/* ここで閉じカッコの整合性をとるために最後に ) を追加 */
+printf(stream, "    return ~a)~%", py_str)$
 close(stream)$
 
-print("Done: formula_module.py generated with perfect syntax.")$
+print("Success: thermal_module.py generated with proper function calls.")$
 /* [wxMaxima: input   end   ] */
 
 
