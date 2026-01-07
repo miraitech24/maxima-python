@@ -1,0 +1,22 @@
+/* [wxMaxima: input   start ] */
+/* tesla_solver.mac */
+A: k^2 * Q1 * Q2;
+eta_formula: A / (1 + sqrt(1 + A))^2;
+
+filename: "maxima_output.py";
+s: openw(filename);
+
+printf(s, "import numpy as np~%");
+printf(s, "from numpy import sqrt~%~%");
+printf(s, "def get_eta_formula(k, Q1, Q2):~%");
+
+/* 文字列置換を行い、Pythonのべき乗演算子 ** に変換 */
+formula_str: string(eta_formula);
+final_formula: ssubst("**", "^", formula_str);
+
+printf(s, "    return ~a~%", final_formula);
+close(s);
+/* [wxMaxima: input   end   ] */
+
+
+
