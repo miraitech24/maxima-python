@@ -1,0 +1,23 @@
+/* [wxMaxima: input   start ] */
+/* 数式の定義 */
+yield_expr: A * exp(-DeltaE / (k * S)) * exp(-sigma * S);
+
+/* 文字列化してPython用に置換 */
+str_yield: string(yield_expr);
+/* 1. 自然対数の底 %e を np.e または適切な関数へ (ここでは exp() 形式が安全) */
+/* 2. べき乗 ^ を ** へ置換 */
+str_yield: ssubst("np.exp", "exp", str_yield);
+str_yield: ssubst("**", "^", str_yield);
+/* もし %e が残る場合は np.e に置換 */
+str_yield: ssubst("np.e", "%e", str_yield);
+
+/* ファイル書き出し */
+fp: openw("model_functions.py");
+printf(fp, "import numpy as np~%");
+printf(fp, "def calculate_yield(S, A, DeltaE, k, sigma):~%");
+printf(fp, "    return ~a~%", str_yield);
+closew(fp);
+/* [wxMaxima: input   end   ] */
+
+
+

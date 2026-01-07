@@ -112,4 +112,4 @@ $\frac{\partial u}{\partial t} = \alpha \left( \frac{\partial^2 u}{\partial r^2}
 
 3. **チップ半径 R0​ の影響**: 熱源のサイズに対して1mmという距離が近すぎる。
 
----
+---ファイアハイドランド
