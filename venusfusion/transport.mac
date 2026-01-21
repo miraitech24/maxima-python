@@ -1,0 +1,22 @@
+/* [wxMaxima: input   start ] */
+/* 大気輸送方程式の定義 */
+kill(all);
+depends(T, phi);
+/* Cp:比熱, rho:密度, v:風速, R:金星半径, S:熱源 */
+eq: diff(Cp*rho*v*T(phi), phi) = S_const - sigma*T(phi)^4;
+
+/* パラメータの代入（一意解用） */
+Cp: 1000$ rho: 65$ v: 100$ sigma: 5.67e-8$ S_const: 1.0e5$
+
+/* 線形近似による定常解の導出 */
+sol: ode2(diff(T,phi) = (S_const - sigma*T^4)/(Cp*rho*v), T, phi);
+
+/* グラフ出力 */
+plot2d(rhs(ic1(sol, phi=0, T=735)), [phi, 0, %pi/2], [xlabel, "Latitude"], [ylabel, "Temperature (K)"]);
+
+/* Python受け渡し用のデータ書き出し */
+with_stdout ("result.dat", print(float(ev(rhs(sol), phi=0.5, T=735))));
+/* [wxMaxima: input   end   ] */
+
+
+
