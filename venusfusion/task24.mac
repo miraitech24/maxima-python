@@ -1,0 +1,23 @@
+/* [wxMaxima: input   start ] */
+/* 問24: 大気循環による排熱輸送 */
+display2d: false$ /* 2次元表示をオフにして1行テキスト形式を強制 */
+
+/* 1. 支配方程式と解析解の導出 */
+depends(u, phi);
+eq: diff(u, phi, 2) = -A * cos(phi);
+psol: ic2(ode2(eq, u, phi), phi=0, u=u_max, diff(u, phi)=0);
+Q_expr: rhs(psol) * C;
+
+/* 2. Maximaでの検証用グラフ (一意解の確認) */
+/* 単位: phi[rad], Q[W/m^2] */
+plot2d(subst([A=1, u_max=10, C=1.5], Q_expr), [phi, -%pi/2, %pi/2], 
+       [title, "Analytical Verification (Maxima)"], [xlabel, "Latitude (rad)"], [ylabel, "Q (W/m^2)"]);
+
+/* 3. Pythonへの受け渡し：余計な文字を一切入れない */
+f: openw("solution.txt");
+printf(f, "~a", string(Q_expr));
+close(f);
+/* [wxMaxima: input   end   ] */
+
+
+

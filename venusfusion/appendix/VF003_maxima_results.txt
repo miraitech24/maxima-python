@@ -1,0 +1,10 @@
+<math><st>parameter,value,unit</st><st> </st></math>deltaH_rxn1,-54.40000000000009,kJ/mol
+deltaH_rxn2,132.5,kJ/mol
+deltaG_rxn1,-84.39999999999998,kJ/mol
+deltaG_rxn2,81.79999999999995,kJ/mol
+K1_298K,6.124392703233559e+14,dimensionless
+K2_298K,4.6608229738472473e-15,dimensionless
+k1_735K,2.79572719595726e+6,s^-1
+k2_735K,2.0624891181006388e+2,s^-1
+Ea1,50.0,kJ/mol
+Ea2,80.0,kJ/mol

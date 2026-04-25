@@ -1,0 +1,21 @@
+/* 1. 沼回避のための仮定：燃料が尽きるまでの時間は正、質量は常に正 */
+assume(t_e > 0, M0 > 0, mdot > 0, M0 - mdot * t_e > 0, ve > 0);
+
+/* 2. 加速フェーズの解析解導出 */
+v_acc : ve * log(M0 / (M0 - mdot * t));
+d_acc : integrate(v_acc, t);
+/* 初期値 t=0 で d=0 となる定数項の調整 */
+d_formula : ratsimp(d_acc - subst(t=0, d_acc));
+
+/* 3. グラフ出力（燃料が尽きるまでの速度推移） */
+set_plot_option([gnuplot_term, png], [gnuplot_out_file, "velocity_acc.png"])$
+plot2d(subst([M0=100000, mdot=0.1587, ve=29419.95], v_acc), [t, 0, 315000])$
+
+/* 4. Python用モジュール出力 */
+out : openw("model_export.py");
+printf(out, "import numpy as np~%~%");
+printf(out, "def get_v_acc(M0, t, mdot, ve):~%    return ve * np.log(M0 / (M0 - mdot * t))~%~%");
+printf(out, "def get_d_acc(M0, t, mdot, ve):~%    return ~a~%", d_formula);
+close(out);
+
+print("--- Maxima: model_export.py generated (Assumptions Fixed) ---")$

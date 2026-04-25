@@ -1,0 +1,105 @@
+/* VF005_simple.mac - 簡易版（drawを使わない） */
+
+/* 1. パラメータ設定 */
+C_vf: 0.45;
+K_sr: 0.38;
+gamma_ve: 0.15;
+epsilon_f: 0.08;
+tau_s: 50.0;
+tau_a: 10.0;
+sigma: 5.67e-8;
+
+T_s0: 737.0;
+T_a0: 240.0;
+E_v0: 1.0e10;
+S0: 0.8;
+
+t_end: 200.0;
+dt: 1.0;
+
+/* 2. 数値計算 */
+n: floor(t_end/dt);
+t_list: makelist(i*dt, i, 0, n);
+T_s_list: makelist(0, i, 0, n);
+T_a_list: makelist(0, i, 0, n);
+E_v_list: makelist(0, i, 0, n);
+S_list: makelist(0, i, 0, n);
+
+T_s_list[1]: T_s0;
+T_a_list[1]: T_a0;
+E_v_list[1]: E_v0;
+S_list[1]: S0;
+
+for i:1 thru n do (
+    /* 微分方程式を直接計算 */
+    dT_s_dt: (1/tau_s)*(C_vf*T_a_list[i]^4 - sigma*T_s_list[i]^4 + gamma_ve*E_v_list[i]),
+    dT_a_dt: (1/tau_a)*(epsilon_f*T_s_list[i] - K_sr*S_list[i]*T_a_list[i] - (1-C_vf)*T_a_list[i]),
+    dE_v_dt: -0.01*E_v_list[i] + 0.001*T_s_list[i]^2,
+    dS_dt: -K_sr*S_list[i] + 0.05*(1 - S_list[i])*T_a_list[i]/300,
+    
+    /* オイラー法で更新 */
+    T_s_list[i+1]: T_s_list[i] + dT_s_dt * dt,
+    T_a_list[i+1]: T_a_list[i] + dT_a_dt * dt,
+    E_v_list[i+1]: E_v_list[i] + dE_v_dt * dt,
+    S_list[i+1]: S_list[i] + dS_dt * dt
+);
+
+/* 3. データ出力 */
+with_stdout("VF005_simple_data.csv",
+    printf(true, "t,T_s,T_a,E_v,S~%"),
+    for i:1 thru n+1 do (
+        printf(true, "~f,~f,~f,~e,~f~%", 
+               t_list[i], T_s_list[i], T_a_list[i], E_v_list[i], S_list[i])
+    )
+);
+
+/* 4. 結果表示 */
+printf(true, "~%VF-005 簡易解析完了~%");
+printf(true, "初期値: T_s=~f, T_a=~f, E_v=~e, S=~f~%", T_s0, T_a0, E_v0, S0);
+printf(true, "最終値: T_s=~f, T_a=~f, E_v=~e, S=~f~%", 
+       T_s_list[n+1], T_a_list[n+1], E_v_list[n+1], S_list[n+1]);
+printf(true, "データを保存: VF005_simple_data.csv (~d行)~%", n+1);
+
+/* 5. Pythonでプロットするためのデータを保存 */
+/* プロット用の命令を生成 */
+plot_commands: sconcat(
+    "import matplotlib.pyplot as plt~%",
+    "import pandas as pd~%",
+    "import numpy as np~%",
+    "~%",
+    "# データ読み込み~%",
+    "df = pd.read_csv('VF005_simple_data.csv')~%",
+    "~%",
+    "# 温度プロット~%",
+    "plt.figure(figsize=(10, 6))~%",
+    "plt.plot(df['t'], df['T_s'], 'r-', label='表面温度 T_s', linewidth=2)~%",
+    "plt.plot(df['t'], df['T_a'], 'b-', label='大気温度 T_a', linewidth=2)~%",
+    "plt.xlabel('時間 (年)')~%",
+    "plt.ylabel('温度 (K)')~%",
+    "plt.title('VF-005: 金星温度進化')~%",
+    "plt.legend()~%",
+    "plt.grid(True, alpha=0.3)~%",
+    "plt.savefig('VF005_python_temperatures.png', dpi=300)~%",
+    "plt.show()~%",
+    "~%",
+    "# SR風速プロット~%",
+    "plt.figure(figsize=(10, 6))~%",
+    "plt.plot(df['t'], df['S'], 'g-', label='SR風速係数 S', linewidth=2)~%",
+    "plt.xlabel('時間 (年)')~%",
+    "plt.ylabel('風速係数')~%",
+    "plt.title('VF-005: SR風速係数')~%",
+    "plt.legend()~%",
+    "plt.grid(True, alpha=0.3)~%",
+    "plt.savefig('VF005_python_wind.png', dpi=300)~%",
+    "plt.show()~%",
+    "~%",
+    "print('プロット完了')~%"
+);
+
+with_stdout("plot_VF005.py",
+    printf(true, plot_commands)
+);
+
+printf(true, "~%Pythonプロットスクリプトを生成: plot_VF005.py~%");
+printf(true, "実行コマンド: python3 plot_VF005.py~%");
+

@@ -1,0 +1,24 @@
+/* task_901b.mac: 送電ビームの回折限界と受電半径の特定 */
+
+/* 定数 */
+lambda : 0.12$       /* マイクロ波波長 2.45GHz (12.2cm) */
+D_trans : 50000$     /* 水星側送信アンテナ径 50km (ハニカムアレイ) */
+L_dist : 5.0e10$     /* 水星-金星間最短距離 [m] (約5000万km) */
+
+/* 1. 回折限界によるビームの広がり角 theta */
+/* theta = 1.22 * lambda / D */
+theta_diff : 1.22 * lambda / D_trans$
+
+/* 2. 金星到達時のビームスポット半径 R_spot */
+R_spot : L_dist * theta_diff$
+
+/* 3. 拠点あたりの受電可能電力密度分布 (ガウス分布を仮定) */
+/* ここでは単純化し、ビームの中心100km圏内での受電効率を最大とする */
+
+/* Pythonへ渡す：1拠点あたりの実効受電半径 [m] */
+f : openw("rectenna_params.py")$
+printf(f, "R_RECT_M = ~f~%", float(R_spot))$
+printf(f, "WAVELENGTH = ~f~%", float(lambda))$
+close(f)$
+
+print("Beam Spot Radius at Venus (km):", float(R_spot/1000))$

@@ -1,0 +1,34 @@
+/* shuttle_gen.mac */
+kill(all)$
+
+/* 1. 熱平衡解 (#56) */
+eq_T : P = e * s * A * (T^4 - Ts^4)$
+sol_T : solve(eq_T, T)$
+expr_T : rhs(sol_T[2])$
+
+/* 2. 軌道時間解 (#48) */
+eq_t : D = a * (t_trip/2)^2$
+sol_t : solve(eq_t, t_trip)$
+expr_t : rhs(sol_t[2])$
+
+/* Python互換整形関数 */
+py_format(ex) := block(
+    [s],
+    s : string(ex),
+    s : ssubst("np.sqrt", "sqrt", s),
+    s : ssubst("**", "^", s),
+    return(s)
+)$
+
+/* ファイル書き出し */
+fh : openw("target_expr.py")$
+printf(fh, "import numpy as np~%~%")$
+printf(fh, "def get_temp_formula(P, e, s, A, Ts):~%")$
+printf(fh, "    return ~a~%~%", py_format(expr_T))$
+printf(fh, "def get_travel_time(D, a):~%")$
+printf(fh, "    return ~a~%", py_format(expr_t))$
+close(fh)$
+
+/* グラフ表示: 加速度aに対する往復日数(D=5e10m) */
+plot2d(subst([D=5.0e10], 2*rhs(sol_t[2])/(24*3600)), [a, 0.05, 1.0], 
+       [xlabel, "Acc (m/s^2)"], [ylabel, "Round trip (days)"], [title, "Transit Time Limit"])$

@@ -1,0 +1,22 @@
+/* [wxMaxima: input   start ] */
+/* 36_analysis.mac */
+/* 信頼度関数 R(t) = exp(-(t/eta)^m) */
+/* R(t) = 0.999 のとき、 -(t/eta)^m = log(0.999) */
+/* よって t = eta * (-log(0.999))^(1/m) */
+
+/* 1. 理論的な係数 C = -log(0.999) を計算 */
+crit_constant : float(-log(0.999));
+
+/* 2. ファイル bridge_data.txt に書き出し */
+/* 既存の内容を上書きするため 'write で開く */
+s : openw("bridge_data.txt");
+printf(s, "~f~%", crit_constant);
+close(s);
+
+/* 確認用の表示 */
+print("理論係数 C = -log(0.999) を算出しました:", crit_constant);
+print("bridge_data.txt を保存しました。");
+/* [wxMaxima: input   end   ] */
+
+
+

@@ -1,0 +1,13 @@
+/* task103.mac */
+gamma : 0.25$
+L_init : 2.905e+29$
+T_init : 737.0$
+
+/* Python用定数ファイル出力 */
+with_stdout("task103_params.py",
+    print(concat("GAMMA = ", float(gamma))),
+    print(concat("T_INIT = ", float(T_init)))
+)$
+
+/* GUI確認用：角運動量と温度の理論相関 */
+wxplot2d(T_init * (x/L_init)^gamma, [x, 0, L_init], [xlabel, "L_atm"], [ylabel, "Temp (K)"])$

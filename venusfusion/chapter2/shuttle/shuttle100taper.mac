@@ -1,0 +1,25 @@
+kill(all)$
+/* 1. 等応力条件の定義 */
+sigma_lim: sigma_all / S$
+depends(A, x)$
+eq: sigma_lim * 'diff(A, x) = -rho * A * a$
+
+/* 2. 境界条件: x=L(先端)で荷物 m_p を牽引する面積 */
+sol: ode2(eq, A, x)$
+bc: ic1(sol, x=L, A=(m_p*a)/sigma_lim)$
+A_dist: rhs(bc)$
+
+/* 3. テザー全質量の積分 */
+M_tether: integrate(rho * A_dist, x, 0, L)$
+
+/* 4. Python用クリーンエクスポート (メタデータ除去) */
+display2d: false$
+M_str: string(fullratsimp(M_tether))$
+/* 指数表現をPython用に変換 */
+M_str: ssubst("np.exp", "exp", M_str)$
+M_str: ssubst("**", "^", M_str)$
+
+with_stdout("tether_params.py",
+    print("import numpy as np"),
+    print(concat("def get_taper_mass(a, m_p, L, rho, S, sigma_all): return ", M_str))
+)$

@@ -1,0 +1,39 @@
+/* [wxMaxima: input   start ] */
+/* task29.mac */
+kill(all)$
+setup_autoload(draw, draw2d)$
+
+/* 1. 物理定数の設定 (SI単位系) */
+mu_val : 3.986004418e14$ /* 地球重力定数 [m^3/s^2] */
+Re_val : 6.371e6$        /* 地球半径 [m] */
+r0_val : 4.2164e7$       /* 射出開始半径 (GEO付近) [m] */
+
+/* 2. Python用ライブラリの生成 */
+f : openw("orbit_params.py")$
+printf(f, "import math~%")$
+printf(f, "MU = ~e  # [m^3/s^2]~%", mu_val)$
+printf(f, "RE = ~e  # [m]~%", Re_val)$
+printf(f, "R0 = ~e  # [m]~%", r0_val)$
+/* Pythonの文法(べき乗**)に変換して出力 */
+printf(f, "def calc_e(v0, gamma, mu, r0): return math.sqrt(1 + (2*(v0**2/2 - mu/r0)*(r0*v0*math.cos(gamma))**2)/mu**2)~%")$
+printf(f, "def calc_h(v0, gamma, r0): return r0*v0*math.cos(gamma)~%")$
+close(f)$
+
+/* 3. 基準軌道の描画 (v0=3000 m/s, gamma=-12 deg) */
+v_t : 3000$ g_t : -12 * %pi / 180$
+e_t : ev(sqrt(1+(2*(v0^2/2-mu_val/r0_val)*(r0_val*v0*cos(gamma))^2)/mu_val^2),v0=v_t,gamma=g_t)$
+p_t : (r0_val*v_t*cos(g_t))^2/mu_val$
+
+draw2d(
+    title = "Hydrogen Capsule Injection Trajectory (Unit: m)",
+    proportional_axes = 'xyz, grid = true,
+    line_width = 2,
+    color = blue, key = "Capsule Trajectory",
+    parametric(p_t/(1+e_t*cos(phi))*cos(phi), p_t/(1+e_t*cos(phi))*sin(phi), phi, 0, 2*%pi),
+    color = red, key = "Earth Surface",
+    parametric(Re_val*cos(th), Re_val*sin(th), th, 0, 2*%pi)
+)$
+/* [wxMaxima: input   end   ] */
+
+
+

@@ -1,0 +1,29 @@
+/* task_901e.mac: 金星熱収支へのエネルギー注入影響解析 */
+
+/* 定数 */
+sigma : 5.67e-8$      /* ステファン・ボルツマン定数 */
+R_v : 6052e3$         /* 金星半径 [m] */
+A_v : 4 * %pi * R_v^2$ /* 金星表面積 */
+S_v : 2613$           /* 金星軌道太陽定数 [W/m^2] */
+albedo : 0.3$         /* テラフォーミング後想定アルベド */
+epsilon : 0.9$        /* 大気放射率 (温室効果調整後) */
+
+/* 1. 自然状態での平衡温度 T_nat */
+/* (1-albedo)*S_v/4 = epsilon*sigma*T^4 */
+T_nat : (( (1-albedo)*S_v/4 ) / (epsilon*sigma))^(1/4)$
+
+/* 2. 10TWを外部注入した際の温度 T_new */
+P_inj : 10.0e12$
+T_new : (( ((1-albedo)*S_v*A_v/4) + P_inj ) / (epsilon*sigma*A_v))^(1/4)$
+
+/* 3. 温度上昇デルタ Delta_T */
+Delta_T : T_new - T_nat$
+
+/* Pythonへ渡す：温度上昇値と表面積 */
+f : openw("thermal_impact.py")$
+printf(f, "DELTA_T = ~f~%", float(Delta_T))$
+printf(f, "NAT_TEMP_K = ~f~%", float(T_nat))$
+close(f)$
+
+print("Natural Equilibrium Temp (K):", float(T_nat))$
+print("Temperature Increase by 10TW (K):", float(Delta_T))$

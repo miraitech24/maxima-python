@@ -1,0 +1,12 @@
+
+display2d:false$
+/* 入射・着陸条件 */
+v_start : 2166.7$ /* 滑空開始速度 m/s */
+v_land  : 70.0$   /* 着陸進入速度 m/s */
+g : 9.80665$
+G_limit : 3.0$
+a_limit : G_limit * g$
+
+/* 3G制限下での必要減速距離 s を算出 */
+s_sol : solve(v_land^2 - v_start^2 = -2 * a_limit * s, s)$
+print(float(rhs(s_sol[1])) / 1000)$

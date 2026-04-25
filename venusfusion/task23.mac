@@ -1,0 +1,31 @@
+/* [wxMaxima: input   start ] */
+/* 放射冷却の定式化 */
+kill(all);
+/* P: 放射パワー, epsilon: 放射率, sigma: 定数, T: 炉心温度, T_env: 環境温度 */
+P_expr: epsilon * sigma * (T^4 - T_env^4);
+
+/* 温度変化に対する感度(微分)を算出 */
+dP_dT: diff(P_expr, T);
+
+/* 1. 美しい数式表記を表示 */
+print("--- 放射損失の定式化 ---");
+disp(P = P_expr);
+print("--- 温度感度(dP/dT) ---");
+disp(dP_dT);
+
+/* 2. グラフ化（環境温度 735K における放射曲線） */
+plot2d(ev(P_expr, epsilon=0.9, sigma=5.67e-8, T_env=735), [T, 735, 1200], [title, "Radiation Loss on Venus Surface"]);
+
+/* 3. Python用に出力 (累乗 ^ を ** に置換して保存) */
+expr_str: string(P_expr);
+/* Pythonの構文に合わせるための処理 */
+expr_str: ssubst("**", "^", expr_str);
+
+fh: openw("model_expr.txt");
+printf(fh, "~a", expr_str);
+close(fh);
+print("File 'model_expr.txt' has been generated.");
+/* [wxMaxima: input   end   ] */
+
+
+

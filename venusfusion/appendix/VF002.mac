@@ -1,0 +1,230 @@
+/* VF002_maxima_only_fixed.mac */
+/* 硫酸の液化・固定化の化学収支 - Maxima単独版（修正） */
+
+/* 1. 物理化学定数 */
+R: 8.314;               /* 気体定数 [J/(mol·K)] */
+T_venus: 737.0;         /* 金星表面温度 [K] */
+P_venus: 9.3e6;         /* 金星表面気圧 [Pa] (約92気圧) */
+H2SO4_mw: 98.08;        /* 硫酸分子量 [g/mol] */
+
+/* 2. 硫酸の熱力学特性 */
+melting_point: 283.36;  /* 融点 [K] (10.31°C) */
+boiling_point: 610.0;   /* 沸点 [K] (337°C) - 加圧下 */
+heat_fusion: 10.71e3;   /* 融解熱 [J/mol] */
+heat_vaporization: 50.0e3;  /* 蒸発熱 [J/mol]（概算） */
+cp_liquid: 138.0;       /* 液体の定圧比熱 [J/(mol·K)] */
+cp_gas: 50.0;           /* 気体の定圧比熱 [J/(mol·K)] */
+
+/* 3. 金星大気中の硫酸量推定 */
+atm_total_mass: 4.8e20;     /* 大気総質量 [kg] */
+h2so4_fraction: 0.0001;     /* 硫酸の質量分率（概算） */
+cloud_layer_mass: 1e16;     /* 雲層の質量 [kg] */
+
+total_h2so4: atm_total_mass * h2so4_fraction;
+cloud_h2so4: cloud_layer_mass * 0.75;  /* 雲の75%が硫酸 */
+
+/* 4. 相変化の熱力学計算 */
+/* Clausius-Clapeyron方程式: ln(P) = -ΔH_vap/R * (1/T) + C */
+delta_h_vap: heat_vaporization;
+T_boil: boiling_point;
+P_boil: 1.013e5;  /* 1 atm [Pa] */
+
+/* 蒸気圧曲線 */
+P_vapor(T) := exp(log(P_boil) - (delta_h_vap/R) * (1/T - 1/T_boil));
+
+/* 相の判定関数 */
+phase_diagram(T, P) := 
+    if T < melting_point then "solid"
+    else if P > P_vapor(T) then "liquid"
+    else "gas";
+
+/* 5. 物質収支計算（反応速度論） */
+/* 一次反応速度式 - 浮動小数点数を返すように修正 */
+mass_remaining(m0, k, t) := float(m0 * exp(-k * t));
+mass_converted(m0, k, t) := float(m0 - mass_remaining(m0, k, t));
+
+/* 6. エネルギー収支計算 */
+energy_balance(mass_kg, delta_T, phase_change) := block(
+    [moles, sensible_heat, latent_heat, total_energy],
+    
+    /* モル数に変換 */
+    moles: mass_kg * 1000 / H2SO4_mw,
+    
+    /* 顕熱 */
+    sensible_heat: if delta_T > 0 then
+                      float(moles * cp_gas * delta_T)
+                   else
+                      float(moles * cp_liquid * abs(delta_T)),
+    
+    /* 潜熱 */
+    latent_heat: if phase_change = "fusion" then
+                    float(moles * heat_fusion)
+                 else if phase_change = "vaporization" then
+                    float(moles * heat_vaporization)
+                 else 0.0,
+    
+    total_energy: sensible_heat + latent_heat,
+    
+    [total_energy, sensible_heat, latent_heat]
+);
+
+/* 7. 液化プロセスのシミュレーション */
+simulate_liquefaction(k_values) := block(
+    [results: [], t_max: 1.0e7, steps: 1000, i, j, m0: 1.0e10],
+    
+    dt: float(t_max / steps),
+    time_list: makelist(float(i*dt), i, 0, steps),
+    
+    for k in k_values do (
+        mass_rem_list: makelist(mass_remaining(m0, k, t), t, time_list),
+        mass_conv_list: makelist(mass_converted(m0, k, t), t, time_list),
+        
+        results: append(results, [[k, time_list, mass_rem_list, mass_conv_list]])
+    ),
+    
+    results
+);
+
+/* 8. 平衡定数の計算（仮想的な反応） */
+/* 硫酸の解離反応: H2SO4 ↔ 2H+ + SO4^2- */
+K_dissociation(T) := float(exp(-(-90.4e3)/(R*T)));  /* ΔG° = -90.4 kJ/mol を仮定 */
+
+/* 硫酸の溶解度積 */
+Ksp_sulfuric_acid(T) := float(exp(-(-10.0e3)/(R*T)));  /* 仮の値 */
+
+/* 9. メイン計算 */
+print("VF-002: 硫酸の液化・固定化の化学収支 (Maxima単独)");
+print("===================================================");
+print("");
+
+print("金星大気中の硫酸量:");
+printf(true, "  総量: ~e kg~%", float(total_h2so4));
+printf(true, "  雲層中: ~e kg~%", float(cloud_h2so4));
+print("");
+
+/* 相図の計算例 */
+print("相変化の例:");
+T_examples: [200, 300, 400, 500, 600];
+P_examples: [1.0e4, 1.0e5, 1.0e6, 1.0e7, 1.0e8];
+
+for i:1 thru length(T_examples) do (
+    phase: phase_diagram(T_examples[i], P_examples[i]),
+    printf(true, "  T=~f K, P=~e Pa → ~a~%", 
+           float(T_examples[i]), float(P_examples[i]), phase)
+);
+
+print("");
+print("金星表面での相:");
+venus_phase: phase_diagram(T_venus, P_venus);
+printf(true, "  T=~f K, P=~e Pa → ~a~%", T_venus, P_venus, venus_phase);
+print("");
+
+/* エネルギー計算例 */
+print("エネルギー要件の例:");
+mass_to_convert: cloud_h2so4 * 0.1;  /* 雲層中の10%を変換 */
+energy_result: energy_balance(mass_to_convert, 50, "fusion");
+printf(true, "  ~e kg の硫酸を50K冷却して固化するのに必要なエネルギー:~%", 
+       float(mass_to_convert));
+printf(true, "    総エネルギー: ~e J (~f PJ)~%", 
+       energy_result[1], energy_result[1]/1.0e15);
+printf(true, "    内訳 - 顕熱: ~e J, 潜熱: ~e J~%", 
+       energy_result[2], energy_result[3]);
+print("");
+
+/* 反応速度論的計算 */
+print("液化プロセスのシミュレーション:");
+k_values: [1.0e-8, 1.0e-7, 1.0e-6];
+liquefaction_results: simulate_liquefaction(k_values);
+
+/* 各反応速度定数での最終変換率 */
+for result in liquefaction_results do (
+    k_val: result[1],
+    mass_conv_list: result[4],
+    final_conversion: last(mass_conv_list) / (1.0e10) * 100.0,
+    printf(true, "  k=~e 1/s → 最終変換率: ~f%~%", float(k_val), float(final_conversion))
+);
+
+/* 10. ファイル出力 */
+/* 熱力学データ */
+with_stdout("VF002_thermodynamics.csv",
+    printf(true, "property,value,unit~%"),
+    printf(true, "melting_point,~f,K~%", melting_point),
+    printf(true, "boiling_point,~f,K~%", boiling_point),
+    printf(true, "heat_of_fusion,~e,J/mol~%", float(heat_fusion)),
+    printf(true, "heat_of_vaporization,~e,J/mol~%", float(heat_vaporization)),
+    printf(true, "total_H2SO4_in_atmosphere,~e,kg~%", float(total_h2so4)),
+    printf(true, "H2SO4_in_clouds,~e,kg~%", float(cloud_h2so4))
+);
+
+/* 液化シミュレーションデータ - 修正版 */
+with_stdout("VF002_liquefaction.csv",
+    printf(true, "time,"),
+    /* ヘッダー */
+    for k in k_values do (
+        printf(true, "k=~e_remaining,k=~e_converted,", float(k), float(k))
+    ),
+    printf(true, "~%"),
+    
+    /* データ */
+    time_list: liquefaction_results[1][2],
+    num_times: length(time_list),
+    for i:1 thru 100 step 10 do (  /* 100点に間引く */
+        printf(true, "~f", time_list[i]),
+        for result in liquefaction_results do (
+            printf(true, ",~e,~e", 
+                   float(result[3][i]),  /* remaining */
+                   float(result[4][i]))  /* converted */
+        ),
+        printf(true, "~%")
+    )
+);
+
+/* 11. グラフ生成（相図） */
+/* 温度-圧力相図 */
+T_min: 200;
+T_max: 700;
+P_min: 1.0e3;
+P_max: 1.0e8;
+
+/* 相境界の計算 */
+phase_boundary(T) := P_vapor(T);
+
+/* グラフデータを生成 */
+with_stdout("VF002_phase_data.txt",
+    printf(true, "T,P_vapor,phase~%"),
+    for T from T_min step 10 thru T_max do (
+        P_val: phase_boundary(T),
+        phase: phase_diagram(T, P_val*1.1),  /* 気液境界付近 */
+        printf(true, "~f,~e,~a~%", float(T), float(P_val), phase)
+    )
+);
+
+/* 12. 平衡定数の温度依存性 */
+print("");
+print("平衡定数の温度依存性:");
+T_range_eq: makelist(273 + i*10, i, 0, 50);  /* 0-500°C */
+for T_eq in [273, 373, 473, 573, 673] do (
+    K_diss: K_dissociation(T_eq),
+    K_sp: Ksp_sulfuric_acid(T_eq),
+    printf(true, "  T=~f K: K_diss=~e, K_sp=~e~%", T_eq, K_diss, K_sp)
+);
+
+/* 13. 追加解析：エネルギー要件の質量依存性 */
+print("");
+print("エネルギー要件の質量依存性:");
+mass_range: [1.0e5, 1.0e6, 1.0e7, 1.0e8, 1.0e9, 1.0e10];
+printf(true, "質量 (kg), エネルギー (PJ)~%");
+for m in mass_range do (
+    energy: energy_balance(m, 100, "fusion")[1],
+    printf(true, "~e, ~f~%", float(m), float(energy/1.0e15))
+);
+
+/* 14. 終了メッセージ */
+print("");
+print("===================================================");
+print("✅ VF-002 完了");
+print("生成されたファイル:");
+print("  1. VF002_thermodynamics.csv - 熱力学データ");
+print("  2. VF002_liquefaction.csv - 液化シミュレーション");
+print("  3. VF002_phase_data.txt - 相図データ");
+

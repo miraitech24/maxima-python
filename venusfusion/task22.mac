@@ -1,0 +1,23 @@
+/* [wxMaxima: input   start ] */
+/* 1. 微分方程式の定義と一般解の導出 */
+depends(N, t);
+eqn: 'diff(N, t) = G - lambda * N;
+sol: ode2(eqn, N, t);
+gen_sol: ic1(sol, t=0, N=N0);
+
+/* 2. 表示用（美しい数式表記） */
+print("--- 導出された一般解 ---");
+disp(gen_sol);
+
+/* 3. グラフ化（正規化パラメータでの挙動確認） */
+plot2d(ev(rhs(gen_sol), G=1, lambda=0.1, N0=0), [t, 0, 50], [title, "Tritium Concentration Over Time"]);
+
+/* 4. Python受け渡し用のファイル出力 */
+string_sol: string(rhs(gen_sol));
+writefile("sol_expr.txt");
+print(string_sol);
+closefile();
+/* [wxMaxima: input   end   ] */
+
+
+

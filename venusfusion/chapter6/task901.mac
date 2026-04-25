@@ -1,0 +1,37 @@
+/* task_901.mac: 理論電力密度の導出とデータ出力 */
+
+/* 定数定義 */
+sigma : 5.67037e-8$    /* ステファン・ボルツマン定数 */
+S_earth : 1361$        /* 地球の太陽定数 [W/m^2] */
+r_m_avg : 0.387$       /* 水星平均距離 [AU] */
+epsilon : 0.95$        /* パネル放射率 */
+eta_theory : 0.30$     /* 想定変換効率 (30%) */
+
+/* 水星平均軌道での放射強度 */
+S_m_avg : S_earth * (1.0 / r_m_avg)^2$
+
+/* 単位面積あたりの発電電力密度 W [W/m^2] */
+W_density : S_m_avg * eta_theory$
+
+/* 理論平衡温度 T の導出 (放射冷却と発電のバランス) */
+/* S * (1 - eta) = epsilon * sigma * T^4 */
+T_eq : ((S_m_avg * (1 - eta_theory)) / (epsilon * sigma))^(1/4)$
+
+/* 結果の表示 */
+print("--- Maxima Calculation Results ---")$
+print("Solar Intensity at Mercury (avg):", float(S_m_avg), "W/m^2")$
+print("Power Density at 30% efficiency:", float(W_density), "W/m^2")$
+print("Equilibrium Temperature:", float(T_eq), "K")$
+
+/* Pythonへの引き渡し用ファイル出力 */
+/* 1行目に電力密度、2行目に平均距離を出力 */
+f : openw("transfer_params.txt")$
+printf(f, "~f~%", float(W_density))$
+printf(f, "~f~%", float(r_m_avg))$
+close(f)$
+
+/* グラフ出力: 効率 eta に対する平衡温度の変化 */
+plot2d(((S_m_avg * (1 - e)) / (epsilon * sigma))^(1/4), [e, 0.05, 0.5],
+    [xlabel, "Efficiency (eta)"], [ylabel, "Temperature (K)"],
+    [title, "Equilibrium Temperature vs Efficiency"],
+    [pdf_file, "temp_vs_eff.pdf"])$

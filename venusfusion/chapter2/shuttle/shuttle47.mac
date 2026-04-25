@@ -1,0 +1,20 @@
+/* shuttle_gen.mac */
+kill(all)$
+eq : P = e * s * A * (T^4 - Ts^4)$
+sol : solve(eq, T)$
+target : rhs(sol[2])$
+
+/* Python互換形式へ整形して出力 */
+py_expr : string(target)$
+/* べき乗記号 ^ を ** に置換 */
+py_expr : ssubst("**", "^", py_expr)$
+
+fh : openw("target_expr.py")$
+printf(fh, "import numpy as np~%~%")$
+printf(fh, "def get_temp_formula(P, e, s, A, Ts):~%")$
+printf(fh, "    return ~a~%", py_expr)$
+close(fh)$
+
+/* グラフ表示 */
+plot2d(subst([e=0.9, s=5.67e-8, A=1200, Ts=3], target), 
+       [P, 0, 2e8], [xlabel, "Thermal Power (W)"], [ylabel, "Temp (K)"])$

@@ -1,0 +1,140 @@
+/* VF004_analytical.mac */
+/* 連成システムの解析解計算 - Maxima版 */
+
+/* 1. システムパラメータ */
+alpha: 0.05;      /* 成長率係数 */
+beta: 0.02;       /* 減衰率係数 */
+gamma: 0.01;      /* 結合係数 */
+delta: 0.03;      /* 外部擾乱係数 */
+t_end: 200;       /* シミュレーション期間 */
+
+/* 2. 連成微分方程式の定義 */
+/* システムA: dA/dt = alpha*A - gamma*B */
+/* システムB: dB/dt = beta*B + gamma*A - delta*B */
+
+eq1: 'diff(A(t), t) = alpha*A(t) - gamma*B(t);
+eq2: 'diff(B(t), t) = beta*B(t) + gamma*A(t) - delta*B(t);
+
+/* 3. 初期条件 */
+init_cond: [A(0) = 100, B(0) = 50];
+
+/* 4. 解析解の求解 */
+ode_system: [eq1, eq2];
+analytical_solution: desolve(ode_system, [A(t), B(t)], init_cond);
+
+/* 5. 数値関数の定義 */
+A_analytical(t) := ev(rhs(analytical_solution[1]), numer);
+B_analytical(t) := ev(rhs(analytical_solution[2]), numer);
+
+/* 6. 特性値解析 */
+system_matrix: matrix([alpha, -gamma], [gamma, beta - delta]);
+eigenvalues: eigenvalues(system_matrix);
+eigenvectors: eigenvectors(system_matrix);
+
+/* 7. 定常状態解析 */
+steady_state: solve([alpha*A - gamma*B = 0, gamma*A + (beta - delta)*B = 0], [A, B]);
+
+/* 8. 感度解析関数 */
+sensitivity(param, t) := block(
+    [h: 1e-6, base_value, perturbed_value],
+    base_value: A_analytical(t),
+    /* パラメータを一時的に変更 */
+    ev(alpha: alpha + h, numer),
+    perturbed_value: ev(A_analytical(t), numer),
+    /* パラメータを元に戻す */
+    ev(alpha: alpha - h, numer),
+    (perturbed_value - base_value) / h
+);
+
+/* 9. 数値積分による累積量計算 */
+cumulative_A: romberg(A_analytical(t), t, 0, t_end);
+cumulative_B: romberg(B_analytical(t), t, 0, t_end);
+
+/* 10. データ出力用関数 */
+export_data(filename) := block(
+    [t_list: makelist(i, i, 0, t_end, 1),
+     A_list: makelist(A_analytical(t), t, 0, t_end, 1),
+     B_list: makelist(B_analytical(t), t, 0, t_end, 1)],
+    
+    /* ファイルに書き出し */
+    with_stdout(filename,
+        printf(true, "t,A_analytical,B_analytical~%"),
+        for i:1 thru length(t_list) do
+            printf(true, "~f,~f,~f~%", t_list[i], A_list[i], B_list[i])
+    )
+);
+
+/* 11. 可視化関数 */
+plot_coupled_system() := draw2d(
+    terminal = pngcairo,
+    file_name = "VF004_analytical",
+    title = "VF-004: 連成システム解析解",
+    xlabel = "時間 (単位)",
+    ylabel = "状態変数",
+    yrange = [0, 500],
+    points_joined = true,
+    color = blue,
+    line_width = 2,
+    key = "システム A (解析解)",
+    explicit(A_analytical(x), x, 0, t_end),
+    color = red,
+    key = "システム B (解析解)",
+    explicit(B_analytical(x), x, 0, t_end),
+    color = black,
+    line_type = dots,
+    key = "定常状態 A",
+    explicit(rhs(steady_state[1][1]), x, 0, t_end),
+    color = gray,
+    key = "定常状態 B",
+    explicit(rhs(steady_state[1][2]), x, 0, t_end)
+);
+
+/* 12. 位相平面解析 */
+plot_phase_portrait() := draw2d(
+    terminal = pngcairo,
+    file_name = "VF004_phase",
+    title = "VF-004: 位相平面",
+    xlabel = "システム A",
+    ylabel = "システム B",
+    points_joined = true,
+    color = purple,
+    line_width = 2,
+    parametric(A_analytical(t), B_analytical(t), t, 0, t_end),
+    point_type = circle,
+    point_size = 1,
+    color = black,
+    key = "初期値",
+    points([[100, 50]]),
+    color = red,
+    key = "定常状態",
+    points([[rhs(steady_state[1][1]), rhs(steady_state[1][2])]])
+);
+
+/* 13. 実行セクション */
+:lisp (format t "~%=== VF-004 Maxima 解析計算 ===~%")
+:lisp (format t "解析解: ~%")
+
+print("システムAの解析解:");
+A_analytical(t);
+
+print("システムBの解析解:");
+B_analytical(t);
+
+print("特性値:");
+eigenvalues;
+
+print("定常状態:");
+steady_state;
+
+print("累積量 A:", cumulative_A);
+print("累積量 B:", cumulative_B);
+
+/* データ出力 */
+export_data("VF004_analytical_data.csv");
+
+/* グラフ生成 */
+plot_coupled_system();
+plot_phase_portrait();
+
+:lisp (format t "~%解析計算完了。結果を VF004_analytical_data.csv に出力しました。~%")
+

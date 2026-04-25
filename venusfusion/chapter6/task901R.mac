@@ -1,0 +1,33 @@
+/* task_901_recheck.mac: 極限環境下での修復エネルギーコスト再定義 */
+
+/* 定数再定義（より厳密に） */
+S_m : 9087$          /* 水星放射強度 [W/m^2] */
+eta_sys : 0.30$      /* 発電効率 */
+m_unit : 0.27$       /* パネル面密度 [kg/m^2] */
+decay_rate : 5.0e-4$ /* 損耗率（上方修正：0.05%/year） */
+
+/* 修復に必要なエネルギー要素 [J/kg] */
+E_refine : 4.5e7$    /* アルミ精錬 (約13kWh/kg) */
+E_fab    : 1.0e7$    /* ハニカム構造への超精密加工 */
+/* 輸送コスト: 水星地表からL1点付近のパネル群への射出 (v_esc = 4.3 km/s) */
+v_esc    : 4300$
+E_trans  : 0.5 * v_esc^2$ 
+
+/* 1. 1kgのパネルを再生産・配置する総エネルギー */
+/* システム効率(30%)を考慮した実効コスト */
+E_total_kg : (E_refine + E_fab + E_trans) / 0.5$ /* 設備運用効率50%と仮定 */
+
+/* 2. 年間の単位面積あたりの「修復コスト」[W/m^2] */
+W_repair : (m_unit * decay_rate * E_total_kg) / (365 * 24 * 3600)$
+
+/* 3. 修正されたオーバーヘッド率 */
+R_repair_real : W_repair / (S_m * eta_sys)$
+
+/* Pythonへ引き渡し */
+f : openw("repair_params_v2.py")$
+printf(f, "REPAIR_RATIO = ~e~%", float(R_repair_real))$
+printf(f, "E_TOTAL_KG = ~e~%", float(E_total_kg))$
+printf(f, "DECAY_RATE = ~e~%", float(decay_rate))$
+close(f)$
+
+print("Revised Maintenance Overhead (%):", float(R_repair_real * 100))$

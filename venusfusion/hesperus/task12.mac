@@ -1,0 +1,14 @@
+/* [wxMaxima: input   start ] */
+/* 1. パラメータ定義 */
+assume(alpha > 0, L > 0, P_source > 0)$
+
+/* 2. 吸収モデル: P_absorbed = P_source * (1 - exp(-alpha * L)) */
+P_abs : P_source * (1 - exp(-alpha * L))$
+
+/* 3. 地表設置 (L=大気層全体) vs 軌道設置 (L=0) の比率 */
+/* Pythonへ引き渡し */
+with_stdout ("formula_12.txt", print(string(P_abs)))$
+/* [wxMaxima: input   end   ] */
+
+
+

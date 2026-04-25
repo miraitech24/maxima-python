@@ -1,0 +1,26 @@
+/* chapter6_final.mac: 恒久インフラとしての定常状態宣言 */
+
+/* 物理定数と最終パラメータ */
+sigma : 5.67037e-8$
+A_v : 4.60e14$         /* 金星表面積 [m^2] */
+P_sun : 1.2e17$       /* 金星が受ける太陽放射総量 (アルベド0.3考慮後) */
+P_mercury : 1.0e13$   /* 水星からの定常注入電力 (10TW) */
+epsilon_final : 0.85$ /* テラフォーミング後の大気放射率 */
+
+/* 1. 最終的な放射平衡温度 T_final の算出 */
+T_final_val : ((P_sun + P_mercury) / (epsilon_final * sigma * A_v))^(1/4)$
+
+/* 2. SR制動のレバレッジ率 (注入電力 vs 大気運動エネルギー) */
+/* 運動エネルギー E = 1/2 * M_atm * v^2 (v=100m/s -> 1m/sへの抑制) */
+M_atm : 4.8e20$
+E_saved : 0.5 * M_atm * (100^2 - 1^2)$
+Years_saved : E_saved / (P_mercury * (365*24*3600))$
+
+/* Pythonへ渡す：定数ファイル生成 */
+f : openw("final_params.py")$
+printf(f, "T_FINAL = ~f~%", float(T_final_val))$
+printf(f, "YEARS_TO_DEPLETE = ~f~%", float(Years_saved))$
+close(f)$
+
+print("Final Planetary Temperature (K):", float(T_final_val))$
+print("Energy Leverage (Years):", float(Years_saved))$

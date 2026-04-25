@@ -1,0 +1,7 @@
+property,value,unit
+melting_point,283.36,K
+boiling_point,610.0,K
+heat_of_fusion,1.071e+4,J/mol
+heat_of_vaporization,5.0e+4,J/mol
+total_H2SO4_in_atmosphere,4.8e+16,kg
+H2SO4_in_clouds,7.5e+15,kg

@@ -1,0 +1,20 @@
+/* Maxima Code: 課題32 修正版出力 */
+
+/* 1. 理論計算 */
+theory_alpha : 0.125$
+theory_N0    : 1.0$
+
+/* 2. params.py のクリーンな書き出し */
+/* openw を使い、ストリーム経由で直接書き込むことで GUIのXML混入を防ぐ */
+s : openw("params.py")$
+printf(s, "ALPHA = ~f~%", theory_alpha)$
+printf(s, "N0 = ~f~%", theory_N0)$
+close(s)$
+
+print("params.py を正常に生成しました。")$
+
+/* 理論解の数式表示とグラフ（これは画面用） */
+depends(N, t);
+psol: ic1(ode2('diff(N, t) = alpha * N, N, t), t=0, N=N0);
+tex(psol);
+plot2d(rhs(subst([alpha=theory_alpha, N0=theory_N0], psol)), [t, 0, 50])$

@@ -1,0 +1,34 @@
+/* #101a: 自然エネルギー解析 */
+S_v : 2613.9;                /* 金星軌道での太陽定数 (W/m2) */
+A_v : 0.76;                  /* アルベド */
+R_v : 6.052e6;               /* 金星半径 (m) */
+P_sun : %pi * R_v^2 * S_v * (1 - A_v); /* 実効受光電力 */
+
+/* #101b: 大気慣性モーメント */
+M_atm : 4.8e20;              /* 大気総質量 (kg) */
+V_sr  : 100;                 /* SR平均速度 (m/s) */
+L_atm : M_atm * R_v * V_sr;  /* 総角運動量 */
+
+/* #101c: 熱上昇流の流体定義 */
+rho_atm : 65.0;              /* 下層大気密度 (kg/m3) */
+W_out   : 1.0e13;            /* 1拠点熱出力 (10TW) */
+Cp      : 1000;              /* 比熱 (J/kg・K) */
+delta_T : 50;                /* 上昇流の温度差 (K) */
+g_v     : 8.87;              /* 金星重力 */
+
+/* 質量流量と上昇速度の導出 */
+m_dot : W_out / (Cp * delta_T);
+v_up  : sqrt(2 * g_v * 10000 * (delta_T / 737)); /* 10km上昇を想定 */
+/* 有効制動半径 (m) */
+r_eff : sqrt(m_dot / (%pi * rho_atm * v_up));
+
+/* Pythonへのデータ引き渡し */
+with_stdout("task101_params.py",
+    print(concat("L_ATM = ", float(L_atm))),
+    print(concat("R_EFF = ", float(r_eff))),
+    print(concat("P_SUN = ", float(P_sun)))
+);
+
+/* グラフ出力: 拠点数増加に伴う制動ポテンシャルの可視化 */
+set_plot_option([terminal, png], [png_file, "task101_braking.png"]);
+plot2d(1 - exp(-x/865), [x, 1, 1000], [xlabel, "Number of Nodes"], [ylabel, "Braking Potential"]);

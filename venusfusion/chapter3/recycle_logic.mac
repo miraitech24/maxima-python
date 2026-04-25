@@ -1,0 +1,5 @@
+
+    display2d:false$
+    V_total: eta * (P_cnt*W_cnt + P_alu*W_alu + P_abl*W_abl)$
+    print(V_total)$
+    

@@ -1,0 +1,29 @@
+/* task_901c.mac: 金星大気角運動量と維持トルクの理論解析 */
+
+/* 定数 */
+R_v : 6.052e6$      /* 金星半径 [m] */
+g_v : 8.87$         /* 金星重力加速度 [m/s^2] */
+P_s : 9.3e6$        /* 地表気圧 [Pa] (93気圧) */
+M_atm : (4 * %pi * R_v^2 * P_s) / g_v$ /* 大気総質量 [kg] */
+
+/* 1. 風速 v の時の大気全体の角運動量 L */
+/* 簡略化のため大気層の厚さを無視した薄殻近似 */
+L_atm(v) := M_atm * R_v * v$
+
+/* 2. SRが再発しようとする自然のトルク N_nat の推定 */
+/* 太陽加熱による熱潮汐力が駆動源 (過去の観測データより約 10^19 Nm 程度) */
+N_nat : 1.5e19$ 
+
+/* 3. このトルクを打ち消すための必要電力 P_req (P = N * omega) */
+/* omega は金星自転角速度ではなく、大気の回転角速度 */
+omega_v(v) := v / R_v$
+P_req(v) := N_nat * omega_v(v)$
+
+/* Pythonへ渡す：1m/s維持に必要な理論電力と大気質量 */
+f : openw("torque_params.py")$
+printf(f, "M_ATM_KG = ~e~%", float(M_atm))$
+printf(f, "N_NAT_NM = ~e~%", float(N_nat))$
+close(f)$
+
+print("Total Atmosphere Mass (kg):", float(M_atm))$
+print("Theoretical Power to halt 1m/s SR (TW):", float(P_req(1.0)/1e12))$

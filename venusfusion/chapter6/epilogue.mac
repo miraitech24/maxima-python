@@ -1,0 +1,26 @@
+/* epilogue_final_calc.mac: 金星プロジェクトの最終効率査定（再修正版） */
+
+/* 1. 金星維持のレバレッジ率 (Q_venus) */
+P_sun_venus : 1.2e17$ 
+P_brake : 1.0e13$ 
+Q_val : float(P_sun_venus / P_brake)$ 
+
+/* 2. カルダシェフ・スケール K の計算 */
+/* 常用対数 log10 を自然対数 log に変換して確実に数値化 */
+/* K = (log10(P) - 6) / 10 */
+P_total : P_brake + P_sun_venus$
+K_now_val : float((log(P_total)/log(10) - 6) / 10)$
+
+/* 3. 目標値（Type I）の計算 */
+P_type1 : 1.74e17$ 
+K_target_val : float((log(P_type1)/log(10) - 6) / 10)$
+
+/* Pythonへ引き渡し */
+f : openw("epilogue_params.py")$
+printf(f, "Q_VENUS = ~f~%", Q_val)$
+printf(f, "K_NOW = ~f~%", K_now_val)$
+printf(f, "K_TARGET = ~f~%", K_target_val)$
+close(f)$
+
+print("Leverage Q (Controlled/Injected):", Q_val)$
+print("Current Kardashev Scale:", K_now_val)$

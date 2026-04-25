@@ -1,0 +1,24 @@
+/* [wxMaxima: input   start ] */
+/* ガモフ因子の簡略化モデルでの解析解導出 */
+kill(all);
+depends(P, D);
+/* 解析的な透過確率の基本式（定数部分は簡略化） */
+P_expr: exp(-A / sqrt(E_kin) * (1 - D_eff/D));
+
+/* 1. 数式の表示 */
+print("--- 導出された透過係数 P ---");
+disp(P_expr);
+
+/* 2. グラフ化（固定Dでのエネルギー依存性） */
+plot2d(ev(P_expr, A=10, D_eff=1, D=5), [E_kin, 1, 100], [title, "Tunneling Probability"]);
+
+/* 3. ファイル書き出し (Pythonが読み取れるように) */
+/* 保存先を明示的に指定 */
+fh: openw("sol_v.txt");
+printf(fh, "~a", string(P_expr));
+close(fh);
+print("ファイル 'sol_v.txt' を出力しました。");
+/* [wxMaxima: input   end   ] */
+
+
+

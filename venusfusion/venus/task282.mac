@@ -1,0 +1,28 @@
+/* --- 課題28: バッチ/GUI両対応版 --- */
+
+/* directory_nameのエラーを回避するため、文字列として処理 */
+if (load_pathname # false) then (
+    chdir(file_search_maxima(".")[1]) /* 現在のフォルダを確実に指定 */
+)$
+
+/* 理論解の定義 */
+delta_H : -178000$
+delta_S : -160$
+R : 8.314$
+G(T) := delta_H - T * delta_S$
+K(T) := exp(-G(T) / (R * T))$
+
+/* グラフ出力 (バッチ時はファイルとして保存するか、表示をスキップ) */
+if (not batchmode) then (
+    plot2d(K(T), [T, 400, 1000], [logy], [title, "Equilibrium K(T)"])
+)$
+
+/* 数値テーブル出力 (display2d:false でXMLタグを完全排除) */
+display2d: false$
+with_stdout("equilibrium_data.txt", 
+    for t:400 step 10 thru 1000 do (
+        print(t, ",", float(K(t)))
+    )
+)$
+display2d: true$
+print("SUCCESS: Data exported to equilibrium_data.txt")$

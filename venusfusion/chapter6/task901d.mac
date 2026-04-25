@@ -1,0 +1,28 @@
+/* task_901d.mac: 水星パネルの損耗・修復平衡解析 */
+
+/* 定数 */
+S_m : 9087$          /* 水星放射強度 [W/m^2] */
+E_refine : 3.0e7$    /* アルミ精錬・成形コスト [J/kg] */
+m_unit : 0.27$       /* パネル単位面積質量 [kg/m^2] (100μm厚) */
+decay_rate : 1.0e-4$ /* 年間損耗率 (0.01%/year: 太陽風・隕石等) */
+
+/* 1. 年間の単位面積あたり損耗質量 [kg/m^2/year] */
+m_loss_year : m_unit * decay_rate$
+
+/* 2. 1m^2を修復（生産・輸送）するために必要な年間エネルギー [J/year] */
+/* 輸送コストを含め、精錬エネルギーの5倍と見積もる */
+E_repair_year : m_loss_year * (E_refine * 5)$
+
+/* 3. 1m^2あたりの年間発電量 [J/year] (効率30%) */
+E_gen_year : S_m * 0.30 * (365 * 24 * 3600)$
+
+/* 4. 自己修復コスト比率 R_repair (無次元) */
+R_repair : E_repair_year / E_gen_year$
+
+/* Pythonへ渡す：維持コスト比率 */
+f : openw("repair_params.py")$
+printf(f, "REPAIR_COST_RATIO = ~e~%", float(R_repair))$
+printf(f, "DECAY_RATE = ~e~%", float(decay_rate))$
+close(f)$
+
+print("Annual Maintenance Cost Ratio:", float(R_repair))$

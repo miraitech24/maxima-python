@@ -1,0 +1,144 @@
+/* VF-003_maxima_analysis.mac */
+/* 金星硫酸還元の熱力学・反応速度解析 */
+
+/* 1. 化学反応式の定義 */
+/* 主要な硫酸還元反応:
+   反応1: H2SO4(l) + H2(g) → SO2(g) + 2H2O(l)  （水素還元）
+   反応2: H2SO4(l) → H2O(l) + SO3(g)           （熱分解）
+   反応3: SO3(g) + H2(g) → SO2(g) + H2O(l)     （二次還元）
+*/
+
+/* 2. 熱力学的データ（標準状態: 298K, 1bar） */
+/* 生成エンタルピー ΔH_f° (kJ/mol) */
+H2SO4_l: -814.0;   /* 液体硫酸 */
+H2O_l:   -285.8;   /* 液体水 */
+SO2_g:   -296.8;   /* 二酸化硫黄 */
+SO3_g:   -395.7;   /* 三酸化硫黄 */
+H2_g:      0.0;    /* 水素ガス */
+
+/* 生成ギブス自由エネルギー ΔG_f° (kJ/mol) */
+H2SO4_l_G: -690.0;
+H2O_l_G:   -237.1;
+SO2_g_G:   -300.2;
+SO3_g_G:   -371.1;
+H2_g_G:      0.0;
+
+/* 3. 反応エンタルピーとギブス自由エネルギーの計算 */
+/* 反応1: H2SO4(l) + H2(g) → SO2(g) + 2H2O(l) */
+deltaH_rxn1: (SO2_g + 2*H2O_l) - (H2SO4_l + H2_g);
+deltaG_rxn1: (SO2_g_G + 2*H2O_l_G) - (H2SO4_l_G + H2_g_G);
+
+/* 反応2: H2SO4(l) → H2O(l) + SO3(g) */
+deltaH_rxn2: (H2O_l + SO3_g) - H2SO4_l;
+deltaG_rxn2: (H2O_l_G + SO3_g_G) - H2SO4_l_G;
+
+/* 4. 平衡定数の計算（298K） */
+/* ΔG° = -RT lnK より */
+R: 8.314e-3;  /* kJ/(mol·K) */
+T: 298.15;    /* K */
+K1: exp(-deltaG_rxn1/(R*T));
+K2: exp(-deltaG_rxn2/(R*T));
+
+/* 5. 反応速度論（アレニウス式）のパラメータ推定 */
+/* 仮定: 触媒存在下での硫酸還元 */
+/* 活性化エネルギー Ea (kJ/mol) */
+Ea1: 50.0;  /* 反応1のEa */
+Ea2: 80.0;  /* 反応2のEa */
+
+/* 頻度因子 A (1/s) */
+A1: 1e10;
+A2: 1e8;
+
+/* アレニウス式: k = A * exp(-Ea/(R*T)) */
+k1(Temp):= A1 * exp(-Ea1/(R*Temp));
+k2(Temp):= A2 * exp(-Ea2/(R*Temp));
+
+/* 6. 金星条件での平衡定数（温度依存性） */
+/* van't Hoff式: d(lnK)/d(1/T) = -ΔH°/R */
+/* 温度T2での平衡定数 */
+K1_T(Temp):= K1 * exp(-deltaH_rxn1/R * (1/Temp - 1/T));
+K2_T(Temp):= K2 * exp(-deltaH_rxn2/R * (1/Temp - 1/T));
+
+/* 7. 金星表面条件での計算 */
+/* 初期条件: T=735K, P=92bar */
+T_venus: 735;
+P_venus: 92;
+
+/* 金星温度での速度定数 */
+k1_venus: k1(T_venus);
+k2_venus: k2(T_venus);
+
+/* 金星温度での平衡定数 */
+K1_venus: K1_T(T_venus);
+K2_venus: K2_T(T_venus);
+
+/* 8. 微分方程式の形式的導出 */
+/* 硫酸濃度 [H2SO4] の時間変化 */
+/* d[H2SO4]/dt = -k1[H2SO4][H2] - k2[H2SO4] */
+/* ただし、[H2]は水素供給速度で制御 */
+
+/* 9. エネルギーバランス */
+/* 反応熱による温度変化の計算 */
+/* 仮定: 反応1は発熱、反応2は吸熱 */
+/* システム全体の熱容量: C_p_system */
+
+C_p_system: 1e8;  /* 仮の値 (J/K) */
+
+/* 温度変化率: dT/dt = (反応熱の合計) / C_p_system */
+/* Q_rxn = Σ(反応速度×反応エンタルピー) */
+
+/* 10. 水量収支の微分方程式 */
+/* 水生成速度: d[H2O]/dt = 2*r1 + r2 */
+/* ここで r1, r2 は各反応の速度 */
+
+/* 11. 数値計算の準備（パラメータ設定） */
+/* 金星の初期硫酸量 (kg) */
+H2SO4_initial: 1e18;  /* 推定値: 1兆トン */
+H2O_initial: 0;
+SO2_initial: 0;
+
+/* 水素供給速度 (mol/s) */
+H2_supply_rate: 1e6;  /* 仮定: 1e6 mol/s = 2トン/時程度 */
+
+/* 12. 解析結果の表示 */
+print("=== VF-003: 硫酸還元熱力学解析 ===");
+print("");
+print("1. 反応エンタルピー (ΔH, kJ/mol):");
+printf(true, "   反応1 (H2SO4 + H2 → SO2 + 2H2O): ~,3f~%", deltaH_rxn1);
+printf(true, "   反応2 (H2SO4 → H2O + SO3): ~,3f~%", deltaH_rxn2);
+print("");
+print("2. 反応ギブス自由エネルギー (ΔG, kJ/mol):");
+printf(true, "   反応1: ~,3f~%", deltaG_rxn1);
+printf(true, "   反応2: ~,3f~%", deltaG_rxn2);
+print("");
+print("3. 平衡定数 (298K):");
+printf(true, "   反応1: K1 = ~,3e~%", K1);
+printf(true, "   反応2: K2 = ~,3e~%", K2);
+print("");
+print("4. 金星条件 (735K, 92bar):");
+printf(true, "   反応1速度定数: k1 = ~,3e s⁻¹~%", k1_venus);
+printf(true, "   反応2速度定数: k2 = ~,3e s⁻¹~%", k2_venus);
+printf(true, "   反応1平衡定数: K1 = ~,3e~%", K1_venus);
+printf(true, "   反応2平衡定数: K2 = ~,3e~%", K2_venus);
+print("");
+print("5. 初期条件:");
+printf(true, "   初期硫酸量: ~,3e kg~%", H2SO4_initial);
+printf(true, "   水素供給速度: ~,3e mol/s~%", H2_supply_rate);
+print("");
+print("=== 解析完了 ===");
+
+/* 13. Python連携用のデータ出力 */
+with_stdout("VF003_maxima_results.txt",
+    print("parameter,value,unit"),
+    printf(true, "deltaH_rxn1,~f,kJ/mol~%", deltaH_rxn1),
+    printf(true, "deltaH_rxn2,~f,kJ/mol~%", deltaH_rxn2),
+    printf(true, "deltaG_rxn1,~f,kJ/mol~%", deltaG_rxn1),
+    printf(true, "deltaG_rxn2,~f,kJ/mol~%", deltaG_rxn2),
+    printf(true, "K1_298K,~e,dimensionless~%", K1),
+    printf(true, "K2_298K,~e,dimensionless~%", K2),
+    printf(true, "k1_735K,~e,s^-1~%", k1_venus),
+    printf(true, "k2_735K,~e,s^-1~%", k2_venus),
+    printf(true, "Ea1,~f,kJ/mol~%", Ea1),
+    printf(true, "Ea2,~f,kJ/mol~%", Ea2)
+);
+

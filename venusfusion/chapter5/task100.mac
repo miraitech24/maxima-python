@@ -1,0 +1,9 @@
+/* 金星が太陽から受ける総エネルギー（熱入力）は約 1.7e17 W */
+P_solar : 1.7e17$ 
+/* 目標とする干渉エネルギー（太陽光の数%を局所的にコントロール） */
+P_required : P_solar * 0.05$ 
+/* 1拠点あたりの炉の出力 (10 TW = 1e13 W) */
+P_per_hub : 1e13$
+
+Number_of_hubs : P_required / P_per_hub;
+print("必要な拠点数（10TW級）:", float(Number_of_hubs));

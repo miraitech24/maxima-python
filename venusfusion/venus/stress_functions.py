@@ -1,0 +1,3 @@
+<math><st>import numpy as np</st><st> </st></math><math><st>def get_stresses(r, T_surf, Q, k, alpha, E, nu, Ri):</st><st> </st></math>    sr = -((E*Q*alpha*r**2)/(8*np.pi*k*r**3-8*np.pi*k*nu*r**3))+(E*Q*Ri**2*alpha)/(8*np.pi*k*r**3-8*np.pi*k*nu*r**3)-(E*T_surf*alpha*r**3)/(3*r**3-3*nu*r**3)+(E*Ri**3*T_surf*alpha)/(3*r**3-3*nu*r**3)
+    st = -((E*Q*Ri**2*alpha)/(8*np.pi*k*r**3-8*np.pi*k*nu*r**3))-(2*E*Ri**3*T_surf*alpha)/(6*r**3-6*nu*r**3)-(E*T_surf*alpha)/(6-6*nu)
+<math><st>    return sr, st</st><st> </st></math>

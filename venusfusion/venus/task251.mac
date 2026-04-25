@@ -1,0 +1,9 @@
+/* [wxMaxima: input   start ] */
+display2d: false$
+/* 物理法則：材料不均質性deltaを含む反応確率 */
+P_expr: exp(- (Eb / (k * T * (S + delta))))$
+stringout("solution_p.txt", P_expr)$
+/* [wxMaxima: input   end   ] */
+
+
+

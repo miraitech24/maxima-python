@@ -1,0 +1,38 @@
+
+Maxima 5.46.0 https://maxima.sourceforge.io
+using Lisp GNU Common Lisp (GCL) GCL 2.6.14 git tag Version_2_6_15pre7
+Distributed under the GNU Public License. See the file COPYING.
+Dedicated to the memory of William Schelter.
+The function bug_report() provides bug reporting information.
+(%i1) batch("VF004_analytical.mac")
+
+read and interpret /home/iwamura/ドキュメント/coupling/venusfusion/appendix/VF004_analytical.mac
+(%i2) alpha:0.05
+(%o2)                                0.05
+(%i3) beta:0.02
+(%o3)                                0.02
+(%i4) gamma:0.01
+(%o4)                                0.01
+(%i5) delta:0.03
+(%o5)                                0.03
+(%i6) t_end:200
+(%o6)                                 200
+(%i7) eq1:'diff(A(t),t) = alpha*A(t)-gamma*B(t)
+                       d
+(%o7)                  -- (A(t)) = 0.05 A(t) - 0.01 B(t)
+                       dt
+(%i8) eq2:'diff(B(t),t) = beta*B(t)+gamma*A(t)+(-delta)*B(t)
+                       d
+(%o8)                  -- (B(t)) = 0.01 A(t) - 0.01 B(t)
+                       dt
+(%i9) init_cond:[A(0) = 100,B(0) = 50]
+(%o9)                       [A(0) = 100, B(0) = 50]
+(%i10) ode_system:[eq1,eq2]
+        d                                  d
+(%o10) [-- (A(t)) = 0.05 A(t) - 0.01 B(t), -- (B(t)) = 0.01 A(t) - 0.01 B(t)]
+        dt                                 dt
+(%i11) analytical_solution:desolve(ode_system,[A(t),B(t)],init_cond)
+desolve(eqns, vars): expected exactly 2 arguments but got 3: errexp1
+ -- an error. To debug this try: debugmode(true);
+(%o12) /home/iwamura/ドキュメント/coupling/venusfusion/appendix/VF004_an\
+alytical.mac

@@ -1,0 +1,182 @@
+/* VF004_final_fixed.mac - 構文エラー修正版 */
+
+/* 1. クリアと初期化 */
+kill(all)$
+reset()$
+
+/* 2. システムパラメータ */
+alpha: 0.05;
+beta: 0.02;
+gamma: 0.01;
+delta: 0.03;
+A0: 100.0;
+B0: 50.0;
+t_end: 100.0;
+dt: 1.0;
+
+print("========================================");
+print("VF-004: 連成システム解析");
+print("========================================");
+
+/* 3. 微分方程式を解く */
+print("1. 解析解を計算中...");
+
+/* 初期条件の設定 */
+atvalue(A(t), t=0, A0)$
+atvalue(B(t), t=0, B0)$
+
+/* 連成微分方程式 */
+eq1: 'diff(A(t), t) = alpha*A(t) - gamma*B(t);
+eq2: 'diff(B(t), t) = beta*B(t) + gamma*A(t) - delta*B(t);
+
+print("微分方程式:");
+print(eq1);
+print(eq2);
+
+/* 解析解の取得 */
+sol: desolve([eq1, eq2], [A(t), B(t)]);
+
+print("解析解:");
+print(sol);
+
+/* 数値関数の定義 */
+A_ana(t) := ev(rhs(sol[1]), numer);
+B_ana(t) := ev(rhs(sol[2]), numer);
+
+/* 4. 時間発展データの作成 */
+print("2. 時間発展データを作成中...");
+t_list: makelist(i, i, 0, t_end, dt);
+A_list: makelist(A_ana(t), t, 0, t_end, dt);
+B_list: makelist(B_ana(t), t, 0, t_end, dt);
+
+/* 5. CSVファイル出力 */
+print("3. CSVファイルを出力中...");
+
+with_stdout("VF004_analytical_data.csv",
+    printf(true, "t,A_analytical,B_analytical~%"),
+    for i:1 thru length(t_list) do (
+        printf(true, "~f,~f,~f~%", t_list[i], A_list[i], B_list[i])
+    )
+);
+
+print("CSVファイル生成完了: VF004_analytical_data.csv");
+
+/* 6. 特性値解析 */
+print("4. 特性値解析を実行中...");
+M: matrix([alpha, -gamma], [gamma, beta - delta]);
+eigen: eigenvectors(M);
+
+print("システム行列 M:");
+print(M);
+print("特性値:");
+print(eigen[1]);
+print("特性ベクトル:");
+print(eigen[2]);
+
+/* 7. 定常状態の計算 */
+print("5. 定常状態を計算中...");
+steady: solve([alpha*A - gamma*B = 0, gamma*A + (beta-delta)*B = 0], [A, B]);
+
+print("定常状態:");
+print(steady);
+
+/* 8. 詳細レポート作成 */
+print("6. レポートを作成中...");
+with_stdout("coupling.txt",
+    printf(true, "===============================================~%"),
+    printf(true, "VF-004: 連成システム解析レポート~%"),
+    printf(true, "===============================================~%~%"),
+    
+    printf(true, "1. システムパラメータ:~%"),
+    printf(true, "   成長率係数 (α): ~f~%", alpha),
+    printf(true, "   減衰率係数 (β): ~f~%", beta),
+    printf(true, "   結合係数 (γ): ~f~%", gamma),
+    printf(true, "   外部擾乱係数 (δ): ~f~%", delta),
+    printf(true, "   初期値 A: ~f~%", A0),
+    printf(true, "   初期値 B: ~f~%", B0),
+    printf(true, "   終了時間: ~f~%", t_end),
+    printf(true, "   時間刻み: ~f~%~%", dt),
+    
+    printf(true, "2. 連成微分方程式:~%"),
+    printf(true, "   dA/dt = α·A - γ·B~%"),
+    printf(true, "   dB/dt = β·B + γ·A - δ·B~%~%"),
+    
+    printf(true, "3. 解析解:~%"),
+    printf(true, "   A(t) = ~a~%", rhs(sol[1])),
+    printf(true, "   B(t) = ~a~%~%", rhs(sol[2])),
+    
+    printf(true, "4. 特性値解析:~%"),
+    printf(true, "   システム行列 M = [[~f, ~f], [~f, ~f]]~%", alpha, -gamma, gamma, beta-delta),
+    printf(true, "   特性値: ~a~%", eigen[1]),
+    printf(true, "   安定性判定: "),
+    if apply("and", map(lambda([x], realpart(x) < 0), eigen[1])) then
+        printf(true, "安定（すべての特性値の実部が負）~%")
+    else
+        printf(true, "不安定~%"),
+    
+    printf(true, "5. 定常状態:~%"),
+    printf(true, "   A_steady = ~a~%", rhs(steady[1][1])),
+    printf(true, "   B_steady = ~a~%~%", rhs(steady[1][2])),
+    
+    printf(true, "6. 計算結果（抜粋）:~%"),
+    printf(true, "   t=0:    A=~f, B=~f~%", A0, B0),
+    printf(true, "   t=10:   A=~f, B=~f~%", A_ana(10), B_ana(10)),
+    printf(true, "   t=50:   A=~f, B=~f~%", A_ana(50), B_ana(50)),
+    printf(true, "   t=100:  A=~f, B=~f~%~%", A_ana(100), B_ana(100)),
+    
+    printf(true, "7. 生成ファイル:~%"),
+    printf(true, "   - VF004_analytical_data.csv: 時系列データ~%"),
+    printf(true, "   - coupling.txt: このレポート~%~%"),
+    
+    printf(true, "8. Python連携用情報:~%"),
+    printf(true, "   CSVファイル形式:~%"),
+    printf(true, "     1列目: 時間 t~%"),
+    printf(true, "     2列目: A(t) の解析解~%"),
+    printf(true, "     3列目: B(t) の解析解~%~%"),
+    
+    printf(true, "===============================================~%"),
+    printf(true, "解析完了~%")
+);
+
+print("レポート生成完了: coupling.txt");
+
+/* 9. グラフ生成の準備（データのみ作成、後でPythonで描画）*/
+print("7. グラフ用データ作成中...");
+
+/* 詳細なデータセットを作成（グラフ用）*/
+with_stdout("VF004_plot_data.csv",
+    printf(true, "t,A,B~%"),
+    for t:0 thru t_end step 0.5 do (  /* より細かいステップで */
+        printf(true, "~f,~f,~f~%", t, A_ana(t), B_ana(t))
+    )
+);
+
+/* 10. 完了メッセージ */
+print("");
+print("========================================");
+print("✅ VF-004 Maxima解析完了!");
+print("========================================");
+print("");
+print("📁 生成ファイル:");
+print("   1. VF004_analytical_data.csv - 時系列データ (dt=1)");
+print("   2. VF004_plot_data.csv - グラフ用詳細データ (dt=0.5)");
+print("   3. coupling.txt - 詳細レポート");
+print("");
+print("📊 Pythonでグラフを表示:");
+print("   python3 -c \"");
+print("   import pandas as pd");
+print("   import matplotlib.pyplot as plt");
+print("   data = pd.read_csv('VF004_plot_data.csv')");
+print("   plt.figure(figsize=(10,6))");
+print("   plt.plot(data['t'], data['A'], 'b-', label='System A', linewidth=2)");
+print("   plt.plot(data['t'], data['B'], 'r-', label='System B', linewidth=2)");
+print("   plt.xlabel('Time')");
+print("   plt.ylabel('State Variable')");
+print("   plt.title('VF-004: Coupled System')");
+print("   plt.legend()");
+print("   plt.grid(True, alpha=0.3)");
+print("   plt.savefig('VF004_plot.png', dpi=300)");
+print("   plt.show()");
+print("   \"");
+print("========================================");
+

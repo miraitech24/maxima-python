@@ -1,0 +1,33 @@
+kill(all)$
+
+/* 1. 定推力下での速度・距離の一般解 */
+/* 燃料消費に伴う質量変化: m(t) = m0 - m_dot * t */
+assume(t > 0, m_dot > 0, m0 > m_dot * t)$
+a_t: F / (m0 - m_dot * t)$
+
+/* 速度 v(t): 加速度 a_t を時間で積分 */
+v_t: integrate(a_t, t)$
+/* 加速終了時 t_b における速度増分 (初速 v0=0) */
+v_final: ev(v_t, t=t_b) - ev(v_t, t=0)$
+
+/* 距離 d(t): 速度 v_t を時間で積分 */
+d_t: integrate(v_t, t)$
+/* 加速フェーズ終了時の移動距離 */
+d_final: fullratsimp(ev(d_t, t=t_b) - ev(d_t, t=0))$
+
+/* 2. グラフ: 燃料消費率(m_dot)が上がると、到達距離がどう伸びるかを確認 */
+F_v: 90000$ m0_v: 2000$ t_b_v: 3600$
+plot2d(ev(d_final, F=F_v, m0=m0_v, t_b=t_b_v), [m_dot, 0.01, 0.1],
+       [xlabel, "Burn Rate (kg/s)"], [ylabel, "Distance (m)"],
+       [pdf_file, "distance_per_burnrate.pdf"])$
+
+/* 3. Pythonエクスポート (演算子とモジュール名の置換処理) */
+display2d: false$
+with_stdout("trajectory_params.py",
+    print("import math"),
+    /* log -> math.log, ^ -> ** に置換して Python 互換形式で出力 */
+    print(concat("def get_final_v(F, m0, m_dot, t_b): return ", 
+          ssubst("**", "^", ssubst("math.log", "log", string(v_final))))),
+    print(concat("def get_final_d(F, m0, m_dot, t_b): return ", 
+          ssubst("**", "^", ssubst("math.log", "log", string(d_final)))))
+)$

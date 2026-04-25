@@ -1,0 +1,22 @@
+/* 捕獲直前の運動エネルギーと熱負荷の計算 */
+
+v_escape : 10360$       /* 金星の第2宇宙速度 [m/s] */
+v_capture : 100$        /* 空中駅ネット直前の許容相対速度 [m/s] */
+M_cargo : 5000$         /* 積荷質量 [kg] */
+
+/* 殺さなければならない運動エネルギー delta_K */
+delta_K : 0.5 * M_cargo * (v_escape^2 - v_capture^2)$
+
+/* このエネルギーの大部分は大気の空力加熱として散逸する */
+/* 荷物の安全を確保するためのアブレータ（断熱材）の必要厚み推算 */
+rho_ablation : 500$     /* アブレータ密度 [kg/m^3] */
+h_evap : 1.0e7$         /* 昇華熱 [J/kg] */
+S_front : 7.0$          /* 前面投影面積 [m^2] */
+
+/* 全エネルギーの1%が荷物へ伝熱すると仮定（保守的見積もり） */
+E_heat : delta_K * 0.01$
+M_ablate : E_heat / h_evap$
+Thickness : M_ablate / (rho_ablation * S_front)$
+
+print("Total Kinetic Energy to Shed (GJ):", float(delta_K / 1e9))$
+print("Required Ablator Thickness (mm):", float(Thickness * 1000))$

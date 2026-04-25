@@ -1,0 +1,14 @@
+VF-001 Simulation Parameters
+==================================================
+v0                  : 0.99
+k                   : 0.01
+n_max               : 865
+t_span              : (0, 300)
+growth_rate         : 0.05
+inflection          : 150
+
+Threshold Reach Times:
+  Wind Speed 0.8: 12.9 years
+  Wind Speed 0.5: 31.8 years
+  Wind Speed 0.3: 43.8 years
+  Wind Speed 0.1: 58.9 years

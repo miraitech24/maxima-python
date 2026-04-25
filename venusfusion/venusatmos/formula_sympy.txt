@@ -1,0 +1,1 @@
+S*z/v + (-D*S + D*dC0*v)*exp(v*z/D)/v**2 + (C0*v**2 + D*S - D*dC0*v)/v**2

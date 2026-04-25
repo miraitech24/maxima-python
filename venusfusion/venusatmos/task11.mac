@@ -1,0 +1,14 @@
+/* [wxMaxima: input   start ] */
+/* 1. パッシェンの法則の定義 */
+A:15$ B:360$ gma:0.1$
+Vb(x) := (B * x) / (log(A * x) - log(log(1 + 1/gma)))$
+
+/* 2. 基本特性のグラフ作成 (一意な解の可視化はMaximaの仕事) */
+plot2d(Vb(x), [x, 0.1, 50], [xlabel, "P*d"], [ylabel, "Vb"], [title, "Paschen Characteristic"])$
+
+/* 3. Pythonへの数式受け渡し */
+with_stdout("formula_11.txt", print(string(Vb(x))))$
+/* [wxMaxima: input   end   ] */
+
+
+

@@ -1,0 +1,21 @@
+/* [wxMaxima: input   start ] */
+/* task43_redesign.mac */
+/* 1. 物理定数と必要速度の定義 */
+v_escape: 9957.69$ 
+v_orbit: 7000.0$
+v_required_rg: v_escape - v_orbit$ /* 2957.69 m/s */
+
+/* 2. レールガンパラメータ */
+m: 100$         /* 100kg固定（3Dプリンター生産単位） */
+L_prime: 0.5e-6$
+d: 10.0$
+
+/* 3. 必要電流 I の逆算 (v^2 = (L'*I^2*d)/m) */
+/* I = sqrt( (v^2 * m) / (L' * d) ) */
+I_needed: sqrt( (v_required_rg^2 * m) / (L_prime * d) )$
+
+print("100kg送出に必要な電流 I (MA):", float(I_needed/1e6))$
+/* [wxMaxima: input   end   ] */
+
+
+

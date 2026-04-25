@@ -1,0 +1,18 @@
+/* [wxMaxima: input   start ] */
+/* 出力設定 */
+display2d: false$
+
+/* 送電減衰の一般式 */
+Trans_expr : exp(-10000 * kappa)$
+
+/* グラフ描画（一意な解の可視化） */
+plot2d(Trans_expr, [kappa, 0, 0.001], 
+    [xlabel, "Opacity kappa"], [ylabel, "Efficiency"], 
+    [title, "Theoretical Attenuation Curve"])$
+
+/* 確実にプレーンテキストで出力 */
+with_stdout("formula_14.txt", print(string(Trans_expr)))$
+/* [wxMaxima: input   end   ] */
+
+
+

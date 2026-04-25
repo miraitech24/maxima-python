@@ -1,0 +1,29 @@
+/* task_901_structural.mac: 巨大構造体の質量と光圧の平衡解析 */
+
+/* 定数 */
+c : 3.0e8$           /* 光速 [m/s] */
+S_m : 9087$          /* 水星平均放射強度 [W/m^2] */
+rho_al : 2700$       /* アルミ薄膜密度 [kg/m^3] */
+thickness : 1.0e-4$  /* パネル厚さ 100μm (ハニカム構造平均) */
+
+/* 1. 単位面積あたりの質量 [kg/m^2] */
+m_unit : rho_al * thickness$
+
+/* 2. 太陽光圧による加速度 P = S/c (完全吸収の場合) */
+/* この圧力がパネルを外側へ押し出す力になる */
+acc_light : S_m / (c * m_unit)$
+
+/* 3. 水星の重力による引き止め (平衡軌道の検討) */
+/* 結論: 光圧による摂動は大きいが、ハニカムの角度調整で帆（ソーラーセイル）として制御可能 */
+
+/* Pythonへ渡す：10TW達成時の総質量 M_total [kg] */
+W_unit_eff : S_m * 0.30$ /* 効率30% */
+Area_total : (10.0e12) / W_unit_eff$
+M_total : Area_total * m_unit$
+
+f : openw("structural_params.py")$
+printf(f, "TOTAL_MASS_KG = ~e~%", float(M_total))$
+printf(f, "AREA_KM2 = ~f~%", float(Area_total/1e6))$
+close(f)$
+
+print("Total Mass for 10TW Panel (kg):", float(M_total))$

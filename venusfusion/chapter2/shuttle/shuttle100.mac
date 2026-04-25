@@ -1,0 +1,20 @@
+kill(all)$
+/* 1. 境界値問題の定義と解出 */
+depends(T, x)$
+eq: 'diff(T, x) = -rho * A * a$
+sol: ode2(eq, T, x)$
+bc: ic1(sol, x=L, T=m_p*a)$
+T_dist: rhs(bc)$
+T_max_expr: ev(T_dist, x=0)$
+
+/* 2. グラフ出力: 張力分布 */
+L_val: 1000$ rho_val: 1700$ A_val: 0.000058$ m_p_val: 1000$ a_val: 50$
+plot2d(ev(T_dist, L=L_val, rho=rho_val, A=A_val, m_p=m_p_val, a=a_val), 
+       [x, 0, L_val], [xlabel, "Position x (m)"], [ylabel, "Tension T (N)"],
+       [pdf_file, "tension_distribution.pdf"])$
+
+/* 3. Python用エクスポート (タグを除去しプレーンな文字列で) */
+display2d: false$ /* 数式を1行で出力 */
+with_stdout("tether_params.py",
+    print(concat("def get_t_max(a, m_p, L, rho, A): return ", string(T_max_expr)))
+)$

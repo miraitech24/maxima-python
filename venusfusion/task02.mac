@@ -1,0 +1,17 @@
+/* [wxMaxima: input   start ] */
+/* 物理的制約 */
+assume(L > 0, C > 0, f > 0);
+
+/* 数式の定義 */
+eqn : f = 1 / (2 * %pi * sqrt(L * C));
+
+/* Lについて解き、右辺を取り出す */
+sol : solve(eqn, L);
+ans : rhs(sol[1]);
+
+/* 文字列としてファイルに直接書き出す */
+with_stdout ("formula_02.txt", print(string(ans)));
+/* [wxMaxima: input   end   ] */
+
+
+

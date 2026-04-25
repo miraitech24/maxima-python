@@ -1,0 +1,6 @@
+parameter,value,description
+v0,0.99,初期風速
+k,0.01,制動定数
+exp_alpha,0.018643,指数モデル増加率
+log_alpha,0.026842,ロジスティックモデル増加率
+log_K,872.54,ロジスティックモデル最大拠点数

@@ -1,0 +1,32 @@
+/* atmos_gen.mac */
+kill(all)$
+
+/* 微分方程式の定義 */
+depends(C, z)$
+ode : D * 'diff(C, z, 2) - v * 'diff(C, z) + S = 0$
+
+/* 一般解の導出 */
+sol : ode2(ode, C, z)$
+/* 境界条件 C(0)=C0, C'(0)=dC0 による特解 */
+/* %k1, %k2 を求めるため ic2 を使用 */
+sol_ivp : ic2(sol, z=0, C=C0, 'diff(C,z)=dC0)$
+
+/* Python互換整形 */
+py_format(ex) := block(
+    [s],
+    s : string(rhs(ex)),
+    s : ssubst("np.exp", "exp", s),
+    s : ssubst("**", "^", s),
+    return(s)
+)$
+
+fh : openw("target_expr.py")$
+printf(fh, "import numpy as np~%~%")$
+printf(fh, "def get_concentration(z, D, v, S, C0, dC0):~%")$
+printf(fh, "    # Maxima derived solution for Advection-Diffusion~%")$
+printf(fh, "    return ~a~%", py_format(sol_ivp))$
+close(fh)$
+
+/* グラフ表示: 高度に対する濃度分布 */
+plot2d(subst([D=1.0, v=0.5, S=0.01, C0=1.0, dC0=0.1], rhs(sol_ivp)), [z, 0, 100],
+       [xlabel, "Altitude (km)"], [ylabel, "Concentration"])$

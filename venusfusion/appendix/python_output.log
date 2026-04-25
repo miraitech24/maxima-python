@@ -1,0 +1,36 @@
+Traceback (most recent call last):
+  File "/home/iwamura/ドキュメント/coupling/venusfusion/appendix/VF004_numerical.py", line 416, in <module>
+    analyzer.run_basic_analysis()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/home/iwamura/ドキュメント/coupling/venusfusion/appendix/VF004_numerical.py", line 351, in run_basic_analysis
+    df_sens = self.optimizer.sensitivity_analysis(param, values)
+  File "/home/iwamura/ドキュメント/coupling/venusfusion/appendix/VF004_numerical.py", line 191, in sensitivity_analysis
+    A_area = np.trapz(result['A'], result['t'])
+             ^^^^^^^^
+  File "/home/iwamura/miniconda3/lib/python3.13/site-packages/numpy/__init__.py", line 792, in __getattr__
+    raise AttributeError(f"module {__name__!r} has no attribute {attr!r}")
+AttributeError: module 'numpy' has no attribute 'trapz'. Did you mean: 'trace'?
+フォント設定中...
+  日本語フォントが見つかりません。英字フォントを使用します。
+============================================================
+VF-004: 連成システム解析
+============================================================
+
+1. 数値解法によるシミュレーション実行中...
+   計算完了: 608 回の関数評価
+
+2. 結果の可視化中...
+  Time series plot saved: VF004_timeseries.png
+   可視化完了
+
+3. 簡易感度解析実行中...
+   alphaの感度解析...
+
+エラーが発生しました: module 'numpy' has no attribute 'trapz'
+
+対処方法:
+1. 必要なライブラリをインストール: pip install numpy scipy pandas matplotlib
+2. 日本語フォントがインストールされていない場合は、
+   以下のコマンドで日本語フォントをインストールしてください:
+   Ubuntu/Debian: sudo apt-get install fonts-ipafont fonts-noto-cjk
+   Fedora/RHEL: sudo dnf install ipa-gothic-fonts ipa-mincho-fonts

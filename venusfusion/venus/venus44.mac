@@ -1,0 +1,30 @@
+/* Maxima: 課題44 案C 電力連成モデル */
+
+/* 物理定数の定義 */
+rho : 65$        /* 金星大気密度 (kg/m3) */
+P_base : 90$     /* 麓の気圧 (atm) */
+P_summit : 45$   /* 山頂の気圧 (atm) */
+v_initial : 100$ /* スーパーローテーション風速 (m/s) */
+eta : 0.4$       /* タービン発電効率 (40%) */
+
+/* 1. ベルヌーイの定理に基づく煙突内流速 v_up の推定 */
+/* 圧力差 P_diff = P_base - P_summit が流体加速に寄与 */
+P_diff_pa : (P_base - P_summit) * 101325$ /* Pascal換算 */
+v_up : sqrt(2 * P_diff_pa / rho)$
+
+/* 2. 発電出力 P_gen (直径 D=20m の煙突の場合) */
+D : 20$
+Area : (1/4) * %pi * D^2$
+P_gen : 0.5 * rho * Area * v_up^3 * eta$
+
+/* 3. 引数の書き出し (Pythonへバトンタッチ) */
+print("--- Calculation Results ---")$
+print("Internal Flow Speed (v_up):", float(v_up), "m/s")$
+print("Theoretical Power Output (P_gen):", float(P_gen/10^9), "GW")$
+
+/* Python用パラメータファイル生成 */
+with_stdout ("params_C.py",
+    print("v_up =", float(v_up)),
+    print("p_gen_gw =", float(P_gen/10^9)),
+    print("rho =", float(rho))
+)$

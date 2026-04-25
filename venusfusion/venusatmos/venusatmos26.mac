@@ -1,0 +1,23 @@
+/* tesla_reboot.mac */
+kill(all)$
+
+/* テスラ送電効率モデル（距離dの4乗反比例とQ値） */
+/* k_0はコイル形状定数 */
+P_rec : P_surf * (Q * (k_0 / d^2)^2)$
+
+/* 輸出用電力（受電量からエンジン維持費を引く） */
+P_export : P_rec - P_engine$
+
+/* 高度dによる微分で、エネルギー供給が最大化される高度を検討可能にする */
+dP_dd : diff(P_rec, d)$
+
+/* Python互換整形 */
+py_format(ex) := ssubst("np.sqrt", "sqrt", ssubst("**", "^", string(ex)))$
+
+fh : openw("target_expr.py")$
+printf(fh, "import numpy as np~%~%")$
+printf(fh, "def get_tesla_power(d, P_surf, Q, k_0):~%")$
+printf(fh, "    return ~a~%~%", py_format(P_rec))$
+printf(fh, "def get_export_surplus(d, P_surf, Q, k_0, P_engine):~%")$
+printf(fh, "    return ~a~%", py_format(P_export))$
+close(fh)$

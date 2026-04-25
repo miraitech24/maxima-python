@@ -1,0 +1,22 @@
+/* 物理定数設定 */
+E : 400e9$         /* ヤング率 (Pa): セラミック/CNT複合材 */
+alpha : 4.5e-6$    /* 線膨張係数 (1/K) */
+nu : 0.28$         /* ポアソン比 */
+
+/* 勾配の計算 (平面歪み近似による熱応力係数) */
+slope_val : float((E * alpha) / (2 * (1 - nu)))$
+
+/* 数値のみをファイル出力 */
+s : openw("slope_result.txt")$
+printf(s, "~f", slope_val)$
+close(s)$
+
+/* 理論解の視覚化（確認用） */
+sigma_th(dT) := slope_val * dT$
+draw2d(
+  title = "Analytical Thermal Stress in Reactor Wall (Summit)",
+  xlabel = "Temperature Difference Delta T (K)",
+  ylabel = "Stress (Pa)",
+  grid = true,
+  explicit(sigma_th(x), x, 0, 1000)
+)$

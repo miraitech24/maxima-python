@@ -1,0 +1,7 @@
+
+    display2d:false$
+    /* 衝撃圧 P = 1/2 * rho * v^2 * K (Kは形状係数) */
+    /* タンク壁の応力 sigma = P * r / t (薄肉円筒近似) */
+    sigma_eqn: (1/2 * rho * v^2 * K) * r / d$
+    print(sigma_eqn)$
+    

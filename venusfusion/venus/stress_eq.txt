@@ -1,0 +1,6 @@
+      (-(E*Q*alpha*r**2)/(8*%pi*k*r**3-8*%pi*k*nu*r**3))+(E*Q*Ri**2*alph
+     1   a)/(8*%pi*k*r**3-8*%pi*k*nu*r**3)-(E*T_surf*alpha*r**3)/(3*r**3
+     2   -3*nu*r**3)+(E*Ri**3*T_surf*alpha)/(3*r**3-3*nu*r**3)
+<math><mi lisp="*var-tag*">done</mi><st> </st></math>      (-(E*Q*Ri**2*alpha)/(8*%pi*k*r**3-8*%pi*k*nu*r**3))-(2*E*Ri**3*T_s
+     1   urf*alpha)/(6*r**3-6*nu*r**3)-(E*T_surf*alpha)/(6-6*nu)
+<math><mi lisp="*var-tag*">done</mi><st> </st></math>

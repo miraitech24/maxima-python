@@ -1,0 +1,16 @@
+/* [wxMaxima: input   start ] */
+/* 物理定数の仮定 (金星大気用) */
+assume(P > 0, d > 0, A > 0, B > 0, gma > 0);
+
+/* パッシェンの法則による破壊電圧 */
+V_b : (B * P * d) / (log(A * P * d) - log(log(1 + 1/gma)));
+
+/* 絶縁破壊電界強度 E = V/d */
+E_break : V_b / d;
+
+/* Pythonへ式を渡す (不要なタグを避けるため string のみ出力) */
+with_stdout ("formula_11_v2.txt", print(string(E_break)));
+/* [wxMaxima: input   end   ] */
+
+
+

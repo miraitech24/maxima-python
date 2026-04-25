@@ -1,0 +1,9 @@
+
+    display2d:false$
+    /* ツィオルコフスキーの方程式 dv = ve * ln(m0/m1) */
+    /* ここで ve = Isp * g0 */
+    /* 残存質量比 R = m1/m0 を dv と ve の関数として解く */
+    eqn: dv = ve * log(1/R)$
+    sol: solve(eqn, R)$
+    print(rhs(sol[1]))$
+    

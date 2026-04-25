@@ -1,0 +1,1 @@
+<math><st>L_ATM = 2.9049599999999998e29</st><st> </st></math><math><st>R_EFF = 94.48641039922624</st><st> </st></math><math><st>P_SUN = 7.218515973857325e16</st><st> </st></math>

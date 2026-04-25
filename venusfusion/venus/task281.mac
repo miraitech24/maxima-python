@@ -1,0 +1,25 @@
+/* --- 課題28: ディレクトリ自動同期版 --- */
+
+/* 実行中のファイルの場所を取得して移動 (保存済みであることが前提) */
+if (load_pathname # false) then (
+    chdir(filename_merge(directory_name(load_pathname)))
+)$
+
+delta_H : -178000$
+delta_S : -160$
+R : 8.314$
+G(T) := delta_H - T * delta_S$
+K(T) := exp(-G(T) / (R * T))$
+
+/* 1. グラフ表示 */
+plot2d(K(T), [T, 400, 1000], [logy], [title, "Equilibrium K(T)"])$
+
+/* 2. 数値テーブル出力 (タグ混入防止のため display2d:false) */
+display2d: false$
+with_stdout("equilibrium_data.txt", 
+    for t:400 step 10 thru 1000 do (
+        print(t, ",", float(K(t)))
+    )
+)$
+display2d: true$
+print("Success: equilibrium_data.txt generated at:", getcurrentdirectory())$

@@ -1,0 +1,24 @@
+/* --- 課題28: 金星炭素抽出（理論解・強制パス指定） --- */
+
+/* 1. 理論式の定義 */
+delta_H : -178000$ 
+delta_S : -160$     
+R : 8.314$
+G(T) := delta_H - T * delta_S$
+K(T) := exp(-G(T) / (R * T))$
+
+/* 2. 可視化 */
+plot2d(K(T), [T, 400, 1000], [logy])$
+
+/* 3. 【解決策】Pythonが今見ている場所に直接フルパスで書く */
+/* path は Python のエラーメッセージに出ていたものをそのまま使います */
+target_path : "/home/iwamura/ドキュメント/coupling/venusfusion/equilibrium_data.txt"$
+
+display2d: false$
+with_stdout(target_path, 
+    for t:400 step 10 thru 1000 do (
+        print(t, ",", float(K(t)))
+    )
+)$
+display2d: true$
+print("COMPLETE: File forced to path -> ", target_path)$

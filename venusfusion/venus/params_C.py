@@ -1,0 +1,1 @@
+<math><st>v_up =</st><st> </st><mn>374.5612818300283</mn><st> </st></math><math><st>p_gen_gw =</st><st> </st><mn>214.6158895835403</mn><st> </st></math><math><st>rho =</st><st> </st><mn>65.0</mn><st> </st></math>

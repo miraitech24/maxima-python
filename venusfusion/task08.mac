@@ -1,0 +1,19 @@
+/* [wxMaxima: input   start ] */
+/* インピーダンスの定義 */
+Z_abs: sqrt(R^2 + (omega*L - 1/(omega*C))^2);
+
+/* omegaで微分して極値を求める */
+sol: solve(diff(Z_abs, omega) = 0, omega);
+
+/* 正の解（共振周波数）を取り出す */
+omega_res: part(sol, 2);
+
+/* Pythonに渡すために文字列として保存 */
+string_out: string(rhs(omega_res));
+writefile("formula_08.txt");
+print(string_out);
+closefile();
+/* [wxMaxima: input   end   ] */
+
+
+

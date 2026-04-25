@@ -1,0 +1,30 @@
+/* 1. 物理定数と複素屈折率 */
+m : 1.43 - 0.01*%i$  /* 硫酸の複素屈折率 (吸収あり) */
+r : 1.5e-6$          /* 粒子半径 1.5μm */
+lambda : 1.25e-2$    /* 波長 12.5mm (24GHz) */
+
+/* 2. 解析解の導出 */
+x : float((2 * %pi * r) / lambda)$
+K : (m^2 - 1) / (m^2 + 2)$
+Q_ext : float((8/3) * x^4 * (cabs(K))^2 + 4 * x * imagpart(K))$
+S_ext : float(Q_ext * %pi * r^2)$
+
+/* 3. ファイル出力（関数として実行） */
+export_value(val) := block(
+    [s],
+    s : openw("scattering_slope.txt"),
+    printf(s, "~e", val),
+    close(s)
+)$
+export_value(S_ext)$
+
+/* 4. グラフ表示（波長による断面積の変化） */
+S_func(L) := block(
+    [xx, QQ],
+    xx : (2 * %pi * r) / L,
+    QQ : (8/3) * xx^4 * (cabs(K))^2 + 4 * xx * imagpart(K),
+    float(QQ * %pi * r^2)
+)$
+plot2d(S_func(L), [L, 0.005, 0.05], 
+       [xlabel, "Wavelength lambda (m)"], [ylabel, "Extinction Cross Section (m^2)"],
+       [title, "Wavelength vs Beam Extinction in Sulfuric Acid"])$

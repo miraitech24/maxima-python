@@ -1,0 +1,28 @@
+/* [wxMaxima: input   start ] */
+/* task26_1.mac */
+/* CSV役割：キャパシタへの蓄電効率と放電レートの設計 */
+
+/* [入力境界条件] 課題26からの受電電力 (W) */
+P_recv: 8.0e6$ 
+
+/* [設計目標] 水素カプセル(100kg)を秒速2kmまで加速するエネルギー (J) */
+E_target: 0.5 * 100 * (2000)^2$
+
+/* [一意の解1] 理論上の最短チャージ時間 (s) */
+T_charge: E_target / P_recv$
+
+/* [一意의 解2] 放電電圧 5000V とした時の必要容量 (F) */
+V_max: 5000$
+C_val: (2 * E_target) / (V_max^2)$
+
+/* Pythonへ定数を引き渡し */
+with_stdout ("params_26_1.txt", 
+    block([disp2d: false], printf(true, "~f ~f", C_val, V_max))
+)$
+
+print("Charge Time (s):", float(T_charge))$
+print("Capacitance (F):", float(C_val))$
+/* [wxMaxima: input   end   ] */
+
+
+

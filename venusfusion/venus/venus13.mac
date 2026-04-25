@@ -1,0 +1,24 @@
+/* 1. 物理モデル：球対称定常熱応力 */
+T_dist: T_surf + Q/(4*%pi*k*r);
+int_T: integrate(T_dist*r^2, r);
+sigma_r_expr: -(alpha*E/(1-nu)) * (1/r^3) * (subst(r, r, int_T) - subst(Ri, r, int_T));
+sigma_t_expr: (alpha*E/(2*(1-nu))) * (2/r^3 * (subst(r, r, int_T) - subst(Ri, r, int_T)) - T_dist);
+
+/* 2. 一意解グラフ：設計有効範囲 5.5m 〜 50m */
+set_plot_option([gnuplot_term, pngcairo]);
+set_plot_option([gnuplot_out_file, "stress_plot.png"]);
+plot2d([subst([T_surf=737, Q=1e8, k=2.5, alpha=8e-6, E=50e9, nu=0.25, Ri=5], sigma_r_expr)], 
+       [r, 5.5, 50], [xlabel, "Distance (m)"], [ylabel, "Radial Stress (Pa)"],
+       [title, "Analytical Stress Distribution (Maxima)"]);
+
+/* 3. Python用関数エクスポート（置換処理で互換性確保） */
+s_r_str: ssubst("np.pi", "%pi", ssubst("**", "^", string(expand(sigma_r_expr))))$
+s_t_str: ssubst("np.pi", "%pi", ssubst("**", "^", string(expand(sigma_t_expr))))$
+
+with_stdout ("stress_functions.py", 
+    print("import numpy as np"),
+    print("def get_stresses(r, T_surf, Q, k, alpha, E, nu, Ri):"),
+    printf(true, "    sr = ~a~%", s_r_str),
+    printf(true, "    st = ~a~%", s_t_str),
+    print("    return sr, st")
+);

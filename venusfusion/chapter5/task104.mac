@@ -1,0 +1,21 @@
+/* task104.mac */
+/* Pythonから出力された定数ファイルを直接ロード */
+load("threshold_params.mac")$
+
+/* 停止年数を計算する関数定義 */
+sec_yr : 31557600$
+f_stop(x) := L_atm_val / (x * tau_node_val * sec_yr)$
+
+/* 865拠点時の値を算出 */
+y_865 : f_stop(865)$
+
+print("--- Analysis Results ---")$
+print("Years to stop with 865 nodes (Simple Drag):", float(y_865))$
+print("Theoretical nodes needed for 300 years:", float(n_theory_val))$
+
+/* グラフ描画: 100拠点から理論解(約5.5万)の少し先まで */
+plot2d(f_stop(x), [x, 100, 70000],
+       [y, 0, 10000],
+       [xlabel, "Number of Nodes"], [ylabel, "Years to stop SR"],
+       [title, "SR Braking: Node Count vs Completion Time"],
+       [gnuplot_preamble, "set grid; set logscale x;"])$

@@ -1,0 +1,22 @@
+/* [wxMaxima: input   start ] */
+/* 1. 出力設定 */
+display2d: false$
+
+/* 2. 物理定数と理論式の定義 */
+Eb: 0.5$ k: 8.617e-5$ S: 5.0$ delta: 0$
+P_expr: exp(- (Eb / (k * T * (S + delta))))$
+
+/* 3. 一意解のグラフ表示 (理論曲線の検証) */
+/* 300Kから1500Kの範囲で、反応確率が指数関数的に立ち上がる様子を確認 */
+plot2d(P_expr, [T, 300, 1500], 
+       [title, "Theoretical Reaction Probability (Eb=0.5, S=5.0)"],
+       [xlabel, "Temperature T (K)"], 
+       [ylabel, "Probability P"],
+       [grid, 20, 20])$
+
+/* 4. Python連携用に出力（評価を保留した状態で書き出し） */
+stringout("solution_p.txt", 'exp(- (Eb / (k * T * (S + delta)))))$
+/* [wxMaxima: input   end   ] */
+
+
+

@@ -1,0 +1,13 @@
+/* Maxima: 課題44 排熱と風速のフィードバック連成 */
+
+/* 排熱量 Q が増えると、局所的な上昇気流が発生し、風速 v に干渉する */
+/* v_new = v_old - beta * Q_exhaust */
+
+assume(beta > 0)$
+v_stable(Q) := v_initial - beta * Q;
+
+/* 吸引力(P2)が維持される限界の排熱量を求める */
+P_limit : 60$ /* これ以上気圧が上がると冷却が止まる閾値 */
+solve(P_base - 0.5 * rho * v_stable(Q)^2 = P_limit, Q);
+
+print("システムが崩壊しない最大排熱許容量 Q_max を算出しました。");
