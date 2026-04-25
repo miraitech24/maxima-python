@@ -1,0 +1,21 @@
+BIO-003: RNA自然形成確率 分析結果
+========================================
+総形成確率: 1.177e-31
+log10(確率): -30.93
+========================================
+
+確率構成要素:
+  Bond_probability_per_step: 1.000e+00
+  Chain_formation_probability: 1.000e+00
+  Specific_sequence_probability: 7.889e-31
+  Functional_RNA_probability: 1.492e-01
+  Time_factor_probability: 1.000e+00
+
+RNA長別確率:
+  20 nt: 1.483e-13
+  30 nt: 1.505e-19
+  50 nt: 1.177e-31
+  70 nt: 7.988e-44
+  100 nt: 3.178e-75
+
+科学的解釈: 代替起源理論が必要

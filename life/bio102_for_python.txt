@@ -1,0 +1,10 @@
+# BIO-102 Results from Maxima
+total_efficiency = 0.1739824722385036
+photon_energy_550nm_J = 3.611719740270779E-19
+stage_efficiencies = 
+Absorption,0.95
+Charge_Sep_Transport,0.65025
+Catalyst_Reaction,0.8096
+Overpotential,0.6721311475409836
+System,0.95
+Energy_Conversion,0.5448204556573602

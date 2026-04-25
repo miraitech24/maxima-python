@@ -1,0 +1,13 @@
+
+/* energy_calc.mac - Maxima計算スクリプト */
+/* 既存プロジェクトから計算式を引用 */
+
+/* #26: テスラ送電効率 */
+eta_tesla(f, d) := 0.85 * exp(-0.001 * d) * (f/2.45e9)^(-0.1);
+
+/* #41: 炉寿命計算 */
+reactor_lifetime(P_th, T_in) := 60 * (P_th/1.2)^(-0.2) * (T_in/850)^(-0.3);
+
+/* 結果表示 */
+print("テスラ送電効率 (2.45GHz, 100km): ", eta_tesla(2.45e9, 100));
+print("HTGR寿命 (1.2GW, 850°C): ", reactor_lifetime(1.2, 850));

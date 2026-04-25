@@ -1,0 +1,84 @@
+{
+  "calculation_id": "BIO-103",
+  "timestamp": "20260414_111640",
+  "maxima_results": {
+    "algae_efficiency": 5.72000064475118,
+    "plant_efficiency": 0.5389270020779025,
+    "algae_biomass_kg_m2_day": 0.5952380952380952,
+    "plant_biomass_kg_m2_day": 0.06231348990485646,
+    "algae_O2_g_m2_day": 714.2857142857143,
+    "plant_O2_g_m2_day": 62.31348990485646
+  },
+  "analysis": {
+    "algae_efficiency": 5.72000064475118,
+    "plant_efficiency": 0.5389270020779025,
+    "algae_biomass": 0.5952380952380952,
+    "plant_biomass": 0.06231348990485646,
+    "algae_area_per_person": 0.84,
+    "plant_area_per_person": 8.023944747171544
+  },
+  "scaling": {
+    "algae_area": 4.704,
+    "plant_area": 53.92090870099277,
+    "mixed_area": 12.109664954976154,
+    "algae_power": 1.176,
+    "plant_power": 13.480227175248192,
+    "mixed_power": 3.0274162387440384
+  },
+  "experimental_data": [
+    {
+      "system": "BIOS-3",
+      "type": "藻類",
+      "duration_days": 180,
+      "efficiency": 0.015,
+      "biomass_kg_m2_day": 0.025,
+      "location": "ロシア"
+    },
+    {
+      "system": "MELiSSA",
+      "type": "藻類",
+      "duration_days": 60,
+      "efficiency": 0.018,
+      "biomass_kg_m2_day": 0.03,
+      "location": "ESA"
+    },
+    {
+      "system": "CELSS",
+      "type": "高等植物",
+      "duration_days": 90,
+      "efficiency": 0.012,
+      "biomass_kg_m2_day": 0.02,
+      "location": "NASA"
+    },
+    {
+      "system": "BIOSPHERE 2",
+      "type": "混合",
+      "duration_days": 730,
+      "efficiency": 0.01,
+      "biomass_kg_m2_day": 0.015,
+      "location": "米国"
+    },
+    {
+      "system": "EDEN ISS",
+      "type": "高等植物",
+      "duration_days": 365,
+      "efficiency": 0.014,
+      "biomass_kg_m2_day": 0.028,
+      "location": "南極"
+    },
+    {
+      "system": "VEGGIE (ISS)",
+      "type": "高等植物",
+      "duration_days": 120,
+      "efficiency": 0.011,
+      "biomass_kg_m2_day": 0.018,
+      "location": "ISS"
+    }
+  ],
+  "recommendations": {
+    "optimal_system": "混合システム (藻類 + 高等植物)",
+    "reason": "バイオマス生産性と酸素生産のバランスが良い",
+    "estimated_area_per_person": "3.0 m²/人",
+    "estimated_power_per_person": "0.8 kW/人"
+  }
+}

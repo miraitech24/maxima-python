@@ -1,0 +1,44 @@
+;;; -*- Mode: LISP; package:maxima; syntax:common-lisp; -*- 
+(in-package :maxima)
+(DSKSETQ $ALGAE_RESULTS
+         '((MLIST SIMP) ((MLIST SIMP) "Efficiency" 5.72000064475118)
+           ((MLIST SIMP) "Biomass_production_kg_m2_day" 0.5952380952380952)
+           ((MLIST SIMP) "O2_production_g_m2_day" 714.2857142857143)
+           ((MLIST SIMP) "Biomass_energy_MJ_m2_day" 11.904761904761905)
+           ((MLIST SIMP) "System_energy_MJ_m2_day" 174.82380952380953)
+           ((MLIST SIMP) "Net_energy_MJ_m2_day" -162.91904761904763)
+           ((MLIST SIMP) "Energy_ratio" -0.9319042301092256))) 
+(ADD2LNC '$ALGAE_RESULTS $VALUES) 
+(DSKSETQ $PLANT_RESULTS
+         '((MLIST SIMP)
+           ((MLIST SIMP) "Efficiency"
+            ((MTIMES SIMP) 0.5896800664679853
+             ((MEXPT SIMP) $%E ((RAT SIMP) -9. 100.))))
+           ((MLIST SIMP) "Biomass_production_kg_m2_day"
+            ((MTIMES SIMP) 0.06818181818181818
+             ((MEXPT SIMP) $%E ((RAT SIMP) -9. 100.))))
+           ((MLIST SIMP) "O2_production_g_m2_day"
+            ((MTIMES SIMP) 68.18181818181817
+             ((MEXPT SIMP) $%E ((RAT SIMP) -9. 100.))))
+           ((MLIST SIMP) "Biomass_energy_MJ_m2_day"
+            ((MTIMES SIMP) 1.227272727272727
+             ((MEXPT SIMP) $%E ((RAT SIMP) -9. 100.))))
+           ((MLIST SIMP) "System_energy_MJ_m2_day"
+            ((MPLUS SIMP) 172.79999999999998
+             ((MTIMES SIMP) 0.20863636363636362
+              ((MEXPT SIMP) $%E ((RAT SIMP) -9. 100.)))))
+           ((MLIST SIMP) "Net_energy_MJ_m2_day"
+            ((MPLUS SIMP) -172.79999999999998
+             ((MTIMES SIMP) 1.0186363636363636
+              ((MEXPT SIMP) $%E ((RAT SIMP) -9. 100.)))))
+           ((MLIST SIMP) "Energy_ratio"
+            ((MTIMES SIMP)
+             ((MEXPT SIMP)
+              ((MPLUS SIMP) 172.79999999999998
+               ((MTIMES SIMP) 0.20863636363636362
+                ((MEXPT SIMP) $%E ((RAT SIMP) -9. 100.))))
+              -1.)
+             ((MPLUS SIMP) -172.79999999999998
+              ((MTIMES SIMP) 1.0186363636363636
+               ((MEXPT SIMP) $%E ((RAT SIMP) -9. 100.)))))))) 
+(ADD2LNC '$PLANT_RESULTS $VALUES) 

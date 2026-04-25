@@ -1,0 +1,23 @@
+BIO-201: Ecosystem Sustainability
+===================================
+
+Sustainable Days: 25.435650000000003 days
+
+Parameters:
+  Total NPP: 0.46 kg/day
+  O2 Production: 0.4692 kg/day
+  CO2 Consumption: 0.60858 kg/day
+  O2 Balance: -2.8908 kg/day
+  CO2 Balance: -3.39142 kg/day
+  Limiting Factor: 0.847855
+
+Simulation Results (final):
+  Algae Biomass: 10.0 kg
+  Plant Biomass: 5.999999999999997 kg
+  Oxygen: 88.73600000000123 kg
+
+Recommendations:
+  1. Increase algae area by 30%%
+  2. Maintain recycling efficiency >85%%
+  3. Ensure nutrient buffer >20%%
+  4. Prioritize O2 production improvement

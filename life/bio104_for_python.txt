@@ -1,0 +1,9 @@
+# BIO-104 Results from Maxima
+total_success_probability = 0.03329648432749357
+component_probabilities = 
+material_comparison = 
+Structural_bioinspiration,0.7
+Functional_bioinspiration,0.65
+Process_bioinspiration,0.68
+Gecko_adhesive,0.72
+Lotus_effect_surface,0.75

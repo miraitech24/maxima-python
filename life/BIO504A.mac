@@ -1,0 +1,94 @@
+/* 
+BIO-504A: 遺伝子改変＋物理的防護 統合効果計算
+ハイブリッドアプローチの相乗効果定量化
+*/
+
+kill(all)$
+
+/* 入力: BIO-504の結果 */
+genetic_survival: 0.314;      /* 遺伝子改変のみの生存確率 */
+
+/* 物理的防護パラメータ */
+radiation_shielding: 0.95;    /* 放射線遮蔽効果 (0-1) */
+artificial_gravity: 0.90;     /* 人工重力効果 (0-1) */
+life_support_system: 0.98;    /* 生命維持システム信頼性 */
+structural_integrity: 0.99;   /* 構造完全性 */
+
+/* 統合パラメータ */
+synergy_factor: 1.2;          /* 相乗効果係数 */
+redundancy_factor: 1.5;       /* 冗長性係数 */
+integration_efficiency: 0.85; /* 統合効率 */
+
+/* 計算: 物理的防護単独効果 */
+physical_protection_effect() := block(
+    [P_radiation, P_gravity, P_life, P_structure, P_total],
+    
+    P_radiation: radiation_shielding,
+    P_gravity: artificial_gravity,
+    P_life: life_support_system,
+    P_structure: structural_integrity,
+    
+    P_total: P_radiation * P_gravity * P_life * P_structure,
+    
+    P_total
+);
+
+/* 計算: 統合効果 */
+integrated_effect(genetic_prob, physical_prob) := block(
+    [independent_prob, synergy_effect, integrated_prob],
+    
+    /* 独立確率 (遺伝子 OR 物理) */
+    independent_prob: 1 - (1 - genetic_prob) * (1 - physical_prob),
+    
+    /* 相乗効果 */
+    synergy_effect: independent_prob * synergy_factor,
+    if synergy_effect > 1.0 then synergy_effect: 1.0,
+    
+    /* 統合効率考慮 */
+    integrated_prob: synergy_effect * integration_efficiency,
+    
+    integrated_prob
+);
+
+/* メイン計算 */
+print("BIO-504A: 遺伝子改変＋物理的防護 統合効果")$
+print("==========================================")$
+print("")$
+
+P_physical: physical_protection_effect()$
+P_integrated: integrated_effect(genetic_survival, P_physical)$
+
+print("【計算結果】")$
+printf(true, "遺伝子改変単独: ~6,3f (~5,1f%)~%", genetic_survival, genetic_survival*100)$
+printf(true, "物理的防護単独: ~6,3f (~5,1f%)~%", P_physical, P_physical*100)$
+printf(true, "統合効果: ~6,3f (~5,1f%)~%", P_integrated, P_integrated*100)$
+print("")$
+
+/* 改善率計算 */
+improvement_genetic: (P_integrated - genetic_survival) / genetic_survival * 100$
+improvement_physical: (P_integrated - P_physical) / P_physical * 100$
+
+print("【改善率】")$
+printf(true, "遺伝子単独比: +~5,1f%~%", improvement_genetic)$
+printf(true, "物理単独比: +~5,1f%~%", improvement_physical)$
+print("")$
+
+/* 費用対効果分析 */
+print("【費用対効果】")$
+cost_parameters: [
+    ["Genetic modification", 100, 0.314],  /* [対策, コスト指数, 効果] */
+    ["Radiation shielding", 80, 0.95],
+    ["Artificial gravity", 150, 0.90],
+    ["Life support", 120, 0.98]
+]$
+
+for param in cost_parameters do (
+    measure: param[1],
+    cost: param[2],
+    effect: param[3],
+    
+    cost_effectiveness: effect / cost * 1000,
+    
+    printf(true, "~20a: 効果/コスト = ~6,3f~%", measure, cost_effectiveness)
+)$
+

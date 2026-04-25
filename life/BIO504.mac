@@ -1,0 +1,352 @@
+/* 
+===============================================
+BIO-504: 宇宙環境耐性遺伝子発現率 計算プログラム
+===============================================
+
+【課題仕様】
+背景: 宇宙居住実現には人類の生物学的限界を超える必要
+目標: 遺伝子改変による環境耐性付与の成功率定量化
+入力: 放射線量、重力レベル、遺伝子編集効率、耐性遺伝子効果
+出力: 総合生存確率、遺伝子発現成功率、最適組み合わせ
+計算: 確率連鎖モデル、環境ストレス応答、時間依存適応
+*/
+
+kill(all)$
+
+/* 1. 宇宙環境ストレスパラメータ */
+radiation_level: 1.0;                 /* 放射線レベル [mSv/day] */
+microgravity_level: 0.001;            /* 微小重力レベル [g] */
+temperature_range: [200, 350];        /* 温度範囲 [K] */
+pressure_variation: 0.5;              /* 気圧変動 [atm] */
+oxygen_partial_pressure: 0.21;        /* 酸素分圧 [atm] */
+
+/* 2. 遺伝子編集パラメータ */
+gene_editing_efficiency: 0.85;
+off_target_effects: 0.05;
+epigenetic_stability: 0.90;
+inheritance_stability: 0.80;
+
+/* 3. 耐性遺伝子パラメータ */
+radiation_resistance_genes: [
+    ["DDB2", 0.7, 0.3],
+    ["XRCC5", 0.8, 0.2],
+    ["ATM", 0.9, 0.4],
+    ["RAD51", 0.85, 0.25]
+];
+
+microgravity_adaptation_genes: [
+    ["MYOD1", 0.6, 0.1],
+    ["BMP2", 0.7, 0.15],
+    ["VEGF", 0.75, 0.2],
+    ["ACE", 0.65, 0.1]
+];
+
+metabolic_modification_genes: [
+    ["PPARG", 0.8, 0.3],
+    ["LEP", 0.7, 0.25],
+    ["UCP1", 0.9, 0.4],
+    ["SIRT1", 0.85, 0.2]
+];
+
+/* 4. 生理的適応パラメータ */
+baseline_survival_rate: 0.95;
+adaptation_period: 180;
+cellular_repair_rate: 0.8;
+immune_system_efficiency: 0.85;
+
+/* 5. 環境閾値 */
+radiation_tolerance_threshold: 10.0;
+bone_loss_threshold: 0.02;
+muscle_loss_threshold: 0.03;
+
+/* 関数定義: 遺伝子発現成功率 */
+gene_expression_success(editing_eff, off_target, epigenetic, inheritance) := block(
+    [success_rate],
+    success_rate: editing_eff * (1 - off_target) * epigenetic * inheritance,
+    success_rate
+);
+
+/* 関数定義: 放射線耐性効果 */
+radiation_resistance_effect(genes_list, radiation_dose) := block(
+    [total_effect, side_effects, net_effect, i, gene, radiation_reduction, effective_dose, survival_prob],
+    
+    total_effect: 0,
+    side_effects: 1,
+    
+    for i:1 thru length(genes_list) do (
+        gene: genes_list[i],
+        total_effect: total_effect + gene[2],
+        side_effects: side_effects * (1 - gene[3])
+    ),
+    
+    total_effect: total_effect / length(genes_list),
+    radiation_reduction: 1 - exp(-total_effect * 2),
+    effective_dose: radiation_dose * (1 - radiation_reduction),
+    net_effect: total_effect * side_effects,
+    
+    survival_prob: if effective_dose <= radiation_tolerance_threshold then
+                      1.0
+                   else
+                      exp(-(effective_dose - radiation_tolerance_threshold)/5),
+    
+    [total_effect, side_effects, net_effect, survival_prob]
+);
+
+/* 関数定義: 低重力適応効果 */
+microgravity_adaptation_effect(genes_list, adaptation_days) := block(
+    [muscle_effect, bone_effect, vascular_effect, total_effect,
+     adaptation_factor, i, gene, bone_loss_prevention],
+    
+    muscle_effect: 0,
+    bone_effect: 0,
+    vascular_effect: 0,
+    
+    for i:1 thru length(genes_list) do (
+        gene: genes_list[i],
+        if gene[1] = "MYOD1" then muscle_effect: muscle_effect + gene[2],
+        if gene[1] = "BMP2" then bone_effect: bone_effect + gene[2],
+        if gene[1] = "VEGF" then vascular_effect: vascular_effect + gene[2],
+        if gene[1] = "ACE" then vascular_effect: vascular_effect + gene[2]
+    ),
+    
+    adaptation_factor: 1 - exp(-adaptation_days/30),
+    total_effect: (muscle_effect + bone_effect + vascular_effect) / 3,
+    total_effect: total_effect * adaptation_factor,
+    
+    bone_loss_prevention: if total_effect >= 0.7 then 0.95
+                          else if total_effect >= 0.5 then 0.8
+                          else if total_effect >= 0.3 then 0.6
+                          else 0.3,
+    
+    [muscle_effect, bone_effect, vascular_effect, total_effect, bone_loss_prevention]
+);
+
+/* 関数定義: 代謝改変効果 */
+metabolic_modification_effect(genes_list, oxygen_pressure) := block(
+    [metabolic_rate, thermal_regulation, repair_capacity, total_effect,
+     oxygen_efficiency, energy_efficiency, i, gene],
+    
+    metabolic_rate: 0,
+    thermal_regulation: 0,
+    repair_capacity: 0,
+    
+    for i:1 thru length(genes_list) do (
+        gene: genes_list[i],
+        if gene[1] = "PPARG" then metabolic_rate: metabolic_rate + gene[2],
+        if gene[1] = "LEP" then metabolic_rate: metabolic_rate + gene[2],
+        if gene[1] = "UCP1" then thermal_regulation: thermal_regulation + gene[2],
+        if gene[1] = "SIRT1" then repair_capacity: repair_capacity + gene[2]
+    ),
+    
+    total_effect: (metabolic_rate + thermal_regulation + repair_capacity) / 3,
+    oxygen_efficiency: 1 - exp(-oxygen_pressure * 10),
+    energy_efficiency: total_effect * oxygen_efficiency,
+    
+    [metabolic_rate, thermal_regulation, repair_capacity, total_effect, energy_efficiency]
+);
+
+/* 関数定義: 総合生存確率 */
+total_survival_probability(radiation_prob, microgravity_prob, metabolic_prob,
+                          baseline, repair, immune) := block(
+    [environmental_factor, biological_factor, total_prob],
+    
+    environmental_factor: radiation_prob * microgravity_prob * metabolic_prob,
+    biological_factor: baseline * repair * immune,
+    total_prob: environmental_factor * biological_factor,
+    
+    total_prob
+);
+
+/* メイン計算 */
+print("================================================")$
+print("BIO-504: 宇宙環境耐性遺伝子発現率 計算")$
+print("================================================")$
+print("")$
+
+print("【課題仕様】")$
+print("目的: 遺伝子改変による宇宙環境適応の成功率定量化")$
+print("入力: 放射線、微小重力、遺伝子編集効率、耐性遺伝子")$
+print("出力: 総合生存確率、最適遺伝子組み合わせ")$
+print("")$
+
+/* 基本計算 */
+P_gene_expression: gene_expression_success(gene_editing_efficiency,
+                                          off_target_effects,
+                                          epigenetic_stability,
+                                          inheritance_stability)$
+
+radiation_results: radiation_resistance_effect(radiation_resistance_genes, radiation_level)$
+microgravity_results: microgravity_adaptation_effect(microgravity_adaptation_genes, adaptation_period)$
+metabolic_results: metabolic_modification_effect(metabolic_modification_genes, oxygen_partial_pressure)$
+
+P_total: total_survival_probability(radiation_results[4],
+                                   microgravity_results[5],
+                                   metabolic_results[5],
+                                   baseline_survival_rate,
+                                   cellular_repair_rate,
+                                   immune_system_efficiency)$
+
+/* 結果表示 */
+print("【計算結果】")$
+print("1. 基本確率:")$
+printf(true, "   遺伝子発現成功率: ~6,3f (~5,1f%)~%", P_gene_expression, P_gene_expression*100)$
+printf(true, "   放射線耐性確率: ~6,3f~%", radiation_results[4])$
+printf(true, "   微小重力適応確率: ~6,3f~%", microgravity_results[5])$
+printf(true, "   代謝効率: ~6,3f~%", metabolic_results[5])$
+printf(true, "   総合生存確率: ~6,3f (~5,1f%)~%", P_total, P_total*100)$
+print("")$
+
+print("2. 遺伝子効果詳細:")$
+printf(true, "   放射線耐性遺伝子: 効果=~5,3f, 正味効果=~5,3f~%", 
+       radiation_results[1], radiation_results[3])$
+printf(true, "   微小重力適応遺伝子: 総合効果=~5,3f~%", microgravity_results[4])$
+printf(true, "   代謝改変遺伝子: 総合効果=~5,3f~%", metabolic_results[4])$
+print("")$
+
+/* 感度分析 */
+print("3. 感度分析:")$
+print("   パラメータ変化 (±50%) の影響")$
+sensitivity_analysis: [
+    ["遺伝子編集効率", gene_editing_efficiency, 0.5],
+    ["オフターゲット効果", off_target_effects, 0.5],
+    ["適応期間", adaptation_period, 0.5]
+]$
+
+for param in sensitivity_analysis do (
+    param_name: param[1],
+    base_value: param[2],
+    variation: param[3],
+    
+    /* 簡易計算 */
+    if param_name = "遺伝子編集効率" then (
+        P_gene_temp: gene_expression_success(base_value * 1.5,
+                                            off_target_effects,
+                                            epigenetic_stability,
+                                            inheritance_stability),
+        impact: (P_gene_temp - P_gene_expression) / P_gene_expression,
+        printf(true, "   ~20a: 影響度=~6,3f~%", param_name, impact)
+    )
+    elseif param_name = "適応期間" then (
+        micro_temp: microgravity_adaptation_effect(microgravity_adaptation_genes, 
+                                                  base_value * 1.5),
+        impact: (micro_temp[5] - microgravity_results[5]) / microgravity_results[5],
+        printf(true, "   ~20a: 影響度=~6,3f~%", param_name, impact)
+    )
+    else (
+        printf(true, "   ~20a: 計算省略~%", param_name)
+    )
+)$
+print("")$
+
+/* 最適化提案 */
+print("4. 最適化提案:")$
+optimal_combinations: [
+    ["最小セット (各2遺伝子)", 0.4],
+    ["標準セット (各3遺伝子)", 0.6],
+    ["強化セット (各4遺伝子)", 0.8],
+    ["副作用管理版", 0.7]
+]$
+
+for combo in optimal_combinations do (
+    combo_name: combo[1],
+    expected_improvement: combo[2],
+    new_probability: min(1.0, P_total * (1 + expected_improvement)),
+    
+    printf(true, "   ~25a: 期待確率=~6,3f (改善率=~5,1f%)~%", 
+           combo_name, new_probability, expected_improvement*100)
+)$
+print("")$
+
+/* 開発ロードマップ */
+print("5. 開発ロードマップ:")$
+roadmap: [
+    [2030, "単一遺伝子編集", 0.3],
+    [2035, "多遺伝子編集", 0.5],
+    [2040, "副作用制御", 0.7],
+    [2045, "完全環境適応", 0.9]
+]$
+
+for milestone in roadmap do (
+    year: milestone[1],
+    description: milestone[2],
+    target: milestone[3],
+    
+    printf(true, "   ~4d年: ~20a (目標確率=~4,2f)~%", year, description, target)
+)$
+print("")$
+
+/* 【結論】 */
+print("【結論】")$
+print("================================================")$
+if P_total >= 0.7 then (
+    print("結論: 遺伝子改変による宇宙環境適応は高度に実現可能")
+)
+elseif P_total >= 0.5 and P_total < 0.7 then (
+    print("結論: 遺伝子改変は有効だが追加対策が必要")
+)
+elseif P_total >= 0.3 and P_total < 0.5 then (
+    print("結論: 限定的な適応のみ可能、根本的解決には至らない")
+)
+elseif P_total < 0.3 then (
+    print("結論: 生物学的限界が大きく、技術的補完が必要")
+)$
+
+printf(true, "総合生存確率 ~5,3f は、~%", P_total)$
+if P_total >= 0.7 then (
+    print("長期宇宙居住が可能なレベル")
+)
+elseif P_total >= 0.5 then (
+    print("短期宇宙滞在が可能なレベル")
+)
+elseif P_total >= 0.3 then (
+    print("緊急避難用のみ実用的")
+)
+else (
+    print("現状技術では不十分")
+)$
+
+print("")$
+print("推奨アクション:")$
+if P_total < 0.5 then (
+    print("1. 遺伝子編集精度の向上 (目標: 90%以上)"),
+    print("2. 副作用低減技術の開発"),
+    print("3. 物理的防護との統合")
+)
+else (
+    print("1. 臨床試験の加速"),
+    print("2. 倫理的枠組みの確立"),
+    print("3. 宇宙環境シミュレーション")
+)$
+print("================================================")$
+print("")$
+
+/* Python連携用出力 */
+with_stdout("bio504_for_python.txt",
+  printf(true, "# BIO-504 Results from Maxima~%"),
+  printf(true, "# 課題仕様: 宇宙環境耐性遺伝子発現率計算~%"),
+  printf(true, "gene_expression_success = ~,6f~%", P_gene_expression),
+  printf(true, "radiation_survival_prob = ~,6f~%", radiation_results[4]),
+  printf(true, "microgravity_adaptation_prob = ~,6f~%", microgravity_results[5]),
+  printf(true, "metabolic_efficiency = ~,6f~%", metabolic_results[5]),
+  printf(true, "total_survival_probability = ~,6f~%", P_total),
+  printf(true, "conclusion = ~a~%", 
+         if P_total >= 0.7 then "Highly feasible"
+         elseif P_total >= 0.5 then "Feasible with additional measures"
+         elseif P_total >= 0.3 then "Limited adaptation only"
+         else "Insufficient with current technology"),
+  
+  printf(true, "gene_effects = ~%"),
+  printf(true, "Radiation_genes,~,6f,~,6f~%", radiation_results[1], radiation_results[3]),
+  printf(true, "Microgravity_genes,~,6f,~,6f~%", microgravity_results[4], microgravity_results[5]),
+  printf(true, "Metabolic_genes,~,6f,~,6f~%", metabolic_results[4], metabolic_results[5]),
+  
+  printf(true, "optimization = ~%"),
+  for combo in optimal_combinations do (
+    printf(true, "~a,~,6f~%", combo[1], combo[2])
+  )
+);
+
+print("================================================")$
+print("計算完了: bio504_for_python.txt を出力")$
+print("================================================")$
+

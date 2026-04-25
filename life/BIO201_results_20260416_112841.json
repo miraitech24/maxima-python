@@ -1,0 +1,41 @@
+{
+  "calculation_id": "BIO-201",
+  "timestamp": "20260416_112841",
+  "maxima_results": {
+    "sustainability_days": 23.1
+  },
+  "ecosystem_params": {},
+  "real_experiments": [
+    {
+      "name": "BIOS-3 (Russia)",
+      "duration": 180.0,
+      "description": "4 crew"
+    },
+    {
+      "name": "BIOSPHERE 2",
+      "duration": 730.0,
+      "description": "8 crew"
+    },
+    {
+      "name": "MELiSSA Pilot",
+      "duration": 60.0,
+      "description": "micro-ecosystem"
+    },
+    {
+      "name": "CELSS Testbed",
+      "duration": 90.0,
+      "description": "NASA research"
+    }
+  ],
+  "optimization": [
+    0.8,
+    0.8,
+    0.99,
+    0.5
+  ],
+  "recommendations": [
+    "\u85fb\u985e\u3068\u9ad8\u7b49\u690d\u7269\u306e\u9762\u7a4d\u6bd4\u30924:6\u306b\u6700\u9069\u5316",
+    "\u5faa\u74b0\u52b9\u7387\u309285%\u4ee5\u4e0a\u306b\u7dad\u6301",
+    "\u6804\u990a\u5869\u30d0\u30c3\u30d5\u30a1\u309230%\u78ba\u4fdd"
+  ]
+}

@@ -1,0 +1,6 @@
+﻿ID,Technology,Urgency,Timeframe_years,Priority_Score
+E001,SAF普及,5,3,88.0
+E003,マイクロ炉,5,5,80.0
+E002,高温ガス炉,4,7,60.0
+E005,超臨界地熱,4,8,56.0
+E004,テスラ送電,3,10,36.0

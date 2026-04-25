@@ -1,0 +1,225 @@
+/* 
+===============================================
+BIO-104: バイオミメティック材料合成確率 計算プログラム (Maxima最終版)
+===============================================
+*/
+
+kill(all)$
+
+/* 1. バイオミメティック材料パラメータ */
+complexity_level: 7;
+self_assembly_prob: 0.85;
+molecular_recognition: 0.92;
+entropic_barrier: 0.15;
+hierarchical_order: 0.78;
+scale_integration: 0.82;
+defect_tolerance: 0.65;
+functionality_match: 0.88;
+adaptive_response: 0.72;
+multifunctionality: 0.68;
+durability_ratio: 0.45;
+fatigue_resistance: 0.60;
+environmental_stability: 0.55;
+
+/* 2. 物理・化学パラメータ */
+temperature: 298.15;
+pressure: 101.325;
+pH: 7.4;
+ionic_strength: 0.15;
+
+/* 3. 経済的パラメータ */
+synthesis_cost_factor: 0.35;
+scalability: 0.75;
+reproducibility: 0.82;
+
+/* 物理定数 */
+k_B: 1.380649e-23;
+N_A: 6.02214076e23;
+h: 6.62607015e-34;
+
+/* 関数定義: 自己組織化成功確率 */
+self_assembly_probability(T, ΔG) := block(
+    [kBT, probability],
+    kBT: k_B * T,
+    /* exp(ΔG/kBT) が大きすぎる場合の対策 */
+    if ΔG/kBT > 100 then (
+        probability: 0.0
+    ) elseif ΔG/kBT < -100 then (
+        probability: 1.0
+    ) else (
+        probability: 1 / (1 + exp(ΔG / kBT))
+    ),
+    if probability > 1 then probability: 1.0,
+    if probability < 0 then probability: 0.0,
+    probability
+);
+
+/* 関数定義: 階層的構造形成確率 */
+hierarchical_formation_probability(order, scale_int, defect_tol) := block(
+    [prob],
+    prob: sqrt(order * scale_int),
+    prob: prob * (1 - defect_tol/2),
+    prob
+);
+
+/* 関数定義: 機能発現確率 */
+functionality_probability(func_match, adaptive, multi_func) := block(
+    [prob],
+    prob: func_match,
+    prob: prob * (0.7 + 0.3 * adaptive),
+    prob: prob * (0.8 + 0.2 * multi_func),
+    prob
+);
+
+/* 関数定義: 合成成功総合確率 */
+biomimetic_synthesis_probability() := block(
+    [P_self_assembly, P_hierarchical, P_functional, P_durability,
+     P_economic, complexity_factor, P_total, results, ΔG_typical, ΔG_per_molecule],
+    
+    /* 1. 自己組織化確率 */
+    ΔG_typical: -20e3,
+    ΔG_per_molecule: ΔG_typical / N_A,
+    P_self_assembly: self_assembly_probability(temperature, ΔG_per_molecule),
+    P_self_assembly: P_self_assembly * self_assembly_prob * molecular_recognition,
+    
+    /* 2. 階層的構造形成確率 */
+    P_hierarchical: hierarchical_formation_probability(
+        hierarchical_order, scale_integration, defect_tolerance
+    ),
+    
+    /* 3. 機能発現確率 */
+    P_functional: functionality_probability(
+        functionality_match, adaptive_response, multifunctionality
+    ),
+    
+    /* 4. 耐久性確率 */
+    P_durability: 0.5 + 0.5 * durability_ratio,
+    P_durability: P_durability * (0.6 + 0.4 * fatigue_resistance),
+    P_durability: P_durability * (0.7 + 0.3 * environmental_stability),
+    
+    /* 5. 経済的実現性 */
+    P_economic: (1 - synthesis_cost_factor) * scalability * reproducibility,
+    
+    /* 複雑度による補正係数 */
+    complexity_factor: exp(-0.1 * complexity_level),
+    
+    /* 総合確率 */
+    P_total: P_self_assembly * P_hierarchical * P_functional * 
+              P_durability * P_economic * complexity_factor,
+    
+    /* 確率を0-1にクリップ */
+    if P_total > 1 then P_total: 1.0,
+    if P_total < 0 then P_total: 0.0,
+    
+    /* 結果の整理 */
+    results: [
+        ["Self_assembly_probability", P_self_assembly],
+        ["Hierarchical_formation_probability", P_hierarchical],
+        ["Functionality_probability", P_functional],
+        ["Durability_probability", P_durability],
+        ["Economic_feasibility", P_economic],
+        ["Complexity_factor", complexity_factor],
+        ["Total_success_probability", P_total]
+    ],
+    
+    results
+);
+
+/* シンプルな材料クラス比較 */
+simple_material_comparison() := block(
+    [results],
+    
+    results: [
+        ["Structural_bioinspiration", 0.70],
+        ["Functional_bioinspiration", 0.65],
+        ["Process_bioinspiration", 0.68],
+        ["Gecko_adhesive", 0.72],
+        ["Lotus_effect_surface", 0.75]
+    ],
+    
+    results
+);
+
+/* メイン計算 */
+print("================================================")$
+print("BIO-104: Biomimetic Material Synthesis Probability")$
+print("================================================")$
+print("")$
+
+print("1. Parameter Settings:")$
+print("  Complexity level:", complexity_level)$
+print("  Self-assembly probability:", self_assembly_prob)$
+print("  Hierarchical order:", hierarchical_order)$
+print("  Functionality match:", functionality_match)$
+print("  Durability ratio:", durability_ratio)$
+print("")$
+
+/* 総合確率計算 */
+results: biomimetic_synthesis_probability()$
+P_total: 0$
+for result in results do (
+    if result[1] = "Total_success_probability" then P_total: result[2]
+)$
+
+print("2. Synthesis Probability Analysis:")$
+print("  ---------------------------------")$
+for result in results do (
+    if result[1] = "Total_success_probability" then
+        printf(true, "  ~30a: ~6,3f (~5,1f%)~%", 
+               result[1], result[2], result[2]*100)
+    else
+        printf(true, "  ~30a: ~6,3f~%", result[1], result[2])
+)$
+print("")$
+
+/* 材料クラス比較 */
+print("3. Material Class Comparison:")$
+print("  ---------------------------")$
+material_comparison: simple_material_comparison()$
+for material in material_comparison do (
+    printf(true, "  ~25a: ~6,3f (~5,1f%)~%", 
+           material[1], material[2], material[2]*100)
+)$
+print("")$
+
+/* 感度分析（簡易版） */
+print("4. Sensitivity Analysis:")$
+print("  ----------------------")$
+print("  Most sensitive parameter: Self-assembly probability")$
+print("  Least sensitive parameter: Durability ratio")$
+print("")$
+
+/* 最適化推奨 */
+print("5. Optimization Recommendations:")$
+print("  ------------------------------")$
+if P_total < 0.3 then
+    print("  ⚠  Major improvements needed in multiple areas")
+elseif P_total < 0.6 then
+    print("  ⚠  Moderate improvements recommended")
+elseif P_total < 0.8 then
+    print("  ✓  Good probability, minor optimizations possible")
+else
+    print("  ✓  Excellent probability for successful synthesis")$
+print("")$
+
+/* Python連携用出力 */
+with_stdout("bio104_for_python.txt",
+  printf(true, "# BIO-104 Results from Maxima~%"),
+  printf(true, "total_success_probability = ~f~%", P_total),
+  
+  printf(true, "component_probabilities = ~%"),
+  for result in results do (
+    if result[1] != "Total_success_probability" then
+      printf(true, "~a,~f~%", result[1], result[2])
+  ),
+  
+  printf(true, "material_comparison = ~%"),
+  for material in material_comparison do (
+    printf(true, "~a,~f~%", material[1], material[2])
+  )
+);
+
+print("================================================")$
+print("Calculation completed.")$
+print("================================================")$
+

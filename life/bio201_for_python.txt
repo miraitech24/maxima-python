@@ -1,0 +1,8 @@
+# BIO-201 Results from Maxima
+sustainability_days = 23.1
+ecosystem_parameters = 
+real_experiments = 
+BIOS-3 (Russia),180.0,4 crew, 315 m^3
+BIOSPHERE 2,730.0,8 crew, 1.27e6 m^3
+MELiSSA Pilot,60.0,micro-ecosystem
+CELSS Testbed,90.0,NASA research

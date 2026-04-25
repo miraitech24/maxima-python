@@ -1,0 +1,14 @@
+# BIO-003 Results from Maxima
+total_formation_probability = 1.1769646537260237e-31
+probability_components = 
+Bond_probability_per_step,1.0e+0
+Chain_formation_probability,1.0e+0
+Specific_sequence_probability,7.888609052210117e-31
+Functional_RNA_probability,1.491979949743204e-1
+Time_factor_probability,1.0e+0
+length_probabilities = 
+20,1.4832324230620858e-13
+30,1.5045044988456135e-19
+50,1.1769646537260237e-31
+70,7.988395691583386e-44
+100,3.1783749837207215e-75

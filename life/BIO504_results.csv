@@ -1,0 +1,16 @@
+parameter,value,percentage,log10_value,category
+total_survival_probability,0.583428,58.3428,-0.2340127319614749,overall
+gene_expression_success,0.5814,58.14,-0.23552497256559102,genetic
+radiation_resistance_probability,1.0,100.0,0.0,environmental
+microgravity_adaptation_probability,0.95,95.0,-0.022276394711152253,environmental
+metabolic_efficiency,0.950672,95.0672,-0.021969297111987716,physiological
+Radiation_genes_total_effect,0.8125,81.25,-0.090176630349088,gene_effect
+Radiation_genes_net_effect,0.20475,20.474999999999998,-0.688776089567544,gene_effect
+Microgravity_genes_total_effect,0.897769,89.7769,-0.04683539488154516,gene_effect
+Microgravity_genes_net_effect,0.95,95.0,-0.022276394711152253,gene_effect
+Metabolic_genes_total_effect,1.083333,108.33330000000001,0.03476197263012006,gene_effect
+Metabolic_genes_net_effect,0.950672,95.0672,-0.021969297111987716,gene_effect
+optimization_最小セット (各2遺伝子),0.8167991999999998,81.67991999999998,-0.08788469628323693,optimization
+optimization_標準セット (各3遺伝子),0.9334848,93.34848,-0.02989274930555009,optimization
+optimization_強化セット (各4遺伝子),1.0,100.0,0.0,optimization
+optimization_副作用管理版,0.9918275999999999,99.18275999999999,-0.0035638105832009794,optimization

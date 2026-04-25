@@ -1,0 +1,335 @@
+/* 
+===============================================
+BIO-504: 宇宙環境耐性遺伝子発現率 計算プログラム
+===============================================
+
+未来像: 宇宙居住者の遺伝子改変による環境適応
+放射線耐性、低重力適応、代謝改変の確率計算
+*/
+
+kill(all)$
+
+/* 1. 宇宙環境ストレスパラメータ */
+radiation_level: 1.0;                 /* 放射線レベル [mSv/day] (ISSの約2倍) */
+microgravity_level: 0.001;            /* 微小重力レベル [g] */
+temperature_range: [200, 350];        /* 温度範囲 [K] (-73°C to 77°C) */
+pressure_variation: 0.5;              /* 気圧変動 [atm] */
+oxygen_partial_pressure: 0.21;        /* 酸素分圧 [atm] */
+
+/* 2. 遺伝子改変パラメータ */
+gene_editing_efficiency: 0.85;        /* 遺伝子編集効率 (CRISPR等) */
+off_target_effects: 0.05;             /* オフターゲット効果確率 */
+epigenetic_stability: 0.90;           /* エピジェネティック安定性 */
+inheritance_stability: 0.80;          /* 遺伝的安定性 */
+
+/* 3. 耐性遺伝子パラメータ */
+radiation_resistance_genes: [
+    ["DDB2", 0.7, 0.3],               /* [遺伝子名, 効果率, 副作用確率] */
+    ["XRCC5", 0.8, 0.2],
+    ["ATM", 0.9, 0.4],
+    ["RAD51", 0.85, 0.25]
+];
+
+microgravity_adaptation_genes: [
+    ["MYOD1", 0.6, 0.1],              /* 筋萎縮防止 */
+    ["BMP2", 0.7, 0.15],              /* 骨形成促進 */
+    ["VEGF", 0.75, 0.2],              /* 血管形成 */
+    ["ACE", 0.65, 0.1]                /* 血圧調節 */
+];
+
+metabolic_modification_genes: [
+    ["PPARG", 0.8, 0.3],              /* 代謝調節 */
+    ["LEP", 0.7, 0.25],               /* 食欲調節 */
+    ["UCP1", 0.9, 0.4],               /* 熱産生 */
+    ["SIRT1", 0.85, 0.2]              /* 細胞修復 */
+];
+
+/* 4. 生理的適応パラメータ */
+baseline_survival_rate: 0.95;         /* 地球環境での生存率 */
+adaptation_period: 180;               /* 適応期間 [days] */
+cellular_repair_rate: 0.8;            /* 細胞修復率 */
+immune_system_efficiency: 0.85;       /* 免疫系効率 */
+
+/* 5. 環境閾値 */
+radiation_tolerance_threshold: 10.0;  /* 許容放射線量 [mSv/day] */
+bone_loss_threshold: 0.02;            /* 許容骨密度減少 [/month] */
+muscle_loss_threshold: 0.03;          /* 許容筋量減少 [/month] */
+
+/* 関数定義: 遺伝子発現成功率 */
+gene_expression_success(editing_eff, off_target, epigenetic, inheritance) := block(
+    [success_rate],
+    
+    success_rate: editing_eff * (1 - off_target) * epigenetic * inheritance,
+    
+    success_rate
+);
+
+/* 関数定義: 放射線耐性効果 */
+radiation_resistance_effect(genes_list, radiation_dose) := block(
+    [total_effect, side_effects, net_effect, i, gene],
+    
+    total_effect: 0,
+    side_effects: 1,
+    
+    for i:1 thru length(genes_list) do (
+        gene: genes_list[i],
+        total_effect: total_effect + gene[2],
+        side_effects: side_effects * (1 - gene[3])
+    ),
+    
+    /* 平均効果 */
+    total_effect: total_effect / length(genes_list),
+    
+    /* 放射線軽減効果 */
+    radiation_reduction: 1 - exp(-total_effect * 2),
+    effective_dose: radiation_dose * (1 - radiation_reduction),
+    
+    /* 副作用を考慮した正味効果 */
+    net_effect: total_effect * side_effects,
+    
+    /* 閾値比較 */
+    survival_prob: if effective_dose <= radiation_tolerance_threshold then
+                      1.0
+                   else
+                      exp(-(effective_dose - radiation_tolerance_threshold)/5),
+    
+    [total_effect, side_effects, net_effect, survival_prob]
+);
+
+/* 関数定義: 低重力適応効果 */
+microgravity_adaptation_effect(genes_list, adaptation_days) := block(
+    [muscle_effect, bone_effect, vascular_effect, total_effect,
+     adaptation_factor, i, gene],
+    
+    muscle_effect: 0,
+    bone_effect: 0,
+    vascular_effect: 0,
+    
+    for i:1 thru length(genes_list) do (
+        gene: genes_list[i],
+        if gene[1] = "MYOD1" then muscle_effect: muscle_effect + gene[2],
+        if gene[1] = "BMP2" then bone_effect: bone_effect + gene[2],
+        if gene[1] = "VEGF" then vascular_effect: vascular_effect + gene[2],
+        if gene[1] = "ACE" then vascular_effect: vascular_effect + gene[2]
+    ),
+    
+    /* 適応期間による効果増加 */
+    adaptation_factor: 1 - exp(-adaptation_days/30),
+    
+    total_effect: (muscle_effect + bone_effect + vascular_effect) / 3,
+    total_effect: total_effect * adaptation_factor,
+    
+    /* 骨・筋損失防止確率 */
+    bone_loss_prevention: if total_effect >= 0.7 then 0.95
+                          else if total_effect >= 0.5 then 0.8
+                          else if total_effect >= 0.3 then 0.6
+                          else 0.3,
+    
+    [muscle_effect, bone_effect, vascular_effect, total_effect, bone_loss_prevention]
+);
+
+/* 関数定義: 代謝改変効果 */
+metabolic_modification_effect(genes_list, oxygen_pressure) := block(
+    [metabolic_rate, thermal_regulation, repair_capacity, total_effect,
+     energy_efficiency, i, gene],
+    
+    metabolic_rate: 0,
+    thermal_regulation: 0,
+    repair_capacity: 0,
+    
+    for i:1 thru length(genes_list) do (
+        gene: genes_list[i],
+        if gene[1] = "PPARG" then metabolic_rate: metabolic_rate + gene[2],
+        if gene[1] = "LEP" then metabolic_rate: metabolic_rate + gene[2],
+        if gene[1] = "UCP1" then thermal_regulation: thermal_regulation + gene[2],
+        if gene[1] = "SIRT1" then repair_capacity: repair_capacity + gene[2]
+    ),
+    
+    total_effect: (metabolic_rate + thermal_regulation + repair_capacity) / 3,
+    
+    /* 低酸素環境でのエネルギー効率 */
+    oxygen_efficiency: 1 - exp(-oxygen_pressure * 10),
+    energy_efficiency: total_effect * oxygen_efficiency,
+    
+    [metabolic_rate, thermal_regulation, repair_capacity, total_effect, energy_efficiency]
+);
+
+/* 関数定義: 総合生存確率 */
+total_survival_probability(radiation_prob, microgravity_prob, metabolic_prob,
+                          baseline, repair, immune) := block(
+    [environmental_factor, biological_factor, total_prob],
+    
+    environmental_factor: radiation_prob * microgravity_prob * metabolic_prob,
+    biological_factor: baseline * repair * immune,
+    
+    total_prob: environmental_factor * biological_factor,
+    
+    total_prob
+);
+
+/* メイン計算 */
+print("================================================")$
+print("BIO-504: Space Environment Tolerance Gene Expression")$
+print("================================================")$
+print("")$
+
+print("1. Space Environment Parameters:")$
+print("  -------------------------------")$
+printf(true, "  Radiation level: ~5,2f mSv/day~%", radiation_level)$
+printf(true, "  Microgravity level: ~6,4f g~%", microgravity_level)$
+printf(true, "  Temperature range: ~3dK to ~3dK~%", temperature_range[1], temperature_range[2])$
+printf(true, "  Oxygen partial pressure: ~4,2f atm~%", oxygen_partial_pressure)$
+print("")$
+
+/* 遺伝子編集基本成功率 */
+P_gene_expression: gene_expression_success(gene_editing_efficiency,
+                                          off_target_effects,
+                                          epigenetic_stability,
+                                          inheritance_stability)$
+
+print("2. Gene Editing Success Rate:")$
+print("  ----------------------------")$
+printf(true, "  Editing efficiency: ~5,3f~%", gene_editing_efficiency)$
+printf(true, "  Off-target effects: ~5,3f~%", off_target_effects)$
+printf(true, "  Epigenetic stability: ~5,3f~%", epigenetic_stability)$
+printf(true, "  Inheritance stability: ~5,3f~%", inheritance_stability)$
+printf(true, "  Total expression success: ~5,3f (~5,1f%)~%", 
+       P_gene_expression, P_gene_expression*100)$
+print("")$
+
+/* 放射線耐性効果 */
+radiation_results: radiation_resistance_effect(radiation_resistance_genes, radiation_level)$
+print("3. Radiation Resistance Analysis:")$
+print("  --------------------------------")$
+printf(true, "  Average gene effect: ~5,3f~%", radiation_results[1])$
+printf(true, "  Side effect factor: ~5,3f~%", radiation_results[2])$
+printf(true, "  Net effect: ~5,3f~%", radiation_results[3])$
+printf(true, "  Survival probability: ~5,3f~%", radiation_results[4])$
+print("")$
+
+/* 低重力適応効果 */
+microgravity_results: microgravity_adaptation_effect(microgravity_adaptation_genes, adaptation_period)$
+print("4. Microgravity Adaptation Analysis:")$
+print("  -----------------------------------")$
+printf(true, "  Muscle effect: ~5,3f~%", microgravity_results[1])$
+printf(true, "  Bone effect: ~5,3f~%", microgravity_results[2])$
+printf(true, "  Vascular effect: ~5,3f~%", microgravity_results[3])$
+printf(true, "  Total adaptation: ~5,3f~%", microgravity_results[4])$
+printf(true, "  Bone loss prevention: ~5,3f~%", microgravity_results[5])$
+print("")$
+
+/* 代謝改変効果 */
+metabolic_results: metabolic_modification_effect(metabolic_modification_genes, oxygen_partial_pressure)$
+print("5. Metabolic Modification Analysis:")$
+print("  ----------------------------------")$
+printf(true, "  Metabolic rate effect: ~5,3f~%", metabolic_results[1])$
+printf(true, "  Thermal regulation: ~5,3f~%", metabolic_results[2])$
+printf(true, "  Repair capacity: ~5,3f~%", metabolic_results[3])$
+printf(true, "  Total metabolic effect: ~5,3f~%", metabolic_results[4])$
+printf(true, "  Energy efficiency: ~5,3f~%", metabolic_results[5])$
+print("")$
+
+/* 総合生存確率 */
+P_total: total_survival_probability(radiation_results[4],
+                                   microgravity_results[5],
+                                   metabolic_results[5],
+                                   baseline_survival_rate,
+                                   cellular_repair_rate,
+                                   immune_system_efficiency)$
+
+print("6. Total Survival Probability:")$
+print("  -----------------------------")$
+printf(true, "  Baseline survival (Earth): ~5,3f~%", baseline_survival_rate)$
+printf(true, "  Cellular repair rate: ~5,3f~%", cellular_repair_rate)$
+printf(true, "  Immune system efficiency: ~5,3f~%", immune_system_efficiency)$
+printf(true, "  Environmental factor: ~5,3f~%", 
+       radiation_results[4] * microgravity_results[5] * metabolic_results[5])$
+printf(true, "  Biological factor: ~5,3f~%", 
+       baseline_survival_rate * cellular_repair_rate * immune_system_efficiency)$
+printf(true, "  TOTAL SURVIVAL PROBABILITY: ~5,3f (~5,1f%)~%", P_total, P_total*100)$
+print("")$
+
+/* 遺伝子組み合わせ最適化 */
+print("7. Gene Combination Optimization:")$
+print("  --------------------------------")$
+gene_combinations: [
+    ["Minimal set (2 genes each)", 2, 2, 2],
+    ["Standard set (3 genes each)", 3, 3, 3],
+    ["Comprehensive set (4 genes each)", 4, 4, 4],
+    ["Overexpression risk (all genes)", 4, 4, 4]
+]$
+
+for combo in gene_combinations do (
+    combo_name: combo[1],
+    rad_count: combo[2],
+    micro_count: combo[3],
+    meta_count: combo[4],
+    
+    /* 簡易計算: 遺伝子数に比例した効果 */
+    rad_effect: min(1.0, 0.2 * rad_count),
+    micro_effect: min(1.0, 0.25 * micro_count),
+    meta_effect: min(1.0, 0.3 * meta_count),
+    
+    combo_prob: rad_effect * micro_effect * meta_effect * P_gene_expression,
+    
+    printf(true, "  ~30a: P = ~5,3f~%", combo_name, combo_prob)
+)$
+print("")$
+
+/* 適応期間の影響 */
+print("8. Adaptation Period Analysis:")$
+print("  -----------------------------")$
+periods: [30, 90, 180, 365, 730]$
+for period in periods do (
+    period_results: microgravity_adaptation_effect(microgravity_adaptation_genes, period),
+    adaptation_prob: period_results[5],
+    
+    printf(true, "  ~4d days: Adaptation P = ~5,3f~%", period, adaptation_prob)
+)$
+print("")$
+
+/* 開発ロードマップ */
+print("9. Development Roadmap:")$
+print("  ----------------------")$
+milestones: [
+    [2030, "Radiation resistance genes", 0.3],
+    [2035, "Microgravity adaptation", 0.5],
+    [2040, "Metabolic optimization", 0.7],
+    [2045, "Integrated gene therapy", 0.8],
+    [2050, "Full space adaptation", 0.9]
+]$
+
+for milestone in milestones do (
+    year: milestone[1],
+    description: milestone[2],
+    target: milestone[3],
+    
+    printf(true, "  ~4d: ~30a (Target: ~4,2f)~%", year, description, target)
+)$
+
+print("")$
+print("================================================")$
+print("Key Insight: Genetic adaptation enables long-term space habitation")$
+print("================================================")$
+
+/* Python連携用出力 */
+with_stdout("bio504_for_python.txt",
+  printf(true, "# BIO-504 Results from Maxima~%"),
+  printf(true, "gene_expression_success = ~,6f~%", P_gene_expression),
+  printf(true, "radiation_survival_prob = ~,6f~%", radiation_results[4]),
+  printf(true, "microgravity_adaptation_prob = ~,6f~%", microgravity_results[5]),
+  printf(true, "metabolic_efficiency = ~,6f~%", metabolic_results[5]),
+  printf(true, "total_survival_probability = ~,6f~%", P_total),
+  
+  printf(true, "gene_effects = ~%"),
+  printf(true, "Radiation_genes,~,6f,~,6f~%", radiation_results[1], radiation_results[3]),
+  printf(true, "Microgravity_genes,~,6f,~,6f~%", microgravity_results[4], microgravity_results[5]),
+  printf(true, "Metabolic_genes,~,6f,~,6f~%", metabolic_results[4], metabolic_results[5]),
+  
+  printf(true, "adaptation_timeline = ~%"),
+  for period in periods do (
+    period_results: microgravity_adaptation_effect(microgravity_adaptation_genes, period),
+    printf(true, "~d,~,6f~%", period, period_results[5])
+  )
+);
+

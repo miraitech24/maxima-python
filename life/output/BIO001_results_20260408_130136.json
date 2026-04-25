@@ -1,0 +1,39 @@
+{
+  "calculation_id": "BIO-001",
+  "calculation_name": "微生物宇宙普遍性確率",
+  "timestamp": "20260408_130136",
+  "parameters": {
+    "N_stars": 200000000000.0,
+    "f_habitable": 0.22,
+    "n_habitable": 1.2,
+    "alpha_prior": 1,
+    "beta_prior": 1,
+    "solar_success": 1,
+    "solar_trials": 8
+  },
+  "results": {
+    "bayesian": {
+      "mean": 0.2,
+      "ci_lower": 0.028144973477898197,
+      "ci_upper": 0.48249651491733697
+    },
+    "monte_carlo": {
+      "mean": 0.1988873612520913,
+      "std": 0.1199131160616416,
+      "ci_lower": 0.02799234560482607,
+      "ci_upper": 0.4808472687271893,
+      "num_samples": 10000,
+      "samples_summary": {
+        "min": 0.00048697659085744974,
+        "max": 0.6830894011592304,
+        "median": 0.18285776267503767
+      }
+    }
+  },
+  "interpretation": {
+    "probability_estimate": "0.199",
+    "confidence": "中程度（太陽系データのみに基づく）",
+    "limitations": "系外惑星の直接観測データが不足",
+    "recommendations": "JWST等による大気分光観測の実施を推奨"
+  }
+}

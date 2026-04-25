@@ -1,0 +1,79 @@
+{
+  "calculation_id": "BIO-104",
+  "timestamp": "20260416_110048",
+  "maxima_results": {
+    "total_success_probability": 0.03329648432749357
+  },
+  "component_probabilities": {},
+  "material_comparison": {
+    "Structural_bioinspiration": 0.7,
+    "Functional_bioinspiration": 0.65,
+    "Process_bioinspiration": 0.68,
+    "Gecko_adhesive": 0.72,
+    "Lotus_effect_surface": 0.75
+  },
+  "examples_database": [
+    {
+      "material": "Gecko Tape",
+      "inspiration": "ヤモリの足",
+      "success_rate": 0.85,
+      "year": 2003,
+      "application": "接着剤"
+    },
+    {
+      "material": "Lotus-effect Coating",
+      "inspiration": "ハスの葉",
+      "success_rate": 0.92,
+      "year": 1997,
+      "application": "撥水コーティング"
+    },
+    {
+      "material": "Shark Skin Coating",
+      "inspiration": "サメの皮",
+      "success_rate": 0.78,
+      "year": 2000,
+      "application": "抗汚染・低抵抗"
+    },
+    {
+      "material": "Butterfly Wing Color",
+      "inspiration": "チョウの翅",
+      "success_rate": 0.65,
+      "year": 2005,
+      "application": "構造色"
+    },
+    {
+      "material": "Spider Silk Fiber",
+      "inspiration": "クモの糸",
+      "success_rate": 0.7,
+      "year": 2010,
+      "application": "高強度繊維"
+    },
+    {
+      "material": "Mussel Adhesive",
+      "inspiration": "イガイの接着剤",
+      "success_rate": 0.88,
+      "year": 2008,
+      "application": "水中接着剤"
+    },
+    {
+      "material": "Bone-inspired Composite",
+      "inspiration": "骨",
+      "success_rate": 0.75,
+      "year": 2012,
+      "application": "軽量構造材"
+    },
+    {
+      "material": "Leaf-inspired Solar Cell",
+      "inspiration": "葉の光合成",
+      "success_rate": 0.68,
+      "year": 2015,
+      "application": "太陽電池"
+    }
+  ],
+  "analysis": {
+    "total_probability": 0.03329648432749357,
+    "weakest_component": "データなし",
+    "strongest_component": "データなし",
+    "recommendation": "自己組織化確率と経済的実現性の改善が最も効果的"
+  }
+}

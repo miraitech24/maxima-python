@@ -1,0 +1,90 @@
+/* 
+BIO-102: 人工光合成効率 計算 (超シンプル版)
+*/
+
+kill(all)$
+
+/* パラメータ */
+η_abs: 0.95;
+η_charge_sep: 0.85;
+η_charge_trans: 0.90;
+recombination_loss: 0.15;
+η_cat_OER: 0.88;
+η_cat_HER: 0.92;
+overpotential_anode: 0.35;
+overpotential_cathode: 0.25;
+η_system: 0.95;
+
+/* 物理定数 */
+h: 6.62607015e-34;
+c: 299792458;
+N_A: 6.02214076e23;
+
+/* 関数 */
+photon_energy(λ) := h * c / λ;
+
+calculate_efficiency(λ) := block(
+    [E_photon, E_H2_per_molecule, E_H2_per_electron,
+     η_absorption, η_charge, η_catalyst, V_theoretical,
+     V_total, η_overpotential, η_total],
+    
+    E_photon: photon_energy(λ),
+    E_H2_per_molecule: 237e3 / N_A,
+    E_H2_per_electron: E_H2_per_molecule / 2,
+    
+    η_absorption: η_abs,
+    η_charge: η_charge_sep * η_charge_trans * (1 - recombination_loss),
+    η_catalyst: η_cat_OER * η_cat_HER,
+    
+    V_theoretical: 1.23,
+    V_total: V_theoretical + overpotential_anode + overpotential_cathode,
+    η_overpotential: V_theoretical / V_total,
+    
+    η_total: η_absorption * η_charge * η_catalyst * 
+              η_overpotential * η_system *
+              (E_H2_per_electron / E_photon),
+    
+    if η_total > 1 then η_total: 1.0,
+    if η_total < 0 then η_total: 0.0,
+    
+    η_total
+);
+
+/* 計算実行 */
+print("BIO-102: Artificial Photosynthesis Efficiency");
+print("============================================");
+
+λ: 550e-9;
+η_total: calculate_efficiency(λ);
+
+print("");
+print("Results:");
+print("  Wavelength: ", λ*1e9, " nm");
+print("  Photon energy: ", float(photon_energy(λ)*1e19), " x 10^-19 J");
+print("  Total efficiency: ", float(η_total), " (", float(η_total*100), "%)");
+
+print("");
+print("Stage efficiencies:");
+print("  Absorption: ", float(η_abs), " (", float(η_abs*100), "%)");
+print("  Charge separation/transport: ", float(η_charge_sep * η_charge_trans * (1 - recombination_loss)), 
+      " (", float(η_charge_sep * η_charge_trans * (1 - recombination_loss)*100), "%)");
+print("  Catalyst reaction: ", float(η_cat_OER * η_cat_HER), 
+      " (", float(η_cat_OER * η_cat_HER*100), "%)");
+print("  Overpotential: ", float(1.23/(1.23 + overpotential_anode + overpotential_cathode)), 
+      " (", float(1.23/(1.23 + overpotential_anode + overpotential_cathode)*100), "%)");
+print("  System: ", float(η_system), " (", float(η_system*100), "%)");
+
+/* ファイル出力 */
+with_stdout("bio102_simple_results.txt",
+  print("total_efficiency = ", float(η_total)),
+  print("photon_energy_550nm_J = ", float(photon_energy(550e-9))),
+  print("stage_absorption = ", float(η_abs)),
+  print("stage_charge = ", float(η_charge_sep * η_charge_trans * (1 - recombination_loss))),
+  print("stage_catalyst = ", float(η_cat_OER * η_cat_HER)),
+  print("stage_overpotential = ", float(1.23/(1.23 + overpotential_anode + overpotential_cathode))),
+  print("stage_system = ", float(η_system))
+);
+
+print("");
+print("Results saved to bio102_simple_results.txt");
+

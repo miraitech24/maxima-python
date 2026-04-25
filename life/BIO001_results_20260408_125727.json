@@ -1,0 +1,13 @@
+{
+  "calculation_id": "BIO-001",
+  "timestamp": "20260408_125727",
+  "results": {
+    "bayesian": {
+      "mean": 0.2,
+      "ci": [
+        0.028144973477898197,
+        0.48249651491733697
+      ]
+    },
+    "monte_carlo": {
+      "samples": 

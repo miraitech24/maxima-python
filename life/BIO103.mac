@@ -1,0 +1,295 @@
+/* 
+===============================================
+BIO-103: 閉鎖生態系光合成効率 計算プログラム (Maxima)
+===============================================
+
+課題仕様:
+1. 閉鎖系バイオリアクターの光合成効率モデル
+2. 人工光源、CO2供給、温度制御の最適化
+3. 藻類/高等植物の混合システム
+4. エネルギー収支分析
+
+入力パラメータ:
+- PFD: 光量子束密度 [μmol/m²/s]
+- CO2_conc: CO2濃度 [ppm]
+- T: 温度 [°C]
+- species: 生物種 (藻類/高等植物)
+- system_type: システムタイプ (CELSS/MELiSSA等)
+
+出力:
+- η_bioreactor: バイオリアクター効率
+- biomass_productivity: バイオマス生産性 [g/m²/day]
+- O2_production: 酸素生産速度 [L/m²/day]
+- energy_balance: エネルギー収支
+*/
+
+kill(all)$
+
+/* システムパラメータ */
+/* 1. 光源パラメータ */
+PFD: 500;          /* 光量子束密度 [μmol/m²/s] (ISS標準) */
+light_source: "LED"; /* 光源タイプ */
+light_spectrum: [0.3, 0.5, 0.2]; /* 青:緑:赤 比率 */
+light_efficiency: 0.40; /* LED効率 */
+
+/* 2. 環境パラメータ */
+CO2_conc: 1000;    /* CO2濃度 [ppm] (ISS: 1000-5000ppm) */
+T: 25;             /* 温度 [°C] */
+RH: 70;            /* 相対湿度 [%] */
+pressure: 101.3;   /* 圧力 [kPa] */
+
+/* 3. 生物種パラメータ */
+/* 藻類 (Chlorella vulgaris) */
+algae_params: [
+    ["max_growth_rate", 2.5],      /* 最大比増殖速度 [/day] */
+    ["light_saturation", 200],     /* 光飽和点 [μmol/m²/s] */
+    ["CO2_saturation", 2000],      /* CO2飽和点 [ppm] */
+    ["optimal_T", 25],             /* 至適温度 [°C] */
+    ["biomass_energy", 20],        /* バイオマスエネルギー [MJ/kg] */
+    ["O2_yield", 1.2]              /* 酸素収率 [g-O2/g-biomass] */
+];
+
+/* 高等植物 (レタス) */
+plant_params: [
+    ["max_growth_rate", 0.3],      /* [/day] */
+    ["light_saturation", 500],     /* [μmol/m²/s] */
+    ["CO2_saturation", 1200],      /* [ppm] */
+    ["optimal_T", 22],             /* [°C] */
+    ["biomass_energy", 18],        /* [MJ/kg] */
+    ["O2_yield", 1.0]              /* [g-O2/g-biomass] */
+];
+
+/* 4. システムパラメータ */
+system_type: "CELSS";  /* 閉鎖生態系生命維持システム */
+volume: 1.0;           /* 容積 [m³] */
+surface_area: 1.0;     /* 表面積 [m²] */
+residence_time: 10;    /* 滞留時間 [days] */
+
+/* 物理定数 */
+h: 6.62607015e-34;
+c: 299792458;
+N_A: 6.02214076e23;
+PAR_energy: 2.0e-19;   /* 光合成有効放射の平均エネルギー [J/photon] */
+
+/* 
+関数定義: 光合成速度モデル
+Michaelis-Menten型モデル
+*/
+photosynthesis_rate(PFD, CO2, T_actual, params) := block(
+    [P_max, K_light, K_CO2, T_opt, T_response, rate],
+    
+    /* パラメータ抽出 */
+    P_max: assoc("max_growth_rate", params),
+    K_light: assoc("light_saturation", params),
+    K_CO2: assoc("CO2_saturation", params),
+    T_opt: assoc("optimal_T", params),
+    
+    /* 光応答 (Michaelis-Menten) */
+    light_response: PFD / (K_light + PFD),
+    
+    /* CO2応答 */
+    CO2_response: CO2 / (K_CO2 + CO2),
+    
+    /* 温度応答 (ガウス関数) */
+    T_response: exp(-((T_actual - T_opt) / 10)^2),
+    
+    /* 総合光合成速度 */
+    rate: P_max * light_response * CO2_response * T_response,
+    
+    rate
+);
+
+/* 
+関数定義: バイオリアクター効率
+η = (バイオマスエネルギー) / (投入光エネルギー)
+*/
+bioreactor_efficiency(species, system_params) := block(
+    [params, P_rate, biomass_energy, light_energy, efficiency,
+     daily_biomass, daily_O2],
+    
+    /* 生物種パラメータ選択 */
+    if species = "algae" then
+        params: algae_params
+    else
+        params: plant_params,
+    
+    /* 光合成速度 [/day] */
+    P_rate: photosynthesis_rate(PFD, CO2_conc, T, params),
+    
+    /* バイオマスエネルギー [J/m²/day] */
+    biomass_energy_per_kg: assoc("biomass_energy", params) * 1e6, /* MJ→J */
+    daily_biomass: P_rate * surface_area, /* [kg/m²/day] */
+    total_biomass_energy: daily_biomass * biomass_energy_per_kg,
+    
+    /* 投入光エネルギー [J/m²/day] */
+    /* PAR光子数 = PFD [μmol/m²/s] × 86400 [s/day] × 10^-6 [mol/μmol] */
+    PAR_photons: PFD * 86400 * 1e-6 * N_A, /* [photons/m²/day] */
+    light_energy: PAR_photons * PAR_energy * light_efficiency,
+    
+    /* 効率計算 */
+    efficiency: total_biomass_energy / light_energy,
+    
+    /* 酸素生産 [g-O2/m²/day] */
+    O2_yield: assoc("O2_yield", params),
+    daily_O2: daily_biomass * O2_yield * 1000, /* [g/m²/day] */
+    
+    [efficiency, daily_biomass, daily_O2, P_rate]
+);
+
+/* 
+関数定義: エネルギー収支分析
+Net Energy = Output - Input
+*/
+energy_balance_analysis(species) := block(
+    [efficiency, biomass, O2, P_rate, results],
+    
+    [efficiency, biomass, O2, P_rate]: bioreactor_efficiency(species, []),
+    
+    /* エネルギー計算 */
+    biomass_energy_MJ: biomass * assoc("biomass_energy", 
+        if species = "algae" then algae_params else plant_params),
+    
+    /* システムエネルギー消費 (概算) */
+    /* 照明、冷却、ポンプ、制御 etc. */
+    system_energy_consumption: [
+        ["Lighting", PFD * surface_area * 86400 * 4e-6], /* 4μJ/photon */
+        ["Cooling", 0.1 * biomass_energy_MJ],
+        ["Pumping", 0.05 * biomass_energy_MJ],
+        ["Control", 0.02 * biomass_energy_MJ]
+    ],
+    
+    total_consumption: 0,
+    for item in system_energy_consumption do
+        total_consumption: total_consumption + item[2],
+    
+    net_energy: biomass_energy_MJ - total_consumption,
+    energy_ratio: net_energy / total_consumption,
+    
+    results: [
+        ["Efficiency", efficiency],
+        ["Biomass_production_kg_m2_day", biomass],
+        ["O2_production_g_m2_day", O2],
+        ["Biomass_energy_MJ_m2_day", biomass_energy_MJ],
+        ["System_energy_MJ_m2_day", total_consumption],
+        ["Net_energy_MJ_m2_day", net_energy],
+        ["Energy_ratio", energy_ratio]
+    ],
+    
+    results
+);
+
+/* メイン計算 */
+print("================================================")$
+print("BIO-103: Closed Ecosystem Photosynthesis Efficiency")$
+print("================================================")$
+print("")$
+
+print("System Parameters:")$
+print("  System type:", system_type)$
+print("  Light: PFD =", PFD, "μmol/m²/s, Source =", light_source)$
+print("  Environment: CO2 =", CO2_conc, "ppm, T =", T, "°C")$
+print("  Geometry: Volume =", volume, "m³, Area =", surface_area, "m²")$
+print("")$
+
+/* 藻類システム分析 */
+print("1. Algae Bioreactor (Chlorella vulgaris):")$
+print("  ---------------------------------------")$
+algae_results: energy_balance_analysis("algae")$
+for result in algae_results do (
+    if result[1] = "Efficiency" then
+        printf(true, "    Photosynthesis efficiency: ~5,3f (~5,1f%)~%", 
+               result[2], result[2]*100)
+    else if result[1] = "Biomass_production_kg_m2_day" then
+        printf(true, "    Biomass production: ~6,4f kg/m²/day~%", result[2])
+    else if result[1] = "O2_production_g_m2_day" then
+        printf(true, "    Oxygen production: ~6,1f g/m²/day~%", result[2])
+    else if result[1] = "Energy_ratio" then
+        printf(true, "    Energy ratio (output/input): ~6,3f~%", result[2])
+)$
+print("")$
+
+/* 高等植物システム分析 */
+print("2. Higher Plant System (Lettuce):")$
+print("  ------------------------------")$
+plant_results: energy_balance_analysis("plant")$
+for result in plant_results do (
+    if result[1] = "Efficiency" then
+        printf(true, "    Photosynthesis efficiency: ~5,3f (~5,1f%)~%", 
+               result[2], result[2]*100)
+    else if result[1] = "Biomass_production_kg_m2_day" then
+        printf(true, "    Biomass production: ~6,4f kg/m²/day~%", result[2])
+    else if result[1] = "O2_production_g_m2_day" then
+        printf(true, "    Oxygen production: ~6,1f g/m²/day~%", result[2])
+    else if result[1] = "Energy_ratio" then
+        printf(true, "    Energy ratio (output/input): ~6,3f~%", result[2])
+)$
+print("")$
+
+/* 比較分析 */
+print("3. Comparison Analysis:")$
+print("  --------------------")$
+algae_eff: assoc("Efficiency", algae_results)$
+plant_eff: assoc("Efficiency", plant_results)$
+algae_biomass: assoc("Biomass_production_kg_m2_day", algae_results)$
+plant_biomass: assoc("Biomass_production_kg_m2_day", plant_results)$
+
+printf(true, "    Efficiency ratio (algae/plant): ~6,3f~%", algae_eff/plant_eff)$
+printf(true, "    Biomass ratio (algae/plant): ~6,3f~%", algae_biomass/plant_biomass)$
+print("")$
+
+/* 感度分析 */
+print("4. Sensitivity Analysis (Algae, ±20% change):")$
+print("  ------------------------------------------")$
+sensitivity_params: [
+    ["PFD", PFD],
+    ["CO2_conc", CO2_conc],
+    ["Temperature", T]
+]$
+
+for param in sensitivity_params do (
+    param_name: param[1],
+    param_value: param[2],
+    
+    /* +20% */
+    if param_name = "PFD" then PFD: param_value * 1.2
+    elseif param_name = "CO2_conc" then CO2_conc: param_value * 1.2
+    elseif param_name = "Temperature" then T: param_value * 1.2,
+    
+    [eff_plus, _, _, _]: bioreactor_efficiency("algae", []),
+    
+    /* -20% */
+    if param_name = "PFD" then PFD: param_value * 0.8
+    elseif param_name = "CO2_conc" then CO2_conc: param_value * 0.8
+    elseif param_name = "Temperature" then T: param_value * 0.8,
+    
+    [eff_minus, _, _, _]: bioreactor_efficiency("algae", []),
+    
+    /* 元に戻す */
+    if param_name = "PFD" then PFD: param_value
+    elseif param_name = "CO2_conc" then CO2_conc: param_value
+    elseif param_name = "Temperature" then T: param_value,
+    
+    sensitivity: (eff_plus - eff_minus) / algae_eff / 0.4,
+    
+    printf(true, "    ~15a: ~7,4f~%", param_name, sensitivity)
+)$
+print("")$
+
+/* 結果の保存 */
+save("bio103_maxima_results.mac", algae_results, plant_results)$
+
+/* Python連携用出力 */
+with_stdout("bio103_for_python.txt",
+  printf(true, "# BIO-103 Results from Maxima~%"),
+  printf(true, "algae_efficiency = ~f~%", algae_eff),
+  printf(true, "plant_efficiency = ~f~%", plant_eff),
+  printf(true, "algae_biomass_kg_m2_day = ~f~%", algae_biomass),
+  printf(true, "plant_biomass_kg_m2_day = ~f~%", plant_biomass),
+  printf(true, "algae_O2_g_m2_day = ~f~%", assoc("O2_production_g_m2_day", algae_results)),
+  printf(true, "plant_O2_g_m2_day = ~f~%", assoc("O2_production_g_m2_day", plant_results))
+);
+
+print("================================================")$
+print("Calculation completed.")$
+print("================================================")$
+

@@ -1,0 +1,12 @@
+;;; -*- Mode: LISP; package:maxima; syntax:common-lisp; -*- 
+(in-package :maxima)
+(DSKSETQ |$η_TOTAL_550| '0.1739824722385036) 
+(ADD2LNC '|$η_TOTAL_550| $VALUES) 
+(DSKSETQ |$η_STAGES_550|
+         '((MLIST SIMP) ((MLIST SIMP) "Absorption" 0.95)
+           ((MLIST SIMP) "Charge_Sep_Transport" 0.65025)
+           ((MLIST SIMP) "Catalyst_Reaction" 0.8096)
+           ((MLIST SIMP) "Overpotential" 0.6721311475409836)
+           ((MLIST SIMP) "System" 0.95)
+           ((MLIST SIMP) "Energy_Conversion" 0.5448204556573602))) 
+(ADD2LNC '|$η_STAGES_550| $VALUES) 

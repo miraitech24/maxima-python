@@ -1,0 +1,270 @@
+/* 
+===============================================
+BIO-003: RNA自然形成確率 計算プログラム (Maxima修正版)
+===============================================
+*/
+
+kill(all)$
+
+/* 1. 原始地球環境パラメータ */
+nucleotide_concentration: 1e-6;
+nucleotide_types: 4;
+
+temperature: 350.0;
+pH: 6.5;
+ionic_strength: 0.1;
+pressure: 101.325;
+
+time_available: 1e8;
+seconds_per_year: 3.1536e7;
+total_seconds: time_available * seconds_per_year;
+
+/* 2. 化学反応パラメータ */
+ΔG_phosphodiester: -21.0;
+ΔG_base_pairing: -4.2;
+ΔG_stack: -8.4;
+
+k_forward: 1e-3;
+k_reverse: 1e-6;
+
+mineral_catalysis: 0.01;
+metal_ion_catalysis: 0.005;
+total_catalysis: 1.0 + mineral_catalysis + metal_ion_catalysis;
+
+/* 3. RNA特性パラメータ */
+min_functional_length: 30;
+optimal_length: 50;
+max_length: 100;
+
+A_U_prob: 0.25;
+G_C_prob: 0.25;
+G_U_prob: 0.05;
+mismatch_prob: 0.45;
+
+/* 4. 物理定数 */
+R: 8.314462618;
+k_B: 1.380649e-23;
+N_A: 6.02214076e23;
+h: 6.62607015e-34;
+
+/* 関数定義 */
+arrhenius_probability(E_a, T, A) := block(
+    [k, probability],
+    k: A * exp(-E_a * 1000 / (R * T)),
+    probability: k / (k + 1e-10),
+    if probability > 1 then probability: 1.0,
+    if probability < 0 then probability: 0.0,
+    probability
+);
+
+nucleotide_bond_probability(conc, T, catalysis) := block(
+    [k_eff, collision_freq, prob],
+    k_eff: k_forward * catalysis,
+    collision_freq: 1e9 * conc * N_A,
+    prob: 1 - exp(-k_eff * collision_freq * 1e-15),
+    prob
+);
+
+specific_sequence_probability(length, base_types) := block(
+    [total_sequences, prob],
+    total_sequences: base_types^length,
+    prob: 1 / total_sequences,
+    prob
+);
+
+functional_rna_probability(length, structure_complexity) := block(
+    [prob_folding, prob_function, prob],
+    prob_folding: exp(-structure_complexity * length / 100),
+    prob_function: 0.5 * (1 - exp(-length / min_functional_length)),
+    prob: prob_folding * prob_function,
+    prob
+);
+
+rna_formation_probability() := block(
+    [P_bond, P_chain, P_sequence, P_functional, P_time, P_total,
+     effective_conc, bond_prob_per_step, seq_length, results],
+    
+    effective_conc: nucleotide_concentration * total_catalysis,
+    P_bond: nucleotide_bond_probability(effective_conc, temperature, total_catalysis),
+    
+    seq_length: optimal_length,
+    bond_prob_per_step: P_bond,
+    P_chain: bond_prob_per_step^(seq_length - 1),
+    
+    P_sequence: specific_sequence_probability(seq_length, nucleotide_types),
+    
+    P_functional: functional_rna_probability(seq_length, 2.0),
+    
+    attempts_per_second: 1e15 * effective_conc * N_A,
+    total_attempts: attempts_per_second * total_seconds,
+    P_time: 1 - exp(-total_attempts * P_chain * P_sequence * P_functional),
+    
+    P_total: P_chain * P_sequence * P_functional * P_time,
+    
+    if P_total > 1 then P_total: 1.0,
+    if P_total < 0 then P_total: 0.0,
+    
+    results: [
+        ["Bond_probability_per_step", P_bond],
+        ["Chain_formation_probability", P_chain],
+        ["Specific_sequence_probability", P_sequence],
+        ["Functional_RNA_probability", P_functional],
+        ["Time_factor_probability", P_time],
+        ["Total_formation_probability", P_total],
+        ["Optimal_RNA_length", float(seq_length)],
+        ["Attempts_per_second", float(attempts_per_second)],
+        ["Total_attempts", float(total_attempts)]
+    ],
+    
+    results
+);
+
+/* メイン計算 */
+print("================================================")$
+print("BIO-003: RNA Natural Formation Probability")$
+print("================================================")$
+print("")$
+
+print("1. Primitive Earth Conditions:")$
+print("  Nucleotide concentration:", nucleotide_concentration, "M")$
+print("  Temperature:", temperature, "K (", temperature-273.15, "°C)")$
+print("  Time available:", time_available, "years")$
+print("  Total seconds:", total_seconds, "s")$
+print("")$
+
+/* 総合確率計算 */
+results: rna_formation_probability()$
+P_total: 0$
+for result in results do (
+    if result[1] = "Total_formation_probability" then P_total: result[2]
+)$
+
+print("2. Probability Analysis:")$
+print("  -----------------------")$
+for result in results do (
+    if member(result[1], ["Total_formation_probability", "Time_factor_probability",
+                         "Chain_formation_probability", "Specific_sequence_probability"]) then
+        printf(true, "  ~35a: ~8,3e~%", result[1], result[2])
+    else
+        printf(true, "  ~35a: ~8,3f~%", result[1], result[2])
+)$
+print("")$
+
+/* 感度分析 */
+print("3. Sensitivity Analysis (±1 order of magnitude):")$
+print("  -------------------------------------------------")$
+sensitivity_params: [
+    ["nucleotide_concentration", nucleotide_concentration],
+    ["temperature", temperature],
+    ["mineral_catalysis", mineral_catalysis],
+    ["time_available", time_available]
+]$
+
+for param in sensitivity_params do (
+    param_name: param[1],
+    param_value: param[2],
+    
+    /* +10倍 */
+    if param_name = "nucleotide_concentration" then 
+        nucleotide_concentration: param_value * 10
+    elseif param_name = "temperature" then 
+        temperature: param_value + 50
+    elseif param_name = "mineral_catalysis" then 
+        mineral_catalysis: min(1.0, param_value * 10)
+    elseif param_name = "time_available" then 
+        time_available: param_value * 10,
+    
+    results_plus: rna_formation_probability(),
+    P_plus: 0,
+    for r in results_plus do if r[1] = "Total_formation_probability" then P_plus: r[2],
+    
+    /* -10倍 */
+    if param_name = "nucleotide_concentration" then 
+        nucleotide_concentration: param_value * 0.1
+    elseif param_name = "temperature" then 
+        temperature: param_value - 50
+    elseif param_name = "mineral_catalysis" then 
+        mineral_catalysis: param_value * 0.1
+    elseif param_name = "time_available" then 
+        time_available: param_value * 0.1,
+    
+    results_minus: rna_formation_probability(),
+    P_minus: 0,
+    for r in results_minus do if r[1] = "Total_formation_probability" then P_minus: r[2],
+    
+    /* 元に戻す */
+    if param_name = "nucleotide_concentration" then 
+        nucleotide_concentration: param_value
+    elseif param_name = "temperature" then 
+        temperature: param_value
+    elseif param_name = "mineral_catalysis" then 
+        mineral_catalysis: param_value
+    elseif param_name = "time_available" then 
+        time_available: param_value,
+    
+    sensitivity: log(P_plus / P_minus) / log(100),
+    
+    printf(true, "  ~25a: ~7,3f~%", param_name, sensitivity)
+)$
+print("")$
+
+/* 異なるRNA長での確率 */
+print("4. Probability vs RNA Length:")$
+print("  ---------------------------")$
+lengths: [20, 30, 50, 70, 100]$
+optimal_length_save: optimal_length$
+
+for L in lengths do (
+    optimal_length: L,
+    results_len: rna_formation_probability(),
+    P_len: 0,
+    for r in results_len do if r[1] = "Total_formation_probability" then P_len: r[2],
+    printf(true, "  Length ~3d nt: P = ~8,3e~%", L, P_len)
+)$
+
+optimal_length: optimal_length_save$
+print("")$
+
+/* 科学的解釈 */
+print("5. Scientific Interpretation:")$
+print("  ---------------------------")$
+if P_total > 0.5 then
+    print("  ✓ High probability: RNA world likely")
+elseif P_total > 0.01 then
+    print("  ⚠ Moderate probability: Possible with favorable conditions")
+elseif P_total > 1e-10 then
+    print("  ⚠ Low probability: Requires specific conditions")
+elseif P_total > 1e-20 then
+    print("  ⚠ Very low probability: Rare event in universe")
+else
+    print("  ✗ Extremely low probability: Alternative origins needed")$
+print("")$
+
+/* Python連携用出力 */
+with_stdout("bio003_for_python.txt",
+  printf(true, "# BIO-003 Results from Maxima~%"),
+  printf(true, "total_formation_probability = ~e~%", P_total),
+  
+  printf(true, "probability_components = ~%"),
+  for result in results do (
+    if not member(result[1], ["Total_formation_probability", "Optimal_RNA_length", 
+                             "Attempts_per_second", "Total_attempts"]) then
+      printf(true, "~a,~e~%", result[1], result[2])
+  ),
+  
+  printf(true, "length_probabilities = ~%"),
+  for L in lengths do (
+    optimal_length: L,
+    results_len: rna_formation_probability(),
+    P_len: 0,
+    for r in results_len do if r[1] = "Total_formation_probability" then P_len: r[2],
+    printf(true, "~d,~e~%", L, P_len)
+  )
+);
+
+optimal_length: optimal_length_save$
+
+print("================================================")$
+print("Calculation completed.")$
+print("================================================")$
+

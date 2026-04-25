@@ -1,0 +1,7 @@
+# BIO-103 Results from Maxima
+algae_efficiency = 5.72000064475118
+plant_efficiency = 0.5389270020779025
+algae_biomass_kg_m2_day = 0.5952380952380952
+plant_biomass_kg_m2_day = 0.06231348990485646
+algae_O2_g_m2_day = 714.2857142857143
+plant_O2_g_m2_day = 62.31348990485646

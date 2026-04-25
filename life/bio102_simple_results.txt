@@ -1,0 +1,7 @@
+total_efficiency =  0.1739824722385036 
+photon_energy_550nm_J =  3.611719740270779E-19 
+stage_absorption =  0.95 
+stage_charge =  0.65025 
+stage_catalyst =  0.8096 
+stage_overpotential =  0.6721311475409836 
+stage_system =  0.95 

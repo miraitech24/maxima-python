@@ -1,0 +1,207 @@
+/* 
+BIO-201: 生態系持続時間 計算プログラム (Maxima)
+目標: 閉鎖生態系の持続可能日数を予測
+*/
+
+kill(all)$
+
+/* 1. 生態系パラメータ（BIOS-3実測値に基づく） */
+/* 生物群集パラメータ */
+algae_biomass: 10.0;      /* 藻類バイオマス [kg/m²] */
+higher_plants_biomass: 5.0; /* 高等植物バイオマス [kg/m²] */
+microbes_biomass: 0.5;    /* 微生物バイオマス [kg/m²] */
+
+/* 生産性パラメータ */
+NPP_algae: 0.035;         /* 藻類純一次生産 [kg/m²/day] */
+NPP_plants: 0.022;        /* 植物純一次生産 [kg/m²/day] */
+respiration_rate: 0.15;   /* 呼吸率 [/day] */
+
+/* 循環効率 */
+O2_recycling: 0.85;       /* 酸素再生効率 */
+CO2_recycling: 0.90;      /* CO2再生効率 */
+water_recycling: 0.95;    /* 水再生効率 */
+waste_recycling: 0.70;    /* 廃棄物再生効率 */
+
+/* 2. 人間要件（4人乗組員） */
+human_O2_consumption: 3.36;   /* 酸素消費 [kg/day] (0.84kg/人×4) */
+human_CO2_production: 4.0;    /* CO2生産 [kg/day] (1.0kg/人×4) */
+human_water_consumption: 8.0; /* 水消費 [L/day] (2L/人×4) */
+human_calorie_needs: 8000;    /* カロリー必要量 [kcal/day] (2000×4) */
+
+/* 3. システムパラメータ */
+system_volume: 100.0;     /* システム容積 [m³] */
+cultivation_area: 20.0;   /* 栽培面積 [m²] */
+buffer_capacity: 0.3;     /* バッファ容量（全要件の割合） */
+
+/* 物理・生物定数 */
+O2_per_biomass: 1.2;      /* バイオマス1kgあたり酸素生産 [kg] */
+calories_per_biomass: 4000; /* バイオマス1kgあたりカロリー [kcal] */
+H2O_per_biomass: 0.8;     /* バイオマス1kgあたり水生産 [L] */
+
+/* 
+関数定義: 生態系持続時間計算
+Lotka-Volterra型モデルに基づく
+*/
+ecosystem_sustainability() := block(
+    [total_biomass, total_NPP, O2_production, CO2_consumption,
+     water_production, calorie_production, O2_balance, CO2_balance,
+     water_balance, calorie_balance, limiting_factor, sustainability_days,
+     results],
+    
+    /* 総バイオマスと生産性 */
+    total_biomass: algae_biomass + higher_plants_biomass + microbes_biomass,
+    total_NPP: NPP_algae * algae_biomass + NPP_plants * higher_plants_biomass,
+    
+    /* 酸素生産・消費バランス */
+    O2_production: total_NPP * O2_per_biomass * O2_recycling,
+    O2_balance: O2_production - human_O2_consumption,
+    
+    /* CO2生産・消費バランス */
+    CO2_consumption: total_NPP * 1.47,  /* 光合成によるCO2固定 [kg/day] */
+    CO2_balance: CO2_consumption * CO2_recycling - human_CO2_production,
+    
+    /* 水バランス */
+    water_production: total_NPP * H2O_per_biomass * water_recycling,
+    water_balance: water_production - human_water_consumption,
+    
+    /* 食料バランス */
+    calorie_production: total_NPP * calories_per_biomass,
+    calorie_balance: calorie_production - human_calorie_needs,
+    
+    /* 制限要因の特定 */
+    limiting_factor: min(
+        if O2_balance > 0 then 1e6 else -O2_balance/human_O2_consumption,
+        if CO2_balance > 0 then 1e6 else -CO2_balance/human_CO2_production,
+        if water_balance > 0 then 1e6 else -water_balance/human_water_consumption,
+        if calorie_balance > 0 then 1e6 else -calorie_balance/human_calorie_needs
+    ),
+    
+    /* 持続可能日数（バッファ考慮） */
+    sustainability_days: buffer_capacity * system_volume * limiting_factor,
+    
+    /* 結果の整理 */
+    results: [
+        ["Total_biomass_kg", total_biomass],
+        ["Total_NPP_kg_day", total_NPP],
+        ["O2_balance_kg_day", O2_balance],
+        ["CO2_balance_kg_day", CO2_balance],
+        ["Water_balance_L_day", water_balance],
+        ["Calorie_balance_kcal_day", calorie_balance],
+        ["Limiting_factor", limiting_factor],
+        ["Sustainability_days", sustainability_days]
+    ],
+    
+    results
+);
+
+/* メイン計算 */
+print("================================================")$
+print("BIO-201: Ecosystem Sustainability Analysis")$
+print("================================================")$
+print("")$
+
+print("Mission Parameters:")$
+print("  Crew size: 4 persons")$
+print("  System volume:", system_volume, "m³")$
+print("  Cultivation area:", cultivation_area, "m²")$
+print("")$
+
+/* 持続可能性分析 */
+results: ecosystem_sustainability()$
+sustainability_days: 0$
+for result in results do (
+    if result[1] = "Sustainability_days" then sustainability_days: result[2]
+)$
+
+print("Ecosystem Analysis:")$
+print("  -----------------")$
+for result in results do (
+    if result[1] = "Sustainability_days" then
+        printf(true, "  ~25a: ~6,0f days~%", result[1], result[2])
+    else
+        printf(true, "  ~25a: ~8,3f~%", result[1], result[2])
+)$
+print("")$
+
+/* 感度分析 */
+print("Sensitivity Analysis (±20% change):")$
+print("  ---------------------------------")$
+sensitivity_params: [
+    ["algae_biomass", algae_biomass],
+    ["NPP_algae", NPP_algae],
+    ["O2_recycling", O2_recycling],
+    ["water_recycling", water_recycling]
+]$
+
+for param in sensitivity_params do (
+    param_name: param[1],
+    param_value: param[2],
+    
+    /* +20% */
+    if param_name = "algae_biomass" then algae_biomass: param_value * 1.2
+    elseif param_name = "NPP_algae" then NPP_algae: param_value * 1.2
+    elseif param_name = "O2_recycling" then O2_recycling: param_value * 1.2
+    elseif param_name = "water_recycling" then water_recycling: param_value * 1.2,
+    
+    results_plus: ecosystem_sustainability(),
+    days_plus: 0,
+    for r in results_plus do if r[1] = "Sustainability_days" then days_plus: r[2],
+    
+    /* -20% */
+    if param_name = "algae_biomass" then algae_biomass: param_value * 0.8
+    elseif param_name = "NPP_algae" then NPP_algae: param_value * 0.8
+    elseif param_name = "O2_recycling" then O2_recycling: param_value * 0.8
+    elseif param_name = "water_recycling" then water_recycling: param_value * 0.8,
+    
+    results_minus: ecosystem_sustainability(),
+    days_minus: 0,
+    for r in results_minus do if r[1] = "Sustainability_days" then days_minus: r[2],
+    
+    /* 元に戻す */
+    if param_name = "algae_biomass" then algae_biomass: param_value
+    elseif param_name = "NPP_algae" then NPP_algae: param_value
+    elseif param_name = "O2_recycling" then O2_recycling: param_value
+    elseif param_name = "water_recycling" then water_recycling: param_value,
+    
+    sensitivity: (days_plus - days_minus) / sustainability_days / 0.4,
+    
+    printf(true, "  ~20a: ~7,4f~%", param_name, sensitivity)
+)$
+print("")$
+
+/* 実データ比較 */
+print("Comparison with Real Experiments:")$
+print("  ------------------------------")$
+real_experiments: [
+    ["BIOS-3 (Russia)", 180, "4 crew, 315 m³"],
+    ["BIOSPHERE 2", 730, "8 crew, 1.27e6 m³"],
+    ["MELiSSA Pilot", 60, "micro-ecosystem"],
+    ["CELSS Testbed", 90, "NASA research"]
+]$
+
+for exp in real_experiments do (
+    printf(true, "  ~20a: ~4d days (~a)~%", exp[1], exp[2], exp[3])
+)$
+print("")$
+
+/* Python連携用出力 */
+with_stdout("bio201_for_python.txt",
+  printf(true, "# BIO-201 Results from Maxima~%"),
+  printf(true, "sustainability_days = ~f~%", sustainability_days),
+  
+  printf(true, "ecosystem_parameters = ~%"),
+  for result in results do (
+    if result[1] != "Sustainability_days" then
+      printf(true, "~a,~f~%", result[1], result[2])
+  ),
+  
+  printf(true, "real_experiments = ~%"),
+  for exp in real_experiments do (
+    printf(true, "~a,~f,~a~%", exp[1], float(exp[2]), exp[3])
+  )
+);
+
+print("================================================")$
+print("Calculation completed.")$
+print("================================================")$
+

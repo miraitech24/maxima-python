@@ -1,0 +1,19 @@
+# BIO-501 Results from Maxima
+total_integration_success = 1.000000
+single_electrode_success = 0.172192
+probability_components = 
+Electrode_neuron_contact_probability,0.956786
+Biocompatibility_probability,0.504000
+Signal_transmission_efficiency,0.514476
+Long_term_integration_probability,0.179969
+material_comparison = 
+Graphene,1.000000
+Iridium oxide,1.000000
+Platinum,1.000000
+Tungsten,1.000000
+electrode_optimization = 
+100,1.000000
+500,1.000000
+1000,1.000000
+5000,1.000000
+10000,1.000000

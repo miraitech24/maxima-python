@@ -1,0 +1,17 @@
+# BIO-504 Results from Maxima
+# 課題仕様: 宇宙環境耐性遺伝子発現率計算
+gene_expression_success = 0.581400
+radiation_survival_prob = 1.000000
+microgravity_adaptation_prob = 0.950000
+metabolic_efficiency = 0.950672
+total_survival_probability = 0.583428
+conclusion = Feasible with additional measures
+gene_effects = 
+Radiation_genes,0.812500,0.204750
+Microgravity_genes,0.897769,0.950000
+Metabolic_genes,1.083333,0.950672
+optimization = 
+最小セット (各2遺伝子),0.400000
+標準セット (各3遺伝子),0.600000
+強化セット (各4遺伝子),0.800000
+副作用管理版,0.700000
