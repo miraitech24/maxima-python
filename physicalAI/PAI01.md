@@ -18,7 +18,7 @@ $
   
   $\rho(r) = \rho_0 \exp\left(-\frac{r - R_{\text{V}}}{H}\right)
   $
-
+  
   $\rho_0 = 65 \, \text{kg/m}^3, \quad H = 15 \, \text{km}
   $
 
@@ -26,7 +26,7 @@ $
   
   $\omega(\phi) = \omega_{\text{eq}} \left(1 - \alpha \sin^2\phi\right)
   $
-
+  
   $\omega_{\text{eq}} = 1.992 \times 10^{-7} \, \text{rad/s}, \quad \alpha = 0.1
   $
 
