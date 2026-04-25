@@ -1,0 +1,2 @@
+# Total atmospheric angular momentum (kg m^2/s)
+2.970299e+29

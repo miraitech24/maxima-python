@@ -1,0 +1,7 @@
+# PAI-16 計算結果
+freq=35000000000.0 Hz
+lam=0.0085654988 m
+D_tx=1000.0 m
+min_distance=41400000000.0 m
+spot_gauss_min=451505.576 m
+spot_airy_min=865252.427 m

@@ -1,0 +1,11 @@
+L_total_integrated=3.328693688946597E+26
+I_r_integral=1.319234878965426E+33
+I_theta_integral=1.3333333333333333E+0
+omega_average=1.8924001377736284E-7
+I_shell=1.17128E+34
+E_rotational=2.3238570009600008E+20
+L_earth=6.0971810407432E+27
+Ratio_Venus_Earth=5.45939782122798E-2
+R_venus=6.05E+6
+omega_eq=1.992E-7
+M_total=4.8E+20

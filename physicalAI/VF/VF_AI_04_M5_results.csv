@@ -1,0 +1,13 @@
+Parameter,Value,Unit
+Heat per site,6.500,TW
+Molten salt inlet temp,627,°C
+Molten salt outlet temp,427,°C
+Mass flow per site,20967741.9,kg/s
+Volume flow per site,11648.746,m³/s
+Pipe diameter,86.115,m
+Flow velocity,2.0,m/s
+Heat loss percentage,0.01,%
+Heat exchanger area,70358179.8,m²
+Storage energy,187200.0,TJ
+Storage volume,335483871.0,m³
+Storage time,8,hours

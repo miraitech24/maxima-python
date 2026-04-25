@@ -1,0 +1,7 @@
+M_atm = 4.8E+20
+R_venus = 6.05E+6
+omega = 1.992E-7
+I_moment = 7.02768E+33
+L_angular = 1.399913856E+27
+E_rotational = 1.3943142005760002E+20
+L_earth = 6.0971810407432E+27

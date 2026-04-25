@@ -1,0 +1,4 @@
+risk_type,annual_probability,impact
+機器故障,0.01,中
+自然災害,0.001,高
+人為誤り,0.02,中

@@ -1,0 +1,18 @@
+Parameter,Value,Unit
+"Angular Momentum (Venus, Integrated)",3.328693688946597e+26,kg·m²/s
+"Angular Momentum (Venus, Simple)",1.399913856e+27,kg·m²/s
+Radial Integral I_r,1.319234878965426e+33,kg·m⁵
+Latitudinal Integral I_theta,1.3333333333333333,dimensionless
+Average Angular Velocity ω_avg,1.8924001377736283e-07,rad/s
+Rotational Energy,2.3238570009600007e+20,J
+Moment of Inertia I_shell,1.17128e+34,kg·m²
+Angular Momentum (Earth),6.0971810407432e+27,kg·m²/s
+Venus/Earth Ratio (Integrated),0.0545939782122798,ratio
+Venus/Earth Ratio (Simple),0.2296001786145686,ratio
+Integrated/Simple Ratio,4.205595307999093,ratio
+Hurricane Equivalents,1549.2380006400003,count
+Human Energy Years,0.40066500016551737,years
+"Required Torque (10TW, ω_avg)",5.284294690321046e+19,N·m
+Braking Time Constant (years),0.19961024905470467,years
+Angular Momentum Change Rate,5.284294690321046e+19,kg·m²/s²
+Energy per Year (10TW),3.156e+20,J/year

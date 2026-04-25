@@ -1,0 +1,53 @@
+/* PAI-01: Advanced Venus Atmospheric Angular Momentum */
+/* クリーンな出力版 */
+
+/* 1. 物理定数 */
+R_venus: 6.05e6;
+omega_eq: 1.992e-7;
+H_scale: 1.5e4;
+rho0: 65;
+
+/* 2. 大気密度分布 */
+f_r(r) := rho0 * exp(-(r - R_venus)/H_scale) * r^4;
+
+/* 3. 角速度分布 */
+omega_lat(phi) := omega_eq * (1 - 0.1 * sin(phi)^2);
+
+/* 4. 数値積分 */
+r_max: R_venus + 10 * H_scale;
+I_r: float(romberg(f_r(r), r, R_venus, r_max));
+I_theta: float(integrate(sin(theta)^3, theta, 0, %pi));
+omega_avg: float(romberg(omega_lat(phi), phi, 0, 2*%pi)) / (2*%pi);
+
+/* 5. 総角運動量 */
+L_total: I_r * I_theta * omega_avg;
+
+/* 6. その他の計算 */
+M_total: 4.8e20;
+I_shell: (2/3) * M_total * R_venus^2;
+E_rot: (1/2) * I_shell * omega_eq^2;
+
+/* 7. 地球比較 */
+R_earth: 6.371e6;
+omega_earth: 7.292e-5;
+M_earth_atm: 5.15e18;
+L_earth: (2/5) * M_earth_atm * R_earth^2 * omega_earth;
+ratio: float(L_total / L_earth);
+
+/* 8. クリーンな出力（コメントなし） */
+with_stdout("PAI-01_maxima_clean.txt",
+  printf(true, "L_total_integrated=~e~%", float(L_total)),
+  printf(true, "I_r_integral=~e~%", float(I_r)),
+  printf(true, "I_theta_integral=~e~%", float(I_theta)),
+  printf(true, "omega_average=~e~%", float(omega_avg)),
+  printf(true, "I_shell=~e~%", float(I_shell)),
+  printf(true, "E_rotational=~e~%", float(E_rot)),
+  printf(true, "L_earth=~e~%", float(L_earth)),
+  printf(true, "Ratio_Venus_Earth=~e~%", float(ratio)),
+  printf(true, "R_venus=~e~%", float(R_venus)),
+  printf(true, "omega_eq=~e~%", float(omega_eq)),
+  printf(true, "M_total=~e~%", float(M_total))
+);
+
+print("PAI-01 calculation completed");
+
