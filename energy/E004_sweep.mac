@@ -1,0 +1,67 @@
+/* TAG:E004_v1
+  E004 Tesla power transfer quick feasibility sweep (no input file).
+  - Requirements: distance>=100km, total_eff>=0.70, cost<=0.05 USD/kWh
+  - Coupling rule: simple, file-based handoff; maxima -b; output CSV.
+
+  Model (from #26 integrated spec):
+    Q_eff = Q0 / (1 + Q0 * gamma_cloud)
+    eta   = ( (k*Q_eff)^2 / (1 + sqrt(1 + (k*Q_eff)^2))^2 )
+*/
+
+kill(all)$
+out_csv : "E004_sweep.csv"$
+
+/* --- assumed constants (explicit) --- */
+freq_ghz : 2.45$   /* E004 tech overview */
+tx_mw    : 1.0$    /* E004: 1MW-class */
+
+/* --- requirements (explicit) --- */
+req_dist_km : 100.0$   /* */
+req_eff     : 0.70$    /* */
+req_cost    : 0.05$    /* */
+
+/* 正しい関数定義 */
+q_eff(Q0, gamma_cloud) := Q0 / (1 + Q0 * gamma_cloud)$
+
+/* etaの計算式を修正 - x = k * Q_eff */
+eta_total(k, Q0, gamma_cloud) := block(
+  [Qeff, x],
+  Qeff: Q0 / (1 + Q0 * gamma_cloud),
+  x: k * Qeff,
+  (x^2) / (1 + sqrt(1 + x^2))^2
+)$
+
+/* --- sweep ranges --- */
+k_list      : makelist(i, i, 0.05, 0.50, 0.05)$   /* 0.05, 0.10, ..., 0.50 */
+Q0_list     : makelist(i, i, 10, 300, 10)$        /* 10, 20, ..., 300 */
+g_list      : makelist(i, i, 0.0, 0.05, 0.005)$   /* 0.0, 0.005, ..., 0.05 */
+cost_list   : [0.03, 0.05, 0.07]$                 /* cost scenarios */
+dist_list_km: [50, 100, 150, 200]$                /* distance scenarios */
+
+out : openw(out_csv)$
+printf(out,
+"case_id,freq_ghz,tx_mw,dist_km,k,Q0,gamma_cloud,eta_total,cost_usd_per_kwh,pass_dist,pass_eff,pass_cost,pass_all,rx_mw~%")$
+
+case_num : 0$
+for dist_km in dist_list_km do
+for cost in cost_list do
+for k in k_list do
+for Q0 in Q0_list do
+for gamma_cloud in g_list do block(
+  case_num : case_num + 1,
+  eta_total_val : float(eta_total(k, Q0, gamma_cloud)),  /* 修正: 正しい関数呼び出し */
+  pass_dist : if dist_km >= req_dist_km then 1 else 0,
+  pass_eff  : if eta_total_val >= req_eff then 1 else 0,
+  pass_cost : if cost <= req_cost then 1 else 0,
+  pass_all  : if (pass_dist=1 and pass_eff=1 and pass_cost=1) then 1 else 0,
+  rx_mw : tx_mw * eta_total_val,
+
+  printf(out,
+    "~d,~f,~f,~f,~f,~f,~f,~f,~f,~d,~d,~d,~d,~f~%",
+    case_num, freq_ghz, tx_mw, dist_km, k, Q0, gamma_cloud, eta_total_val, cost,
+    pass_dist, pass_eff, pass_cost, pass_all, rx_mw
+  )
+)$
+close(out)$
+print("OK: wrote ", out_csv)$
+quit()$
