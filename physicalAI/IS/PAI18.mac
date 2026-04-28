@@ -1,0 +1,62 @@
+/* ============================================================
+   PAI‑18：把持ハンド（把持力）
+   目的：氷衛星上の球形氷サンプルを把持するのに必要な力と、
+         木星磁場によるアクチュエータ外乱力を計算する。
+   ============================================================ */
+
+/* ----- 物理定数・環境パラメータ ----- */
+g_europa : 1.314;              /* エウロパ表面重力 [m/s^2] */
+rho_ice  : 917;                /* 氷の密度 [kg/m^3] */
+gamma_ice: 0.07;                /* 氷の表面エネルギー [J/m^2] (JKR pull‑off) */
+B_jupiter: 420e-9;             /* エウロパ軌道での木星磁場 [T] (赤道面) */
+
+/* サンプル半径範囲 [m] */
+R_min : 0.01;   R_max : 0.1;
+
+/* 把持ハンドのアクチュエータ定数 */
+kF : 0.1;          /* 力定数 [N/A] */
+L_coil : 0.05;     /* コイル有効長 [m] */
+
+/* ----- 付着力（JKR pull‑off force） ----- */
+F_ad(R) := 3 * %pi * R * gamma_ice;   /* [N] */
+
+/* サンプル重量 */
+W(R) := 4/3 * %pi * R^3 * rho_ice * g_europa;
+
+/* 必要把持力（付着＋重量） */
+F_req(R) := F_ad(R) + W(R);
+
+/* アクチュエータ電流 */
+I_act(R) := F_req(R) / kF;  /* [A] */
+
+/* 外乱磁場力（コイルが磁場に直交すると仮定） */
+F_dist(I) := I * L_coil * B_jupiter;   /* [N] */
+
+/* ----- 計算＆表示 ----- */
+for R : 0.02 step 0.02 thru 0.1 do (
+   block([],
+      fr : float(F_req(R)),
+      ia : float(I_act(R)),
+      fd : float(F_dist(ia)),
+      printf(true, "R = ~4,2f m | F_req = ~6,4f N | I_act = ~6,4f A | F_dist = ~6,4e N~%", R, fr, ia, fd)
+   )
+)$
+
+/* ----- グラフ ----- */
+plot2d([F_req, F_ad, W], [R, R_min, R_max],
+   [xlabel, "Sample radius R (m)"],
+   [ylabel, "Force (N)"],
+   [legend, "Required grip force", "Adhesion force", "Weight"],
+   [gnuplot_term, png],
+   [gnuplot_out_file, "pai18_grip_force.png"])$
+
+/* ----- 後続Python用データ出力 ----- */
+data : makelist([R, float(F_req(R)), float(I_act(R)), float(F_dist(I_act(R)))],
+               R, 0.02, 0.1, 0.01)$
+fileout : openw("pai18_maxout.csv");
+printf(fileout, "R,F_req,I_act,F_dist~%");
+for d in data do
+   printf(fileout, "~,6f,~,6f,~,6f,~,6e~%", d[1], d[2], d[3], d[4]);
+close(fileout);
+print("Saved pai18_maxout.csv");
+

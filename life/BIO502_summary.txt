@@ -1,0 +1,8 @@
+BIO-502 Summary (Python implementation)
+Model: P = 1/(1+exp(5*(m-1.2*d)))
+Threshold for safe dose: 0.1
+Number of m points: 50
+Generated files:
+  - BIO502_results.png (2x2 subplots)
+  - BIO502_opt_dose.csv (optimal dose table)
+  - BIO502_summary.txt (this file)

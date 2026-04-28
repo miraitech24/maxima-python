@@ -1,0 +1,110 @@
+/* 
+BIO-504B: 遺伝子編集副作用低減技術効果計算
+オフターゲット効果低減、エピジェネティック制御
+*/
+
+kill(all)$
+
+/* 副作用パラメータ (BIO-504より) */
+off_target_base: 0.05;        /* 基本オフターゲット率 */
+epigenetic_instability: 0.10; /* エピジェネティック不安定性 */
+immune_response: 0.15;        /* 免疫応答 */
+long_term_effects: 0.20;      /* 長期副作用確率 */
+
+/* 低減技術パラメータ */
+crispr_accuracy: [            /* CRISPR精度改善 */
+    ["Standard", 1.0],
+    ["High-fidelity", 0.3],   /* 70%低減 */
+    ["Prime editing", 0.1],   /* 90%低減 */
+    ["Base editing", 0.2]     /* 80%低減 */
+];
+
+epigenetic_control: [         /* エピジェネティック制御 */
+    ["None", 1.0],
+    ["Histone modification", 0.5],
+    ["DNA methylation control", 0.3],
+    ["Chromatin remodeling", 0.4]
+];
+
+immune_modulation: [          /* 免疫調節 */
+    ["None", 1.0],
+    ["Immunosuppression", 0.4],
+    ["Tolerance induction", 0.2],
+    ["Stealth technology", 0.1]
+];
+
+/* 計算: 総合副作用低減効果 */
+total_side_effect_reduction(crispr_tech, epigenetic_tech, immune_tech) := block(
+    [off_target_reduced, epigenetic_reduced, immune_reduced, total_reduction],
+    
+    off_target_reduced: off_target_base * crispr_tech,
+    epigenetic_reduced: epigenetic_instability * epigenetic_tech,
+    immune_reduced: immune_response * immune_tech,
+    
+    /* 総合副作用確率 */
+    total_side_effects: off_target_reduced + epigenetic_reduced + immune_reduced + long_term_effects,
+    
+    /* 低減率 */
+    base_side_effects: off_target_base + epigenetic_instability + immune_response + long_term_effects,
+    reduction_rate: 1 - (total_side_effects / base_side_effects),
+    
+    [total_side_effects, reduction_rate]
+);
+
+/* メイン計算 */
+print("BIO-504B: 遺伝子編集副作用低減技術効果")$
+print("========================================")$
+print("")$
+
+/* 基本副作用 */
+base_effects: off_target_base + epigenetic_instability + immune_response + long_term_effects$
+printf(true, "基本副作用確率: ~6,3f~%", base_effects)$
+print("")$
+
+/* 技術組み合わせ分析 */
+print("【技術組み合わせ効果】")$
+tech_combinations: [
+    ["Standard only", 1.0, 1.0, 1.0],
+    ["High-fidelity + Histone", 0.3, 0.5, 1.0],
+    ["Prime editing + DNA methylation", 0.1, 0.3, 0.4],
+    ["All advanced tech", 0.1, 0.3, 0.1]
+]$
+
+for combo in tech_combinations do (
+    combo_name: combo[1],
+    crispr_factor: combo[2],
+    epigenetic_factor: combo[3],
+    immune_factor: combo[4],
+    
+    results: total_side_effect_reduction(crispr_factor, epigenetic_factor, immune_factor),
+    side_effects: results[1],
+    reduction: results[2],
+    
+    printf(true, "~30a: 副作用=~6,3f (低減率=~5,1f%)~%", 
+           combo_name, side_effects, reduction*100)
+)$
+print("")$
+
+/* 生存確率への影響 */
+print("【生存確率への影響】")$
+genetic_survival_base: 0.314$  /* BIO-504結果 */
+
+for combo in tech_combinations do (
+    combo_name: combo[1],
+    crispr_factor: combo[2],
+    epigenetic_factor: combo[3],
+    immune_factor: combo[4],
+    
+    results: total_side_effect_reduction(crispr_factor, epigenetic_factor, immune_factor),
+    side_effects: results[1],
+    reduction: results[2],
+    
+    /* 副作用低減による生存確率向上 */
+    survival_improvement: 1 - side_effects / base_effects,
+    new_survival: genetic_survival_base * (1 + survival_improvement * 0.5),  /* 50%効果 */
+    if new_survival > 1.0 then new_survival: 1.0,
+    
+    printf(true, "~30a: 生存確率=~6,3f (改善=~5,1f%)~%", 
+           combo_name, new_survival, (new_survival/genetic_survival_base - 1)*100)
+)$
+

@@ -23,7 +23,7 @@
 送信アンテナ径 \( D_t \) をビームウエスト \( w_0 = D_t/2 \) と仮定（均一幅分布）。  
 遠方での1/e²強度半径：
 
-$w(L) = w_0 \sqrt{1 + \left( \frac{\lambda L}{\pi w_0^2} \right)^2}
+$w(L) = w_0 \sqrt{1 + \left( \frac{\lambda L}{\pi w_0^2} \right)^2}$
 
 $
 \text{spot diameter} = 2w(L)

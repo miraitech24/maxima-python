@@ -1,0 +1,86 @@
+/* ===== BIO-502 Corrected: BIOCore.csv integration ===== */
+/* ファイルが存在しなければエラー終了 */
+if not file_search("BIOCore.csv") then error("BIOCore.csv not found!")$
+
+/* 1. データ読み込み */
+data: read_matrix("BIOCore.csv")$
+/* 先頭行をヘッダーとして無視、数値部分だけ取得 */
+header: data[1]$
+data_num: rest(data, 1)$
+m_data: col(data_num, 1)$
+d_data: col(data_num, 2)$
+resp_data: col(data_num, 3)$
+
+/* 2. ロジスティックモデル: P = 1/(1+exp(a*(m - b*d)))
+   最小二乗法で a, b を推定 */
+P_model(a,b,m,d):= 1/(1+exp(a*(m - b*d)));
+/* 残差平方和 */
+SS(a,b) := block([s:0],
+  for i:1 thru length(m_data) do
+    s: s + (resp_data[i] - P_model(a,b,m_data[i],d_data[i]))^2,
+  s)$
+
+/* 初期値 a=5, b=1.2 で最適化 */
+load(lsquares)$
+fit_par: lbfgs(SS(a,b), [a,b], [5,1.2], 1e-6, [-1,-1])$
+a_opt: fit_par[1][2]$
+b_opt: fit_par[2][2]$
+print("推定パラメータ: a =", a_opt, ", b =", b_opt)$
+
+/* 3. 最適投与量の計算 (P'(d)=0 を解析的に解く → ここでは閾値制御)
+   安全閾値 threshold = 0.1 */
+threshold: 0.1$
+/* P が threshold 以下になる最小の d (mの関数) */
+P_safe(m,d) := 1/(1+exp(a_opt*(m - b_opt*d)))$
+d_opt_func(m) := find_root(P_safe(m,d) - threshold, d, 0, 2)$
+
+/* 4. m の範囲 0.1 ～ 1.0 で最適投与量を計算 */
+m_vals: makelist(0.1 + i*0.05, i, 0, 18)$
+d_opt_vals: map(d_opt_func, m_vals)$
+
+/* 5. グラフ出力 */
+/* 5.1 データとフィットの比較（例として m=0.3 近辺） */
+plot2d([ [discrete, d_data, resp_data], 
+         P_safe(0.3,d) ],
+       [gnuplot_term, png],
+       [gnuplot_out_file, "BIO502_fit_m03.png"],
+       [xlabel, "d"], [ylabel, "P"],
+       [style, [points,1,2], [lines,2]],
+       [legend, "data", "fitted"])$
+
+/* 5.2 最適投与量曲線 */
+plot2d([discrete, m_vals, d_opt_vals],
+       [gnuplot_term, png],
+       [gnuplot_out_file, "BIO502_opt_dose.png"],
+       [xlabel, "m"], [ylabel, "d_opt"],
+       [style, [lines,2]], [legend, "optimal dose"])$
+
+/* 5.3 安全域表示 (m=0.5 の場合) */
+plot2d(P_safe(0.5,d), [d,0,1.5],
+       [gnuplot_term, png],
+       [gnuplot_out_file, "BIO502_safe_m05.png"],
+       [xlabel, "d"], [ylabel, "P"],
+       [style, [lines,2]],
+       [legend, "P(m=0.5)"])$
+
+/* 6. 結果をCSV保存 */
+with_stdout("BIO502_fitted_params.csv",
+  printf(true, "a,b~%"),
+  printf(true, "~f,~f~%", a_opt, b_opt))$
+
+with_stdout("BIO502_optimal_dose.csv",
+  printf(true, "m,d_opt~%"),
+  for i:1 thru length(m_vals) do
+    printf(true, "~f,~f~%", m_vals[i], d_opt_vals[i]))$
+
+/* 7. サマリーファイル */
+with_stdout("BIO502_summary.txt",
+  print("BIO-502 Corrected Summary"),
+  print("Source file: BIOCore.csv"),
+  print("Fitted model: P = 1/(1+exp(", a_opt, "*(m - ", b_opt, "*d)))"),
+  print("Threshold:", threshold),
+  print("Output files: BIO502_fit_m03.png, BIO502_opt_dose.png, BIO502_safe_m05.png"),
+  print("            : BIO502_fitted_params.csv, BIO502_optimal_dose.csv"))$
+
+quit()$
+

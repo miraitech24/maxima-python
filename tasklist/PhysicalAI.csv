@@ -1,0 +1,30 @@
+﻿ID, Physical AI Body Functions, Physical Core, Formula, Target Value, Unit, Importance
+PAI-01, Planetary Atmosphere Manipulation Arm, Angular Momentum Control Torque, τ = P/ω,50200000000000000000.00000, N·m, ★★★★★, maxima python,04-26-22, Venus
+PAI-02, Thermal Updraft Generation Nozzle, Airflow Wall Output, P = ρAv³/2,1680000000000.00000, W, ★★★★★,,, Venus
+PAI-03, Self-replicating Factory, Replication Time, t = t_rep·log₂(N),279, years, ★★★★☆,,, Venus
+PAI-11, Submersible Function Hull, Pressure-resistant Design, σ = ρ·g·h,10000000.00000, Pa, ★★★☆☆,,, Venus
+PAI-12, Sulfuric Acid Sea Resistant Hull, Corrosion Resistance, Corrosion Rate < 0.1, mm/year, ★★☆☆☆,,,, Venus
+PAI-16, Energy Transmission Beam, Diffraction-limited Spot Diameter, r = 1.22λD/d,7440000000.00000, m, ★★★★☆, python,04-26-25, Venus
+PAI-18, Gripping Hand, Gripping Force, F = μ·N,1000, N, ★★★☆☆,,04-26-26, Jupiter
+PAI-18, PAI-18-EXT1, Introduction of Temperature-dependent Friction Model (Ice Rheology), Formulate ice creep/rheology characteristics in Maxima and evaluate temperature/time dependence of gripping force in Python,,,, Maxima Python,,
+PAI-18, PAI-18-EXT2, Evaluation of Adhesives and Shape Memory Alloy Application on Gripping Surface, Compare gripping force enhancement effects of adhesive pads and SMA grippers using theoretical calculation (Maxima) and experimental curve fitting (Python),,,, Maxima Python,,
+PAI-18, PAI-18-EXT3, Gripping Force Degradation Curve Based on Radiation Exposure Test Data, Derive material degradation model against cumulative radiation dose in Maxima and estimate lifespan in Python (graph with Japanese font support),,,, Maxima Python (with font switch),,
+PAI-18, PAI-18-EXT4, Coupling with Overall Manipulator Dynamics Analysis, Incorporate reaction force on gripping part into manipulator dynamics model and simulate control response in Python (derive link equations in Maxima),,,, Maxima Python,,
+ Analysis,,,,,,Python, In Progress, PAI-29, S ...
+ PAI-19, Visual Sensor, Resolution Limit, θ = 1.22·λ/D,0.0001, rad, ★★★☆☆,,, Venus
+PAI-20, Comprehensive Physical Ability, Multifunctional Integration, Evaluation = Π(function_i)^(1/n),0.75,, ★★★★☆,,04-26-27, Centauri
+PAI-21, Quantum Entanglement Gate Calibration,,,,,, Maxima, In Progress,
+PAI-22, Gravitational Wave Coupling Efficiency,,,,,, Python, In Progress,
+PAI-23, Exotic Matter Stability Verification,,,,,, Maxima, In Progress,
+PAI-24, Multi-Dimensional Spacetime Mapping,,,,,, Python, In Progress,
+PAI-25, Energy Extraction from Wormhole Throat,,,,,, Maxima, In Progress,
+PAI-26, Causality Violation Risk Assessment,,,,,, Python, In Progress,
+PAI-27, Information Transmission Capacity (Nested),,,,,, Maxima, In Progress,
+PAI-28, Hypergate Resonance Frequency Analysis,,,,,, Python, In Progress,
+PAI-29, String Network Topology Optimization,,,,,, Maxima, In Progress,
+PAI-30, Vacuum Polarization Effect on Throat,,,,,, Python, In Progress,
+PA-31, Venus Heat Dissipation and Cooling System (Thermal Management), Active cooling and insulation structure corresponding to a surface temperature of 460°C. Includes thermoelectric conversion.,,,,, ★★★★★ (Equivalent to pressure and corrosion resistance) ,,, Venus
+PA-32, Sulfuric Acid Cloud Energy Collection Panel, Multi-directional light reception and storage system that can generate electricity even when sunlight is scattered by sulfuric acid clouds.,,,,, ★★★★☆ ,,,
+PA-33, High-gravity-compatible legs and propulsion system, Venus has about 0.9G compared to Earth, but a special design is required for the mobility system due to the combination with high pressure.,,,,★★★☆☆,,,
+PA-34, Long-term radiation-resistant electronic skin, Venus has a weak magnetic field, resulting in high exposure to cosmic rays and solar wind. Necessary for estimating the lifespan of surface AI.,,,,★★★☆☆,,,
+,,,,,,,,,,

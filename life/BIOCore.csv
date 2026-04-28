@@ -1,0 +1,21 @@
+Task ID, Category, Core Task, Calculation Content, Necessity of Coupling, Urgency, Expected Resolution Year
+BIO-501, Cyborgization, Brain-Machine Interface Engraftment Rate, Probability of neuron and electrode engraftment, signal transmission efficiency, Essential, High, 2040
+BIO-502, Organ Replacement, Xenogeneic Organ Rejection Probability, Probability of immune rejection of pig organs, immunosuppressant optimization, Essential, High, 2035
+BIO-503, Sensory Replacement, Sensor-Neuron Connection Success Rate, Probability of integration between artificial sensors and the nervous system, Essential, High, 2045
+BIO-504, Space Adaptation, Space Environment Resistance Gene Expression Rate, Probability of activation of radiation resistance and microgravity adaptation genes, Essential, High, 2050
+BIO-505, Photosynthetic Function, Human Photosynthesis Efficiency Calculation, Energy production efficiency through chloroplast introduction, Essential, Medium, 2060
+BIO-506, Metabolic Modification, Photosynthesis-Traditional Metabolism Integration Rate, Optimization of energy allocation between photosynthesis and conventional metabolism, Essential, Medium, 2065
+BIO-507, Aging Suppression, Probability of Avoiding Cellular Senescence, Probability of maintaining telomere extension and cell repair mechanisms, Essential, High, 2030
+BIO-508, Memory Transfer, Brain Memory Digitization Success Rate, Probability of complete transfer and reconstruction of long-term memory, Essential, Medium, 2070
+BIO-509, Consciousness Continuity, Identity Preservation Rate After Cyborg Transition, Probability of ensuring continuity of self, Analysis, High, 2075
+BIO-510, Group Adaptation, Minimum Genetic Diversity in Space Colonies, Minimum number of individuals and genetic diversity required for survival, Essential, Medium, 2080
+BIO-511, Reproductive Modification, Reproductive Success Rate Under Space Conditions, Probability of normal development under low gravity and radiation, Essential, Medium, 2090
+BIO-512, Ecosystem Construction, Closed Space Ecosystem Sustainability Probability, Duration of material circulation in a fully closed system, Essential, High, 2060
+BIO-513, Energy, Photosynthesis-Dependent Energy Self-Sufficiency Rate, Proportion of life-sustaining energy from photosynthesis, Essential, Medium, 2065
+BIO-514, Means of Transportation, Organismal Tolerance Probability During Wormhole Passage, Survival rate of organisms passing through exotic matter, Essential, Low, 2100
+BIO-515, Time Extension, Relativistic Time Dilation Adaptation Probability, Probability of physiological adaptation near light-speed travel, Analysis, Low, 2110
+BIO-516, Information Life, Probability of Realizing a Fully Digital Lifeform, Probability of complete digitization and reproduction of biological information, Essential, Medium, 2120
+BIO-517, Species Preservation, Probability of Extraterrestrial Life Backup, Probability of extraterrestrial preservation and restoration of human information, Essential, High, 2050
+BIO-518, Ethical threshold, Limit of maintaining humanity, Quantification of how much modification still allows one to be called 'human', Analysis, High, 2040
+BIO-519, Cost, Economic feasibility of cyborgization, Resources and energy required for cyborgization of all humanity, Essential, Medium, 2080
+BIO-520, Social structure, Sustainability of an ageless society, Mathematical model of population growth and resource consumption, Essential, High, 2070

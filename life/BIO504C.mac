@@ -1,0 +1,106 @@
+/* 
+===============================================
+BIO-504: 宇宙環境耐性遺伝子発現率 計算プログラム
+===============================================
+
+【課題仕様】
+背景: 宇宙居住実現には人類の生物学的限界を超える必要
+目標: 遺伝子改変による環境耐性付与の成功率定量化
+入力: 放射線量、重力レベル、遺伝子編集効率、耐性遺伝子効果
+出力: 総合生存確率、遺伝子発現成功率、最適組み合わせ
+計算: 確率連鎖モデル、環境ストレス応答、時間依存適応
+*/
+
+kill(all)$
+
+/* 1. 環境ストレスパラメータ */
+radiation_dose: 0.5$       /* Sv/year */
+gravity_level: 0.38$       /* Mars gravity (g) */
+temp_variation: 60$        /* K range */
+atmosphere_pressure: 0.006$ /* atm (Mars) */
+
+/* 2. 遺伝子編集効率 */
+crispr_efficiency: 0.85$   /* 基本編集効率 */
+epigenetic_mod: 0.7$       /* エピジェネティック調整効率 */
+synthetic_stability: 0.9$  /* 合成遺伝子の安定性 */
+
+/* 3. 耐性遺伝子の効果 */
+/* 放射線耐性遺伝子群 */
+rad_gene1_effect: 0.4$     /* 放射線損傷修復率向上 */
+rad_gene2_effect: 0.3$     /* 抗酸化酵素活性化 */
+rad_gene3_effect: 0.2$     /* アポトーシス制御 */
+
+/* 微小重力適応遺伝子群 */
+grav_gene1_effect: 0.5$    /* 骨密度維持 */
+grav_gene2_effect: 0.4$    /* 筋萎縮抑制 */
+grav_gene3_effect: 0.3$    /* 免疫機能維持 */
+
+/* 代謝適応遺伝子群 */
+meta_gene1_effect: 0.6$    /* エネルギー代謝効率化 */
+meta_gene2_effect: 0.5$    /* 栄養素吸収向上 */
+meta_gene3_effect: 0.4$    /* 解毒機能強化 */
+
+/* 4. 発現成功率: 各遺伝子の独立確率 × 編集効率 × 環境補正 */
+rad_success: rad_gene1_effect * rad_gene2_effect * rad_gene3_effect * 
+             crispr_efficiency * epigenetic_mod * synthetic_stability$
+
+grav_success: grav_gene1_effect * grav_gene2_effect * grav_gene3_effect * 
+              crispr_efficiency * epigenetic_mod * synthetic_stability$
+
+meta_success: meta_gene1_effect * meta_gene2_effect * meta_gene3_effect * 
+              crispr_efficiency * epigenetic_mod * synthetic_stability$
+
+/* 5. 環境ストレス影響指数 */
+rad_stress_factor: radiation_dose / 0.1$   /* 地球基準0.1Sv */
+grav_stress_factor: abs(gravity_level - 1.0)$ /* 1gからのずれ */
+temp_stress_factor: temp_variation / 30$
+
+/* 6. 総合生存確率: 各耐性成功×ストレス生存指数 */
+/* ストレス生存: exp(-stress_factor) */
+rad_survival: exp(-rad_stress_factor)$
+grav_survival: exp(-grav_stress_factor)$
+temp_survival: exp(-temp_stress_factor)$
+
+P_total: rad_success * rad_survival + 
+         grav_success * grav_survival + 
+         meta_success * temp_survival$
+P_total: P_total / 3$   /* 平均化 */
+
+/* 7. 個別遺伝子発現結果（数値データ出力用） */
+radiation_results: [rad_gene1_effect, rad_gene2_effect, rad_gene3_effect, rad_success, rad_survival]$
+microgravity_results: [grav_gene1_effect, grav_gene2_effect, grav_gene3_effect, grav_success, grav_survival]$
+metabolic_results: [meta_gene1_effect, meta_gene2_effect, meta_gene3_effect, meta_success, temp_survival]$
+
+/* 8. 最適遺伝子組み合わせ探索 */
+optimal_combinations: [
+  ["radiation_priority", rad_success * rad_survival],
+  ["microgravity_priority", grav_success * grav_survival],
+  ["metabolic_priority", meta_success * temp_survival],
+  ["balanced", (rad_success * rad_survival + grav_success * grav_survival + 
+                meta_success * temp_survival) / 3]
+]$
+
+/* 9. ファイル出力 */
+with_stdout("bio504_for_python.txt",
+  printf(true, "radiation_dose = ~,6f~%", radiation_dose),
+  printf(true, "gravity_level = ~,6f~%", gravity_level),
+  printf(true, "P_total = ~,6f~%", P_total),
+  printf(true, "conclusion = ~a~%", 
+         if P_total >= 0.7 then "Highly feasible"
+         elseif P_total >= 0.5 then "Feasible with additional measures"
+         elseif P_total >= 0.3 then "Limited adaptation only"
+         else "Insufficient with current technology"),
+  printf(true, "gene_effects = ~%"),
+  printf(true, "Radiation_genes,~,6f,~,6f~%", radiation_results[1], radiation_results[3]),
+  printf(true, "Microgravity_genes,~,6f,~,6f~%", microgravity_results[4], microgravity_results[5]),
+  printf(true, "Metabolic_genes,~,6f,~,6f~%", metabolic_results[4], metabolic_results[5]),
+  printf(true, "optimization = ~%"),
+  for combo in optimal_combinations do (
+    printf(true, "~a,~,6f~%", combo[1], combo[2])
+  )
+)$
+
+print("================================================")$
+print("計算完了: bio504_for_python.txt を出力")$
+print("================================================")$
+

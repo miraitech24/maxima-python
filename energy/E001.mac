@@ -1,0 +1,82 @@
+/*====================================================
+  E001.mac
+  持続可能航空燃料(SAF) 普及に伴う主要パラメータ計算
+  ・SAFエネルギー密度（MJ/kg）
+  ・従来燃料とのGHG削減率
+  ・必要なSAF生産量（年間）
+  ・原料供給可能量からの生産可能率
+  ・#26テスラ送電連動による電力供給の試算（付加）
+====================================================*/
+
+kill(all)$
+load("mnewton")$
+
+/* ---------- 1. 基本物性 ---------- */
+rho_SAF:800.0; /* kg/m3, SAF密度 */
+E_conv:43.0;   /* MJ/kg, 従来Jet-A1エネルギー密度 */
+E_SAF:42.5;    /* MJ/kg, SAFエネルギー密度（HEFA法想定） */
+eta_prod:0.85; /* SAF製造効率（原料→燃料エネルギー変換効率） */
+
+/* エネルギー密度比 */
+energy_ratio:E_SAF/E_conv;
+print("エネルギー密度比 = ", float(energy_ratio))$
+
+/* ---------- 2. GHG削減率 ---------- */
+LCA_conv:89.0;    /* gCO2eq/MJ, 従来燃料 */
+LCA_SAF:15.0;     /* gCO2eq/MJ, SAF（廃食用油由来） */
+ghg_reduction:(1 - LCA_SAF/LCA_conv)*100;
+print("GHG削減率 = ", float(ghg_reduction), " %")$
+
+/* ---------- 3. 年間必要生産量（日本国内航空需要, 2023年基準） ---------- */
+fuel_consumption:7.5e6; /* kl/年, 国内航空燃料消費量 */
+fuel_mass:fuel_consumption * rho_SAF; /* kg/年 */
+energy_total:fuel_mass * E_SAF * 1e-6; /* MJ→GJ/年 */
+
+print("年間消費量 (kg) = ", float(fuel_mass))$
+print("年間エネルギー需要 (GJ) = ", float(energy_total))$
+
+/* SAF置換率目標（2030年10%） */
+target_rate:0.1;
+saf_needed_mass:fuel_mass * target_rate;
+saf_needed_vol:saf_needed_mass / rho_SAF * 1e-3; /* m3→kl */
+print("SAF必要量 (kl/年, 10%置換) = ", float(saf_needed_vol))$
+
+/* ---------- 4. 原料供給可能量からの生産可能率 ---------- */
+/* 廃食用油年間回収量：約10万kl（日本） */
+waste_oil_vol:1.0e5; /* kl/年 */
+waste_oil_density:920; /* kg/m3 */
+waste_oil_mass:waste_oil_vol * waste_oil_density * 1e-3; /* kl→t */
+/* HEFA変換率：原料1kl→SAF約0.9kl */
+conv_rate:0.9;
+saf_from_waste:waste_oil_vol * conv_rate; /* kl */
+coverage:saf_from_waste / saf_needed_vol * 100;
+print("廃食用油からのSAF生産可能量 (kl/年) = ", float(saf_from_waste))$
+print("必要量カバー率 (%) = ", float(coverage))$
+
+/* SAFe生産に必要な廃食用油の割合 */
+required_oil_for_target:saf_needed_vol / conv_rate;
+print("目標SAF生産に必要な廃食用油量 (kl/年) = ", float(required_oil_for_target))$
+
+/* ---------- 5. テスラ送電#26連動（付加） ---------- */
+/* 製造に必要な電力：SAF 1kgあたり約5kWh（水素化処理） */
+elec_per_kg:5.0; /* kWh/kg */
+total_power_needed:saf_needed_mass * elec_per_kg * 1e-3; /* MWh/年 */
+power_GW:total_power_needed / (365*24*1e3); /* 平均連続出力GW */
+print("SAF製造に必要な年間電力量 (MWh/年) = ", float(total_power_needed))$
+print("平均連続出力 (GW) = ", float(power_GW))$
+
+/* テスラ送電#26: 中東〜日本間のマイクロ波送電効率η=0.85(公称) */
+eta_wpt:0.85;
+required_from_wpt:power_GW / eta_wpt;
+print("テスラ送電側要求出力 (GW) = ", float(required_from_wpt))$
+
+/* ---------- 6. CO2削減量 ---------- */
+co2_reduction: (saf_needed_mass * E_SAF * LCA_conv * 1e-6)   /* 従来GHG */
+             - (saf_needed_mass * E_SAF * LCA_SAF * 1e-6);    /* SAF GHG */
+print("10%置換による年間CO2削減量 (tCO2eq/年) = ", float(co2_reduction))$
+
+/* ---------- 結果表示 ---------- */
+print("=========================================")$
+print("E001 計算終了")$
+print("=========================================")$
+
