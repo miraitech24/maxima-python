@@ -1,0 +1,6 @@
+PAI-21 Calibration Summary
+timestamp_utc: 2026-05-03T03:12:51.055312+00:00Z
+formula: K = mu * N
+target_k_n: 1000.0
+cases: 25
+pass_target: 6

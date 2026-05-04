@@ -1,1 +1,1 @@
-maxima_expr = '2*x*sin(x)+(2-x^2)*cos(x)' 
+maxima_expr = ''integrate(x^2*sin(x),x)' 

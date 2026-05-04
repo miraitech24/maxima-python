@@ -1,0 +1,9 @@
+
+NIL
+/* Starts dribbling to formula_08.txt (2026/5/1, 12:38:52).*/
+<math><lbl altCopy="%o5">(%o5) </lbl><mi lisp="*var-tag*">done</mi></math>
+<PROMPT>(%i6) </PROMPT>
+print(string_out);
+<math><st>%i/sqrt(C*L)</st><st> </st></math><math><lbl altCopy="%o6">(%o6) </lbl><st>%i/sqrt(C*L)</st></math>
+<PROMPT>(%i7) </PROMPT>
+closefile();

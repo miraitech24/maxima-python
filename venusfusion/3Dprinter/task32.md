@@ -39,8 +39,6 @@ $N(t) = N_0 e^{\alpha t}
 
 ---<img width="612" height="393" alt="task32-2026-01-16" src="https://github.com/user-attachments/assets/949697fb-c3d4-47fc-b5e3-9b896a40385a" />
 
-
-
 ### 1. 左側の急上昇：理論上の「お祭り状態」
 
 グラフの左側で数値がグングン上がっている部分は、**Maximaで計算した理想的な増殖**を表しています。

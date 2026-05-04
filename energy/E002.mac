@@ -1,0 +1,19 @@
+/* Assignment: HTGR炉寿命解析 (#41) */
+/* 目的：高温ガス炉の運転可能年数を中性子照射脆化から求める */
+/* 仕様：英語変数名、出力は数値中心、グラフ無し */
+
+P_thermal : 1.2e9;           /* 熱出力 [W]（1.2 GW） */
+phi_fast   : 1.0e13;         /* 高速中性子束 [n/(cm^2·s)] */
+fluence_limit : 1.9e22;      /* 圧力容器の許容中性子照射量 [n/cm^2] */
+
+/* 寿命計算 */
+t_seconds : fluence_limit / phi_fast;
+t_years   : t_seconds / (365.25 * 24 * 3600);
+
+/* 結果表示 */
+print("炉寿命");
+print("  熱出力          : 1.2 GW");
+print("  高速中性子束    : 1.0×10^13 n/(cm^2·s)");
+print("  許容照射量      : 1.9×10^22 n/cm^2");
+print("  寿命            = ", float(t_years), " 年");
+

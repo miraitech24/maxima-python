@@ -1,0 +1,12 @@
+copy_tex(expr) := block(
+    [latex: tex1(expr)],
+    latex: ssubst("", "\\ensuremath{", latex),
+    latex: ssubst("", "}", latex),
+    /* コマンドを直接文字列として構築して system に渡す */
+    system(concat("echo '$$", latex, "$$' | xclip -selection clipboard")),
+    print("Copied to clipboard: $$", latex, "$$")
+);
+
+copy_tex(1/2);
+copy_tex(2.078239627613369e-25);
+quit;

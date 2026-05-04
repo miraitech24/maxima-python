@@ -1,0 +1,8 @@
+PAI-02 Nozzle Power Summary
+timestamp_utc: 2026-05-04T03:17:04.145211+00:00Z
+formula: P = p*A*v/2 (as in table)
+target_P_W: 1680000000000.0
+cases: 64
+pass_target: 1
+max_case:
+  case_id=64, p=1000000.0, A=1000.0, v=5000.0, P_W=2500000000000.0

@@ -1,0 +1,61 @@
+/* 
+   PAI-12 : Pressure vessel design for supercritical CO2 environment
+   Venus surface: ~9.2 MPa, 735 K.  Supercritical CO2 acts as a strong solvent.
+   Thin-wall cylinder approximation: σ = P * r / (2 * t)
+   We solve for required wall thickness t using given allowable stress.
+*/
+
+kill(all);  
+load(draw);
+
+/* ===== Parameters ===== */
+r_inner : 0.5$                          /* inner radius (m), example value */
+length   : 2.0$                         /* cylinder length (m) */
+P_venus  : 9.2e6$                       /* design pressure (Pa), Venus surface + safety */
+sigma_allow : 150e6$                     /* allowable stress (Pa), example for high-temp alloy */
+SF       : 1.5$                         /* safety factor */
+P_design : P_venus * SF$
+
+/* ===== Thickness calculation ===== */
+/* Thin-wall hoop stress : sigma = P * r / t   -> t = P * r / sigma */
+t_min : float(P_design * r_inner / (2 * sigma_allow))$   /* thickness (m) */
+t_min_mm : t_min * 1000$
+print("Minimum wall thickness = ", float(t_min_mm), " mm")$
+
+/* ===== Mass estimation ===== */
+rho_mat : 8000$                         /* density (kg/m^3) for steel alloy */
+mass : rho_mat * %pi * ((r_inner + t_min)^2 - r_inner^2) * length$
+print("Estimated mass of pressure hull = ", float(mass), " kg")$
+
+/* ===== Allowable stress vs temperature curve (simplified) ===== */
+/* Plot decreasing allowable stress with temperature */
+temp_K : makelist(300 + i*100, i, 0, 6)$
+sigma_T : map(lambda([T], if T<=800 then 200e6 - (T-300)*0.15e6 else 90e6), temp_K)$
+
+/* Save numerical data */
+file_output : openw("pai12_sigma_vs_T.csv")$
+printf(file_output, "Temperature_K,AllowableStress_Pa~%")$
+for i:1 thru length(temp_K) do
+    printf(file_output, "~f,~f~%", temp_K[i], sigma_T[i])$
+close(file_output)$
+
+/* Quick plot in PNG */
+draw2d(
+    file_name = "pai12_allowable_stress",
+    terminal = png,
+    dimensions = [600, 400],
+    xlabel = "Temperature (K)",
+    ylabel = "Allowable Stress (Pa)",
+    title  = "High-temperature alloy allowable stress",
+    points_joined = true,
+    points(temp_K, sigma_T)
+)$
+
+/* Result summary */
+print("===== PAI-12 Result =====");
+print("Design pressure : ", float(P_design/1e6), " MPa");
+print("Wall thickness  : ", float(t_min_mm), " mm");
+print("Hull mass       : ", float(mass), " kg");
+print("Data file       : pai12_sigma_vs_T.csv");
+print("Graph           : pai12_allowable_stress.png");
+

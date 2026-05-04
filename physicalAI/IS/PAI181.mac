@@ -1,0 +1,41 @@
+/* pai18_ice_rheology.mac
+   Ice rheology: Glen's flow law and relaxation time for gripping force.
+   Outputs temperature-dependent parameters to ice_rheology_data.csv */
+
+/* ----- Physical constants ----- */
+R_gas : 8.314;                /* J/(mol·K) */
+G_ice : 3.5e9;                /* Pa, shear modulus of ice */
+n     : 3;                    /* stress exponent */
+sigma_ref : 1.0e6;           /* reference stress for linearisation (Pa) */
+
+/* Reference state (at T_ref) */
+T_ref : 273.15;               /* K (0°C) */
+A_ref : 2.4e-24;              /* Pa^{-n} s^{-1} at T_ref */
+Q     : 60.0e3;               /* J/mol, activation energy */
+
+/* ----- Expressions ----- */
+/* Arrhenius factor */
+A(T) :=A_ref * exp( (Q/R_gas) * (1/T_ref - 1/T) );
+
+/* Effective viscosity from Glen's law */
+eta_eff(T) := 1 / (3 * A(T) * sigma_ref^(n-1));
+
+/* Relaxation time (Maxwell model) */
+tau_relax(T) := eta_eff(T) / G_ice;
+
+/* ----- Generate output for temperature range ----- */
+T_min : 250;   /* K */
+T_max : 273.15;
+T_step: 1;     /* K */
+
+s: openw("ice_rheology_data.csv");
+printf(s, "T(K),A(Pa^-n s^-1),tau(s)~%");
+for T : T_min step T_step thru T_max do (
+    printf(s, "~f,~e,~e~%", float(T), float(A(T)), float(tau_relax(T)))
+);
+close(s);
+
+print("ice_rheology_data.csv has been generated.");
+print("Columns: T(K), A(Pa^-n s^-1), tau(s)");
+print("Maxima part completed.");
+

@@ -1,5 +1,3 @@
-
-
 # 課題#41：LENR炉の熱疲労解析 仕様書
 
 ## 1. 目的
@@ -57,8 +55,6 @@ Maximaの解をインポートし、履歴シミュレーションを実行し�
 3. **設計へのフィードバック**: 寿命を延ばすためには、単に材料を強くするだけでなく、熱伝導率を高めて温度勾配を緩和するか、もしくは積層構造による「熱応力逃がし」の3Dプリント構造を採用する必要があります（課題#30と連動）。
 
 ---
-
-
 
 <img width="608" height="598" alt="venus412026-01-17 11-55-07" src="https://github.com/user-attachments/assets/805edabd-5fa0-4f05-955b-91a6b0d1a937" />
 <img width="392" height="266" alt="venu41-ｖ2026-01-17" src="https://github.com/user-attachments/assets/94649a0d-d585-4d60-a461-fa5510158842" />

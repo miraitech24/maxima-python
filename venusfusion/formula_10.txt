@@ -1,0 +1,9 @@
+
+NIL
+/* Starts dribbling to formula_10.txt (2026/5/1, 12:45:01).*/
+<math><lbl altCopy="%o7">(%o7) </lbl><mi lisp="*var-tag*">done</mi></math>
+<PROMPT>(%i8) </PROMPT>
+print(string_out);
+<math><st>[(A_v*P_v*delta_H)/(M_co2*g_v),(A_receptor*R^2*T^4*sigma)/L^2]</st><st> </st></math><math><lbl altCopy="%o8">(%o8) </lbl><st>[(A_v*P_v*delta_H)/(M_co2*g_v),(A_receptor*R^2*T^4*sigma)/L^2]</st></math>
+<PROMPT>(%i9) </PROMPT>
+closefile();
