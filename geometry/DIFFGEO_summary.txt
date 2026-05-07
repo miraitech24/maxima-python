@@ -1,0 +1,31 @@
+微分幾何学・時空歪み解析 サマリー
+timestamp_utc: 2026-05-07T04:20:04.319228+00:00Z
+解析対象: 2次元球面 (半径=1)
+座標: θ=60° (緯度), φ (経度)
+計量テンソル: ds² = dθ² + sin²θ dφ²
+リッチテンソル: R_θθ=1, R_φφ=sin²θ
+リッチスカラー: R=2 (定数)
+リッチフロー時間: 0 → 0.50
+最終体積: 0.0100
+最終曲率: 0.6667
+
+Maxima連成出力:
+
+batch("DIFFGEO_model.mac")
+
+read and interpret /home/iwamura/ドキュメント/coupling/working/geometry/DIFFGEO_model.mac
+kill(all)
+coords:[theta,phi]
+dim:2
+g:matrix([1,0],[0,sin(theta)^2])
+print("=== 計量テンソル g_ij ===")
+=== 計量テンソル g_ij === 
+disp(g)
+                              [ 1       0      ]
+                              [                ]
+                              [       2        ]
+                              [ 0  sin (theta) ]
+
+g_inv:invert(g)
+print("=== 逆計量テンソル g^ij ===")
+=== 逆計量テンソル g^ij =

@@ -1,0 +1,10 @@
+PAI-18-EXT2 Ice Creep (Rheology) Summary
+timestamp_utc: 2026-05-06T05:07:38.959060+00:00Z
+formula: F = mu * N (Glen's flow law with Arrhenius temperature dependence)
+target_F_N: 1000.0
+total_cases: 900
+pass_cases: 900
+pass_rate: 100.0%
+best_case: T=223.15K, t=0.0h, mu=0.5, F=2000.0N
+worst_case: T=223.15K, t=0.0h, mu=0.5, F=2000.0N
+NOTE: Ice rheology model implements Arrhenius temperature dependence and Glen's n=3 creep law

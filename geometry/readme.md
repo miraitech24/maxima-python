@@ -53,5 +53,3 @@ python flow_sim.py
 ```
 
 <img width="609" height="338" alt="geometry2025-12-22" src="https://github.com/user-attachments/assets/86606adc-0ae5-4fe2-ab2e-6701c7127e2e" />
-
-

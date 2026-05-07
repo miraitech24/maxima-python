@@ -1,0 +1,5 @@
+
+'diff(v,y,1)+'diff(u,x,1) = 0;
+'diff(u,y,1)*v+u*'diff(u,x,1) = 1.5e-5*('diff(u,y,2)+'diff(u,x,2))-0.8163265306122448*'diff(p,x,1);
+v*'diff(v,y,1)+u*'diff(v,x,1) = 1.5e-5*('diff(v,y,2)+'diff(v,x,2))-0.8163265306122448*'diff(p,y,1);
+'diff(p,y,2)+'diff(p,x,2) = -(1.225*(('diff(v,y,1))^2+2*'diff(u,y,1)*'diff(v,x,1)+('diff(u,x,1))^2));

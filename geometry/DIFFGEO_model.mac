@@ -1,0 +1,146 @@
+/* TAG: DIFFGEO_MAXIMA_V1 */
+
+/* 微分幾何学: 2次元球面のリッチテンソル導出 */
+
+kill(all)$
+
+/* 座標系の定義 (theta, phi) */
+
+coords: [theta, phi]$
+
+dim: 2$
+
+/* 計量テンソル (2次元球面) */
+
+/* ds^2 = dtheta^2 + sin(theta)^2 dphi^2 */
+
+g: matrix([1, 0], [0, sin(theta)^2])$
+
+print("=== 計量テンソル g_ij ===")$
+
+disp(g)$
+
+/* 逆計量テンソルの計算 */
+
+g_inv: invert(g)$
+
+print("=== 逆計量テンソル g^ij ===")$
+
+disp(g_inv)$
+
+/* クリストッフェル記号の計算 */
+
+christoffel_first(k, i, j) := 
+    1/2 * (diff(g[k][i], coords[j]) + diff(g[k][j], coords[i]) - diff(g[i][j], coords[k]));
+
+christoffel_second(i, j, k) := 
+    sum(g_inv[i][l] * christoffel_first(l, j, k), l, 1, dim);
+
+/* クリストッフェル記号の表示 */
+
+print("=== クリストッフェル記号 Γ^i_jk ===")$
+
+for i: 1 thru dim do (
+    for j: 1 thru dim do (
+        for k: 1 thru dim do (
+            Gamma: christoffel_second(i, j, k),
+            if Gamma # 0 then (
+                print("Γ^", i, "_", j, k, " = ", Gamma)
+            )
+        )
+    )
+)$
+
+/* リーマン曲率テンソルの計算 */
+
+riemann(i, j, k, l) := 
+    diff(christoffel_second(i, j, l), coords[k]) - 
+    diff(christoffel_second(i, j, k), coords[l]) + 
+    sum(christoffel_second(p, j, l) * christoffel_second(i, p, k) - 
+        christoffel_second(p, j, k) * christoffel_second(i, p, l), p, 1, dim);
+
+/* リッチテンソル (リーマンテンソルの縮約) */
+
+ricci(j, k) := sum(riemann(i, j, i, k), i, 1, dim);
+
+/* リッチテンソルの計算 */
+
+print("=== リッチテンソル R_jk ===")$
+
+R11: ricci(1, 1)$
+
+R12: ricci(1, 2)$
+
+R21: ricci(2, 1)$
+
+R22: ricci(2, 2)$
+
+print("R11 = ", R11)$
+
+print("R12 = ", R12)$
+
+print("R21 = ", R21)$
+
+print("R22 = ", R22)$
+
+/* リッチスカラー (曲率スカラー) */
+
+ricci_scalar: sum(sum(g_inv[i][j] * ricci(i, j), i, 1, dim), j, 1, dim);
+
+print("=== リッチスカラー R ===")$
+
+print("R = ", ricci_scalar)$
+
+/* アインシュタインテンソル G_ij = R_ij - (1/2) R g_ij */
+
+einstein(i, j) := ricci(i, j) - 1/2 * ricci_scalar * g[i][j];
+
+print("=== アインシュタインテンソル G_ij ===")$
+
+G11: einstein(1, 1)$
+
+G22: einstein(2, 2)$
+
+print("G11 = ", G11)$
+
+print("G22 = ", G22)$
+
+/* Python連携用: 数値評価可能な形式で出力 */
+
+/* リッチテンソル成分をリスト形式で保存 */
+
+ricci_11_expr: ev(R11, nouns)$
+
+ricci_22_expr: ev(R22, nouns)$
+
+file: openw("ricci_tensor.txt")$
+
+printf(file, "[~a, ~a]", ricci_11_expr, ricci_22_expr)$
+
+close(file)$
+
+/* 数値計算用パラメータ */
+
+print("=== 数値評価 (theta=60度) ===")$
+
+theta_val: %pi/3$
+
+R11_num: ev(R11, theta=theta_val)$
+
+R22_num: ev(R22, theta=theta_val)$
+
+R_num: ev(ricci_scalar, theta=theta_val)$
+
+print("theta = 60deg = ", theta_val, " rad")$
+
+print("R11 = ", R11_num)$
+
+print("R22 = ", R22_num)$
+
+print("R (Ricci scalar) = ", R_num)$
+
+print("=== Maxima計算完了 ===")$
+
+quit()$
+
+

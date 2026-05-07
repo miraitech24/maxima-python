@@ -33,5 +33,3 @@ $\mathbf{u} \cdot \nabla \mathbf{u} = -\frac{1}{\rho} \nabla p + \nu \nabla^2 \m
 <img width="248" height="261" alt="spipe2025-12-31" src="https://github.com/user-attachments/assets/776d8342-ea7a-4ee0-8005-1a7b6df60331" />
 
 <img width="788" height="664" alt="spipev2025-12-31" src="https://github.com/user-attachments/assets/2126cd74-4d93-4e1d-8046-bc8d198c2a3d" />
-
-

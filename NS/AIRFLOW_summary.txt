@@ -1,0 +1,26 @@
+室内気流解析 サマリー
+timestamp_utc: 2026-05-07T03:07:41.507022+00:00Z
+レイノルズ数: 66666.7
+最大速度: 0.000 m/s
+最大圧力: 0.000 Pa
+
+Maxima連成出力:
+
+batch("AIRFLOW_model.mac")
+
+read and interpret /home/iwamura/ドキュメント/coupling/working/NS/AIRFLOW_model.mac
+kill(all)
+depends([u,v,p],[x,y])
+rho:1.225
+nu:1.5E-5
+continuity:diff(u,x)+diff(v,y) = 0
+NS_x:u*diff(u,x)+v*diff(u,y) = ((-1)/rho)*diff(p,x)
+                             +nu*(diff(u,x,2)+diff(u,y,2))
+NS_y:u*diff(v,x)+v*diff(v,y) = ((-1)/rho)*diff(p,y)
+                             +nu*(diff(v,x,2)+diff(v,y,2))
+print("=== 連続の式 ===")
+=== 連続の式 === 
+print(continuity)
+dv   du
+-- + -- = 0 
+dy   dx

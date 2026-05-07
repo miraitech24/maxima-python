@@ -1,0 +1,10 @@
+PA-32 Sulfuric Acid Energy Harvesting Panel Summary (Maxima)
+timestamp: timestamp()
+required_energy_wh_per_day: 5000.0
+panel_area_m2: 10.0
+base_efficiency: 0.25
+scatter_ratio: 0.3, scatter_efficiency: 0.15
+battery_capacity_wh: 10000.0, charge_eff: 0.92, discharge_eff: 0.95
+total_cases: 100
+pass_cases: 88
+pass_rate: 88.0%

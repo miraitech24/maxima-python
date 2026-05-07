@@ -1,0 +1,59 @@
+/* TAG: FOURIER_MAXIMA_V1 */
+/* ガウス型関数のフーリエ変換 (定積分) */
+/* 問題: ∫_0^∞ exp(-a x^2) cos(b x) dx の解析解を求める */
+
+kill(all)$
+
+/* 仮定: a > 0 (収束条件) */
+assume(a > 0)$
+
+/* 被積分関数 */
+expr: exp(-a * x^2) * cos(b * x)$
+
+print("=== 問題 ===")$
+print("次の定積分の解析解を求める:")$
+print( 'integrate(exp(-a*x^2)*cos(b*x), x, 0, inf) )$
+
+/* 解析解の導出 */
+sol: integrate(expr, x, 0, inf)$
+
+print("=== 解析解 ===")$
+print(sol)$
+
+/* よく知られた公式による確認 */
+/* ∫_0^∞ e^{-a x^2} cos(b x) dx = 1/2 * √(π/a) * e^{-b^2/(4a)} */
+known_formula: 1/2 * sqrt(%pi / a) * exp(-b^2 / (4 * a))$
+
+print("=== 公式による表現 ===")$
+print(known_formula)$
+
+/* 一致確認 */
+is_equal: is(ratsimp(sol) = ratsimp(known_formula))$
+print("解析解と公式の一致: ", is_equal)$
+
+/* 数値代入 (a=1.0, b=2.0) */
+a_val: 1.0$
+b_val: 2.0$
+
+numerical_sol: float(subst([a=a_val, b=b_val], sol))$
+print("=== 数値評価 ===")$
+print("a = 1.0, b = 2.0 における値: ", numerical_sol)$
+
+/* Python連携用: 数値のみを出力 */
+with_stdout("fourier_result.txt", printf(false, "~f", numerical_sol))$
+print("fourier_result.txt に出力完了")$
+
+/* パラメータ範囲での値の表出力 */
+print("=== パラメータ依存性 ===")$
+printf(true, "~%a=0.5, b=0 → ~f~%", float(subst([a=0.5, b=0], sol)))$
+printf(true, "a=0.5, b=1 → ~f~%", float(subst([a=0.5, b=1], sol)))$
+printf(true, "a=0.5, b=2 → ~f~%", float(subst([a=0.5, b=2], sol)))$
+printf(true, "a=1.0, b=0 → ~f~%", float(subst([a=1.0, b=0], sol)))$
+printf(true, "a=1.0, b=1 → ~f~%", float(subst([a=1.0, b=1], sol)))$
+printf(true, "a=1.0, b=2 → ~f~%", float(subst([a=1.0, b=2], sol)))$
+printf(true, "a=2.0, b=0 → ~f~%", float(subst([a=2.0, b=0], sol)))$
+printf(true, "a=2.0, b=1 → ~f~%", float(subst([a=2.0, b=1], sol)))$
+printf(true, "a=2.0, b=2 → ~f~%", float(subst([a=2.0, b=2], sol)))$
+
+print("=== Maxima計算完了 ===")$
+quit()$

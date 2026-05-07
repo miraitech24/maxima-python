@@ -1,0 +1,65 @@
+/* TAG: AIRFLOW_MAXIMA_V1 */
+/* 室内気流のNavier-Stokes方程式 (2次元) */
+
+kill(all)$
+
+/* 座標と変数 */
+depends([u, v, p], [x, y])$
+
+/* 物理定数 */
+rho: 1.225$   /* 空気密度 kg/m^3 */
+nu: 1.5e-5$   /* 動粘性係数 m^2/s */
+
+/* 連続の式 (非圧縮) */
+continuity: diff(u, x) + diff(v, y) = 0$
+
+/* Navier-Stokes方程式 (x方向) */
+NS_x: u * diff(u, x) + v * diff(u, y) = 
+    -1/rho * diff(p, x) + nu * (diff(u, x, 2) + diff(u, y, 2))$
+
+/* Navier-Stokes方程式 (y方向) */
+NS_y: u * diff(v, x) + v * diff(v, y) = 
+    -1/rho * diff(p, y) + nu * (diff(v, x, 2) + diff(v, y, 2))$
+
+print("=== 連続の式 ===")$
+print(continuity)$
+print("=== NS方程式 x成分 ===")$
+print(NS_x)$
+print("=== NS方程式 y成分 ===")$
+print(NS_y)$
+
+/* 圧力ポアソン方程式の導出 (連続の式を満たす圧力場) */
+div_u: diff(u, x) + diff(v, y)$
+poisson_p: diff(p, x, 2) + diff(p, y, 2) = 
+    -rho * ( (diff(u, x))^2 + 2*diff(u, y)*diff(v, x) + (diff(v, y))^2 )$
+
+print("=== 圧力ポアソン方程式 ===")$
+print(poisson_p)$
+
+/* 離散化 (中央差分) */
+dxi: Delta_x$
+dy: Delta_y$
+
+/* 速度勾配の離散化 */
+du_dx: (u[i+1][j] - u[i-1][j])/(2*dxi)$
+du_dy: (u[i][j+1] - u[i][j-1])/(2*dy)$
+dv_dx: (v[i+1][j] - v[i-1][j])/(2*dxi)$
+dv_dy: (v[i][j+1] - v[i][j-1])/(2*dy)$
+
+/* ラプラシアンの離散化 */
+laplace_u: (u[i+1][j] - 2*u[i][j] + u[i-1][j])/dxi^2 +
+           (u[i][j+1] - 2*u[i][j] + u[i][j-1])/dy^2$
+laplace_v: (v[i+1][j] - 2*v[i][j] + v[i-1][j])/dxi^2 +
+           (v[i][j+1] - 2*v[i][j] + v[i][j-1])/dy^2$
+laplace_p: (p[i+1][j] - 2*p[i][j] + p[i-1][j])/dxi^2 +
+           (p[i][j+1] - 2*p[i][j] + p[i][j-1])/dy^2$
+
+print("=== 離散化形式 (x方向) ===")$
+print(NS_x, " → ", u[i][j] * du_dx + v[i][j] * du_dy, "=",
+      -1/rho * (p[i+1][j] - p[i-1][j])/(2*dxi) + nu * laplace_u)$
+
+/* 結果をテキスト出力 */
+stringout("AIRFLOW_equations.txt", continuity, NS_x, NS_y, poisson_p)$
+
+print("Maxima計算完了")$
+quit()$
