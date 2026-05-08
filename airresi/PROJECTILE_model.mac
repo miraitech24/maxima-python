@@ -1,0 +1,59 @@
+/* TAG: PROJECTILE_MAXIMA_V1 */
+/* 空気抵抗を受ける物体の放物運動 */
+/* 運動方程式: m d^2x/dt^2 = -b dx/dt, m d^2y/dt^2 = -mg - b dy/dt */
+
+kill(all)$
+
+/* 1. 運動方程式の定義 */
+eq_x: m * 'diff(x(t), t, 2) = -b * 'diff(x(t), t)$
+eq_y: m * 'diff(y(t), t, 2) = -m * g - b * 'diff(y(t), t)$
+
+print("=== 運動方程式 ===")$
+print("x方向: ", eq_x)$
+print("y方向: ", eq_y)$
+
+/* 2. 初期条件 */
+atvalue(x(t), t=0, 0)$
+atvalue('diff(x(t),t), t=0, v0 * cos(th))$
+atvalue(y(t), t=0, 0)$
+atvalue('diff(y(t),t), t=0, v0 * sin(th))$
+
+print("=== 初期条件 ===")$
+print("x(0) = 0, x'(0) = v0 cosθ")$
+print("y(0) = 0, y'(0) = v0 sinθ")$
+
+/* 3. ラプラス変換で解析解を求める */
+sol: desolve([eq_x, eq_y], [x(t), y(t)])$
+
+print("=== 解析解 ===")$
+print("x(t) = ", ratsimp(sol[1]))$
+print("y(t) = ", ratsimp(sol[2]))$
+
+/* 4. 整理された形式で表示 */
+x_sol: sol[1]$
+y_sol: sol[2]$
+
+print("=== 整理形式 ===")$
+print("x(t) = (m v0 cosθ / b) (1 - e^{-bt/m})")$
+print("y(t) = (m/b)(v0 sinθ + mg/b)(1 - e^{-bt/m}) - (mg/b)t")$
+
+/* 5. Python連携用: 数値出力 */
+params: [m=0.5, g=9.8, b=0.2, v0=30, th=%pi/4]$
+
+/* ルンゲクッタ法で数値解を計算 */
+result: rk([v0*cos(th)*exp(-b*t/m), 
+           (v0*sin(th)+m*g/b)*exp(-b*t/m)-m*g/b], 
+          [x, y], [0, 0], [t, 0, 5, 0.05]), params$
+
+/* CSV出力 */
+out_csv: "trajectory.csv"$
+f: openw(out_csv)$
+printf(f, "t,x,y~%")$
+for row in result do (
+    printf(f, "~f,~f,~f~%", row[1], row[2], row[3])
+)$
+close(f)$
+
+print("=== 計算完了 ===")$
+print("CSV出力: ", out_csv)$
+quit()$

@@ -1,53 +1,83 @@
-# Maxima & Python Coupling Project: Projectile Motion
+# 空気抵抗を受ける物体の放物運動解析システム
 
-このプロジェクトは、数式処理ソフト **Maxima** で物理的な解析解を導出し、そのデータを **Python** でアニメーション化する「連成（Coupling）」のデモンストレーションです。
+## 課題仕様
 
-## 1. 物理モデル (Theoretical Model)
+### 目的
 
-速度に比例する空気抵抗（$F = -bv$）を受ける物体の放物運動を扱います。
+速度に比例する空気抵抗 $F = -bv$ を受ける物体の放物運動を解析する。
+Maximaで運動方程式の解析解を導出し、Pythonで数値計算・可視化を行う。
 
-### 運動方程式 (Equations of Motion)
+### 数式モデル
 
-$m \frac{d^2x}{dt^2} = -b \frac{dx}{dt}$
-$m \frac{d^2y}{dt^2} = -mg - b \frac{dy}{dt}$
+#### 運動方程式
 
-### 解析解 (Analytical Solutions)
+$$
+m\frac{d^2x}{dt^2} = -b\frac{dx}{dt}
+$$
 
-wxMaximaの `desolve` 関数を用いて導出された解は以下の通りです：
+$$
+m\frac{d^2y}{dt^2} = -mg - b\frac{dy}{dt}
+$$
 
-- **水平方向 ($x$):**
-  $x(t) = \frac{m v_0 \cos(\theta)}{b} \left( 1 - e^{-\frac{b}{m}t} \right)$
-- **垂直方向 ($y$):**
-  $y(t) = \frac{m}{b} \left( v_0 \sin(\theta) + \frac{mg}{b} \right) \left( 1 - e^{-\frac{b}{m}t} \right) - \frac{mgt}{b}$
+#### 初期条件
 
----
+$$
+x(0)=0,\quad \dot{x}(0)=v_0\cos\theta,\quad y(0)=0,\quad \dot{y}(0)=v_0\sin\theta
+$$
 
-## 2. Maxima スクリプト (`solver.mac`)
+#### 解析解
 
-数値計算（ルンゲ＝クッタ法）を行い、CSVとして出力するためのコードです。
+$$
+x(t) = \frac{m v_0 \cos\theta}{b} \left(1 - e^{-bt/m}\right)
+$$
 
-/* 運動方程式の数値解法 */
-result: $rk([v0*cos(th)*exp(-b*t/m), (v0*sin(th)+m*g/b)*exp(-b*t/m)-m*g/b], 
-           [x, y], [0, 0], [t, 0, 5, 0.05])$
+$$
+y(t) = \frac{m}{b}\left(v_0\sin\theta + \frac{mg}{b}\right)\left(1 - e^{-bt/m}\right) - \frac{mg}{b}t
+$$
 
-/* CSV出力 (Pythonで読み込みやすい形式) */
-output_file: "trajectory.csv"$
-s: openw(output_file)$
-for row in result do (
-    printf(s, "~f, ~f, ~f~%", row[1], row[2], row[3])
-)$
-close(s)$
+### パラメータ
 
-## 3. Python アニメーションスクリプト (`main_csv.py`)
+| パラメータ | 値   | 単位   | 説明     |
+| ----- | --- | ---- | ------ |
+| m     | 0.5 | kg   | 質量     |
+| g     | 9.8 | m/s² | 重力加速度  |
+| b     | 0.2 | kg/s | 空気抵抗係数 |
+| v0    | 30  | m/s  | 初速     |
+| θ     | 45  | deg  | 投射角    |
 
-出力された `trajectory.csv` を読み込み、アニメーションを表示・保存します。
+## 結論
 
-## 4. 実行方法 (How to Use)
+### 計算結果
 
-1. **Maxima** で `solver.max` を実行し、`trajectory.csv` を生成します。
+- **飛翔時間**: 3.53 秒
+- **到達距離**: 40.11 m
 
-2. **Python** 環境で `main_csv.py` を実行します。
+### 物理的考察
 
-3. 同一ディレクトリ内に `motion.gif` が生成されます。
+1. **空気抵抗の効果**:
+   
+   - 抵抗なしの場合、軌道は放物線
+   - 抵抗がある場合、軌道は非対称で到達距離が減少
+   - 速度が指数関数的に減衰する
 
-<img width="497" height="322" alt="image" src="https://github.com/user-attachments/assets/be95d97c-c42e-44d8-b268-9fc31e10785a" />
+2. **終端速度**:
+   
+   - y方向の終端速度: $v_{term} = mg/b$
+   - 本例では $v_{term} = 24.5$ m/s
+
+3. **エネルギー散逸**:
+   
+   - 空気抵抗により力学的エネルギーが減少
+   - 損失は熱として散逸
+
+### Maxima連成の効果
+
+1. **記号計算**: 微分方程式の解析解を正確に導出
+2. **検証可能性**: 導出過程が.macファイルとして残る
+3. **再現性**: 誰でも同じ計算を再現可能
+
+### 今後の課題
+
+- 空気抵抗の速度2乗則 ($F = -cv^2$) への拡張
+- 風の影響を考慮した3次元運動
+- 回転効果（マグヌス効果）の導入

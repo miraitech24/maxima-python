@@ -1,0 +1,35 @@
+/* TAG: TESLA_MAXIMA_FINAL */
+/* テスラ型無線送電システムの回路方程式 */
+
+kill(all)$
+
+/* 回路方程式 */
+eq1: V = R1 * I1 + %i*omega*M_TA * I2 + %i*omega*M_TB * I3$
+eq2: 0 = %i*omega*M_TA * I1 + (R2+ZL) * I2 + %i*omega*M_AB * I3$
+eq3: 0 = %i*omega*M_TB * I1 + %i*omega*M_AB * I2 + (R3+ZL) * I3$
+
+print("=== 回路方程式 ===")$
+print(eq1)$
+print(eq2)$
+print(eq3)$
+
+/* 電流を解く */
+sol: solve([eq1, eq2, eq3], [I1, I2, I3])$
+I2_sol: radcan(rhs(sol[1][2]))$
+
+/* 電力 */
+P_A: cabs(I2_sol)^2 * ZL$
+
+print("=== 家庭Aの受電電力 ===")$
+print(P_A)$
+
+/* 干渉なしの場合 */
+P_A_no_interf: subst(M_AB=0, P_A)$
+
+print("=== 干渉なしの電力 ===")$
+print(P_A_no_interf)$
+
+stringout("tesla_formulas.txt", I2_sol, P_A, P_A_no_interf)$
+
+print("=== Maxima計算完了 ===")$
+quit()$

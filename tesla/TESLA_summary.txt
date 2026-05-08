@@ -1,0 +1,22 @@
+テスラ型無線送電システム サマリー
+timestamp: 2026-05-08T06:59:41.023102+00:00Z
+
+周波数 f = 1.0 MHz
+電圧 V = 30 V
+抵抗 R = 2.0 Ω
+負荷 ZL = 20 Ω
+
+最適結合 M_opt = 1.056 μH
+理論最大電力 P_max = 102.3 W
+
+=== Maxima出力 ===
+
+batch("TESLA_model.mac")
+
+read and interpret /home/iwamura/ドキュメント/coupling/working/tesla/TESLA_model.mac
+kill(all)
+eq1:V = R1*I1+%i*omega*M_TA*I2+%i*omega*M_TB*I3
+eq2:0 = %i*omega*M_TA*I1+(R2+ZL)*I2+%i*omega*M_AB*I3
+eq3:0 = %i*omega*M_TB*I1+%i*omega*M_AB*I2+(R3+ZL)*I3
+print("=== 回路方程式 ===")
+=== 回路方

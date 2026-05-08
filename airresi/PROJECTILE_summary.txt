@@ -1,0 +1,34 @@
+空気抵抗を受ける物体の放物運動解析 サマリー
+timestamp_utc: 2026-05-08T01:20:39.459908+00:00Z
+
+=== 物理パラメータ ===
+質量 m = 0.5 kg
+重力加速度 g = 9.8 m/s²
+空気抵抗係数 b = 0.2 kg/s
+初速 v0 = 30 m/s
+投射角 θ = 45°
+
+=== 計算結果 ===
+飛翔時間: 3.53 s
+到達距離: 40.11 m
+
+=== Maxima解析出力 ===
+
+batch("PROJECTILE_model.mac")
+
+read and interpret /home/iwamura/ドキュメント/coupling/working/airresi/PROJECTILE_model.mac
+kill(all)
+eq_x:m*'diff(x(t),t,2) = (-b)*'diff(x(t),t)
+eq_y:m*'diff(y(t),t,2) = (-m)*g-b*'diff(y(t),t)
+print("=== 運動方程式 ===")
+=== 運動方程式 === 
+print("x方向: ",eq_x)
+              2
+             d                  d
+x方向:  m (--- (x(t))) = - b (-- (x(t))) 
+               2                dt
+             dt
+print("y方向: ",eq_y)
+              2
+             d                   d
+y方向:  m (-

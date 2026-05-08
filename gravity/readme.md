@@ -66,29 +66,3 @@
 ---
 
 <img width="609" height="393" alt="gravity2025-12-22" src="https://github.com/user-attachments/assets/b3dd0acb-f0fd-49e3-9d35-4b0f648c62b9" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
