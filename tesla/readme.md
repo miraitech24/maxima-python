@@ -41,8 +41,6 @@ $$
 | M_opt | 1.056 | μH  |
 | P_max | 102.3 | W   |
 
-
-
 <img width="1784" height="1184" alt="TESLA_interference_graph" src="https://github.com/user-attachments/assets/358b1dfe-0c4c-460c-b014-7a3f6a8eb2cb" />
 
 ## 結論
