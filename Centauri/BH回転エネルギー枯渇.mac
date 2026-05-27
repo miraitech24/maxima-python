@@ -1,0 +1,27 @@
+/* BH回転エネルギー枯渇 - 修正版 */
+
+/* 物理定数 */
+c: 2.99792458e8;
+G: 6.67430e-11;
+Msun: 1.989e30;
+
+/* 初期状態（a=0.92のBH） */
+Minitial: 6.3 * Msun;
+spinInitial: 0.92;
+etaMax: 0.29;
+
+/* 抽出可能エネルギー */
+Eextractable: etaMax * Minitial * c^2;
+
+/* エネルギーを全て抽出した後のBH */
+Mfinal: Minitial * (1 - etaMax);
+
+/* 結果出力 */
+print("===== BH回転エネルギー枯渇解析 =====");
+print("初期BH質量: ", Minitial/Msun, " 太陽質量");
+print("初期回転パラメータ: ", spinInitial);
+print("抽出可能エネルギー: ", Eextractable, " J");
+print("最終BH質量: ", Mfinal/Msun, " 太陽質量");
+print("最終状態: 静止ブラックホール（a=0）");
+print("====================================");
+

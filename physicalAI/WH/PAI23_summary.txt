@@ -1,0 +1,9 @@
+PAI-23 Exotic Matter Stability Verification Summary
+timestamp: 2026-05-17T04:13:50.487994+00:00
+rho_exotic: -1.00e+18 J/m^3
+p_exotic: -2.00e+18 Pa
+NEC violation: True
+WEC violation: True
+SEC violation: True
+Vacuum decay rate: 1.00e-09 1/s
+Stability threshold: 1.0000

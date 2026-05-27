@@ -1,0 +1,7 @@
+/* PAI-23: Exotic Matter Stability Verification */
+
+stability_condition(rho, p, sigma, lam) := 
+    (rho + 3*p) / (rho - p) < 1/(2*lam);
+tex(stability_condition(rho, p, sigma, lam));
+
+/* 実行: maxima -b PAI23_maxima.mac */

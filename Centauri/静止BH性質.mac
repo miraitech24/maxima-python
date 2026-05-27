@@ -1,0 +1,41 @@
+/* 静止BH（Schwarzschild BH）の性質 - 修正版 */
+
+/* 物理定数 */
+c: 2.99792458e8;
+G: 6.67430e-11;
+Msun: 1.989e30;
+
+/* カーBH（回転）のパラメータ */
+Mbh: 6.3 * Msun;
+spin: 0.92;
+
+/* 事象の地平線の半径（カーBH） */
+rs: G * Mbh / c^2;
+rplus: rs * (1 + sqrt(1 - spin^2));
+
+/* エルゴ球の半径（赤道面上） */
+rergo: 2 * rs;
+
+/* --- エネルギー抽出後 --- */
+/* シュワルツシルトBH（静止、spin=0） */
+spinFinal: 0;
+Mfinal: Mbh * (1 - 0.29);
+
+/* 事象の地平線の半径（シュワルツシルト） */
+rsFinal: 2 * G * Mfinal / c^2;
+
+/* 結果出力 */
+print("===== 静止BH性質解析 =====");
+print("--- カーBH（回転）---");
+print("BH質量: ", Mbh/Msun, " 太陽質量");
+print("回転パラメータ: ", spin);
+print("事象の地平線半径: ", rplus, " m");
+print("エルゴ球半径: ", rergo, " m");
+
+print("--- 静止BH（回転停止後）---");
+print("最終質量: ", Mfinal/Msun, " 太陽質量");
+print("回転パラメータ: ", spinFinal);
+print("事象の地平線半径: ", rsFinal, " m");
+print("エルゴ球: 存在しない");
+print("===================================");
+

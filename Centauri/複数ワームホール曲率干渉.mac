@@ -1,0 +1,24 @@
+/* 複数ワームホール曲率干渉 - 修正版 */
+/* モリス＝ソーン計量の線形近似 */
+
+/* パラメータ設定 */
+r0: 1.0;           /* スロート半径 [m] */
+dist: 100.0;       /* ワームホール間距離 [m]（変数名をd→distに変更） */
+
+/* 各ワームホールの曲率寄与 */
+curvature_single: 1 / r0^2;
+/* = 1.0 [1/m^2] */
+
+/* 干渉項（逆二乗減衰） */
+interference: 1 / dist^2;
+/* = 1.0e-4 [1/m^2] */
+
+/* 相互安定性条件 */
+/* curvature_single > interference * N^2 */
+/* N: ワームホール数 */
+/* N < sqrt(curvature_single / interference) */
+
+max_N: sqrt(curvature_single / interference);
+/* = 100 */
+
+print("1m³あたりの最大安定ワームホール数:", max_N, "個");

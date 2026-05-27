@@ -1,0 +1,31 @@
+/* 自己複製ロボットの増殖と維持能力 - 修正版 */
+
+/* 初期ロボット数 */
+Ninitial: 1000;
+
+/* 複製速度（年間） */
+replicationrate: 0.1;  /* 年間10%増加（変数名修正） */
+
+/* 必要なロボット数（ダイソン環の維持に必要な労働力） */
+Nmaintenance: 1e6;  /* 100万台 */
+
+/* 増殖時間 */
+treach: log(Nmaintenance / Ninitial) / log(1 + replicationrate);
+/* = 72.5年 */
+
+print("初期ロボット数: ", Ninitial, " 台");
+print("複製速度: ", replicationrate*100, " %/年");
+print("必要なロボット数: ", Nmaintenance, " 台");
+print("増殖に必要な時間: ", treach, " 年");
+
+/* その後は、一定数を維持し続ける */
+/* 余剰ロボットは新規建設や探査に回せる */
+
+/* 100年後のロボット数 */
+N100: Ninitial * (1 + replicationrate)^100;
+print("100年後のロボット数: ", N100, " 台");
+
+/* 維持に必要なロボット数を超えた余剰分 */
+surplus: N100 - Nmaintenance;
+print("余剰ロボット数: ", surplus, " 台");
+
