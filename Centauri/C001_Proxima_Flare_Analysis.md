@@ -60,6 +60,6 @@
 
 ## グラフ
 
-![フレアエネルギー vs ダメージ閾値](c001_flare_damage_analysis.png)
+<img width="1800" height="1050" alt="c001_flare_damage_analysis" src="https://github.com/user-attachments/assets/0b82c301-a114-4899-ac04-a356190d140a" />
 
 *図: プロキシマ・ケンタウリのフレアエネルギーとプロキシマb軌道でのエネルギー密度の関係。オレンジ線は軽度ダメージ閾値(1e4 J/m²)、赤線は重度ダメージ閾値(1e6 J/m²)を示す。*

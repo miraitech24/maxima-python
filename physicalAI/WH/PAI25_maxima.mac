@@ -1,0 +1,7 @@
+/* PAI-25: Energy Extraction from Wormhole Throat */
+
+energy_efficiency(M, a, omega, rho, G, c) := 
+    (G * M / (c^2 * a)) * (omega * a / c)^2 * (rho * c^2 / (G * M^2 / a^4));
+tex(energy_efficiency(M, a, omega, rho, G, c));
+
+/* 実行: maxima -b PAI25_maxima.mac */

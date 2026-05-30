@@ -1,0 +1,70 @@
+/* BIO-518: Humanity Preservation Threshold Analysis */
+/* 人間性保持限界値の分析 */
+
+/* パラメータ設定 */
+x0: 0.5;  /* 閾値中央 */
+k: 10.0;  /* 傾きパラメータ */
+
+/* 人間性指数関数 H(x) = 1 / (1 + exp(-k*(x0 - x))) */
+H(x) := 1 / (1 + exp(-k * (x0 - x)));
+
+/* 数値微分（解析的微分は関数定義で計算） */
+/* dH(x) := k * H(x) * (1 - H(x));  ← 解析的微分を使用 */
+dH_analytic(x) := k * H(x) * (1 - H(x));
+
+/* 各改造度での計算 */
+alpha_list: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+
+print("=== Humanity Index Calculation ===")$
+for a in alpha_list do (
+    H_val: H(a),
+    dH_val: dH_analytic(a),
+    print("alpha=", a, " H=", H_val, " dH/dalpha=", dH_val)
+)$
+
+/* 閾値判定 */
+threshold: 0.7;
+print("=== Threshold Analysis ===")$
+print("Threshold: H_critical =", threshold)$
+
+/* 各タスクの改造度 */
+tasks: [
+    ["BIO-507", 0.15],  /* 老化抑制 */
+    ["BIO-502", 0.20],  /* 異種臓器 */
+    ["BIO-505", 0.25],  /* 光合成 */
+    ["BIO-506", 0.30],  /* 代謝改変 */
+    ["BIO-504", 0.35],  /* 宇宙適応 */
+    ["BIO-510", 0.40],  /* 集団適応 */
+    ["BIO-511", 0.45],  /* 生殖改変 */
+    ["BIO-513", 0.50],  /* エネルギー */
+    ["BIO-520", 0.55],  /* 社会構造 */
+    ["BIO-501", 0.65],  /* BMI接合 */
+    ["BIO-503", 0.70],  /* 感覚置換 */
+    ["BIO-512", 0.75],  /* 生態系構築 */
+    ["BIO-508", 0.85],  /* 記憶転送 */
+    ["BIO-509", 0.90],  /* 意識継続性 */
+    ["BIO-516", 0.95]   /* 情報生命 */
+];
+
+print("")$
+print("Task ID | Modification | H(alpha) | Judgment")$
+for task in tasks do (
+    task_id: task[1],
+    mod: task[2],
+    H_val: H(mod),
+    if H_val >= threshold then
+        judgment: "Within"
+    else
+        judgment: "Beyond",
+    print(task_id, " | ", mod, " | ", H_val, " | ", judgment)
+)$
+
+/* 解析的な微分の確認 */
+print("")$
+print("=== Analytical Derivative Verification ===")$
+print("dH/dx = k * H * (1 - H)")$
+for a in [0.3, 0.5, 0.7, 0.8] do (
+    H_a: H(a),
+    dH_analytical: k * H_a * (1 - H_a),
+    print("alpha=", a, " H=", H_a, " dH/dalpha=", dH_analytical)
+)$
