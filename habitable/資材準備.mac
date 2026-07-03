@@ -1,0 +1,139 @@
+/* ================================================================
+   時超えケンタ - 資材準備・リソース収支シミュレーション
+   仕様：連続発射に必要な資材、エネルギー、時間の収支を計算
+   計算項目：
+     1. 探査機1機あたりの必要資材量
+     2. レーザーアレイ建設に必要な資材
+     3. 年間必要資材と調達可能量の比較
+     4. 在庫管理シミュレーション
+   グラフ：経過年数vs資材在庫量
+   ================================================================ */
+
+/* ---- 基本パラメータ ---- */
+/* 探査機1機あたりの構成 */
+M_ship : 1.0e3;           /* 総質量 [kg] */
+f_structure : 0.3;        /* 構造材比率 */
+f_payload : 0.4;          /* ペイロード比率（観測機器、通信） */
+f_propulsion : 0.2;       /* 推進系比率（セイル、レーザー受光部） */
+f_power : 0.1;            /* 電源系比率 */
+
+/* 年間発射数 */
+launch_per_year : 5.1;    /* 機/年（前回計算より） */
+
+/* ---- 資材必要量 ---- */
+M_structure_per_ship : M_ship * f_structure;   /* [kg] */
+M_payload_per_ship : M_ship * f_payload;       /* [kg] */
+M_propulsion_per_ship : M_ship * f_propulsion; /* [kg] */
+M_power_per_ship : M_ship * f_power;           /* [kg] */
+
+print("=== 探査機1機あたり資材必要量 ===")$
+print("構造材: ", M_structure_per_ship, " kg")$
+print("ペイロード: ", M_payload_per_ship, " kg")$
+print("推進系: ", M_propulsion_per_ship, " kg")$
+print("電源系: ", M_power_per_ship, " kg")$
+
+/* ---- 年間必要資材 ---- */
+M_structure_per_year : M_structure_per_ship * launch_per_year;
+M_payload_per_year : M_payload_per_ship * launch_per_year;
+M_propulsion_per_year : M_propulsion_per_ship * launch_per_year;
+M_power_per_year : M_power_per_ship * launch_per_year;
+M_total_per_year : M_ship * launch_per_year;
+
+print("")$
+print("=== 年間必要資材（", launch_per_year, "機/年） ===")$
+print("構造材: ", M_structure_per_year, " kg/年")$
+print("ペイロード: ", M_payload_per_year, " kg/年")$
+print("推進系: ", M_propulsion_per_year, " kg/年")$
+print("電源系: ", M_power_per_year, " kg/年")$
+print("合計: ", M_total_per_year, " kg/年")$
+
+/* ---- レーザーアレイ建設 ---- */
+/* 1機あたり必要エネルギー：5,000 TWh = 1.8e19 J */
+/* レーザー効率η=0.2、太陽光発電効率η_solar=0.3 */
+/* 必要太陽光発電容量 */
+E_per_ship : 1.8e19;      /* [J] */
+eta_laser : 0.2;          /* レーザー効率 */
+eta_solar : 0.3;          /* 太陽光発電効率 */
+E_solar_per_ship : E_per_ship / (eta_laser * eta_solar); /* 必要太陽光エネルギー [J] */
+
+/* 発電衛星の質量（太陽光パネル比出力：100 W/kg） */
+P_required : E_per_ship / t_acc_rel_days / (24*3600); /* 必要電力 [W] */
+M_solar_per_ship : P_required / 100; /* 発電衛星質量 [kg] */
+
+print("")$
+print("=== レーザーアレイ建設 ===")$
+print("1機加速に必要な太陽光発電容量: ", P_required/1e9, " GW")$
+print("発電衛星質量: ", M_solar_per_ship/1e6, " 百万トン")$
+print("（参考：国際宇宙ステーション質量 約420トン）")$
+
+/* ---- 在庫管理シミュレーション ---- */
+/* 前提：初期在庫5年分、生産能力は年5機分 */
+initial_stock : 5 * M_total_per_year;  /* 5年分の初期在庫 [kg] */
+production_rate : M_total_per_year;     /* 年間生産量 [kg/年] */
+consumption_rate : M_total_per_year;    /* 年間消費量 [kg/年]（発射数に等しい） */
+
+/* 在庫推移：S(t) = S0 + (生産 - 消費) * t */
+/* 理想的な場合：生産=消費で在庫一定 */
+/* リスクシナリオ：生産が消費に追いつかない場合 */
+
+print("")$
+print("=== 在庫管理 ===")$
+print("初期在庫（5年分）: ", initial_stock/1e6, " 百万トン")$
+print("年間生産能力: ", production_rate/1e6, " 百万トン/年")$
+print("年間消費量: ", consumption_rate/1e6, " 百万トン/年")$
+
+/* ---- グラフ：在庫推移 ---- */
+years_stock : makelist(i, i, 0, 30); /* 30年計画 */
+
+/* シナリオ1：生産=消費（安定） */
+stock_stable : makelist(initial_stock, i, 0, 30);
+
+/* シナリオ2：生産が消費の80%（不足） */
+production_rate_low : 0.8 * M_total_per_year;
+stock_deficit : makelist(initial_stock + (production_rate_low - consumption_rate) * i, i, 0, 30);
+
+/* シナリオ3：生産が消費の120%（余剰） */
+production_rate_high : 1.2 * M_total_per_year;
+stock_surplus : makelist(initial_stock + (production_rate_high - consumption_rate) * i, i, 0, 30);
+
+plot2d([
+    [discrete, years_stock, stock_stable],
+    [discrete, years_stock, stock_deficit],
+    [discrete, years_stock, stock_surplus]
+], [xlabel, "経過年数 [年]"],
+   [ylabel, "在庫量 [kg]"],
+   [style, [lines, 2], [lines, 2, 2], [lines, 2, 3]],
+   [legend, "安定（生産=消費）", "不足（生産80%）", "余剰（生産120%）"],
+   [title, "資材在庫推移シミュレーション"],
+   [gnuplot_preamble, "set grid; set key bottom left;"])$
+
+/* ---- 観測衛星の数とコスト ---- */
+/* 観測衛星1機あたり質量 */
+M_obs_sat : 5.0e3;        /* 5トン（ハッブル級） */
+N_obs_sats : 10;          /* 10機の観測衛星群 */
+M_obs_total : M_obs_sat * N_obs_sats;
+
+print("")$
+print("=== 観測衛星群 ===")$
+print("観測衛星総質量: ", M_obs_total/1e3, " トン")$
+print("探査機換算: ", M_obs_total / M_ship, " 機分")$
+print("これは探査機", launch_per_year, "機/年の約", 
+      M_obs_total/M_ship/launch_per_year, "年分の資材に相当")$
+
+/* ---- 結論 ---- */
+print("")$
+print("=== 結論 ===")$
+print("1. 資材面：探査機1機あたり1トン。年間5機で5トン/年。")$
+print("   これは国際宇宙ステーション1基分の質量（約420トン）の約1/84。")$
+print("   月面基地や小惑星採掘で十分調達可能。")$
+print("2. エネルギー面：1機あたり5,000 TWh。")$
+print("   太陽光発電衛星（質量約100万トン）が必要。")$
+print("   これは野心的だが、自己複製ロボット技術で建設可能。")$
+print("3. 観測フェーズ：10機の観測衛星（総質量50トン）で十分。")$
+print("   探査機5機分の資材で観測網が構築できる。")$
+print("4. 在庫管理：初期在庫5年分（25トン）を確保し、")$
+print("   生産能力を消費と一致させれば安定運用可能。")$
+print("   生産能力に余裕があれば、予備在庫を積み増せる。")$
+print("5. 結論：資材・準備に抜かりはない。")$
+print("   観測データに基づく柔軟なターゲット選定と、")$
+print("   適切な在庫管理により、無駄のない連続発射が実現可能。")$

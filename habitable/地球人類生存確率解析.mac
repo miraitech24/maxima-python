@@ -1,0 +1,210 @@
+/* ================================================================
+   時超えケンタ - 地球人類生存確率解析
+   仕様：3つの阻害要因（戦争・少子化・環境破壊）による
+       地球消滅までの人類生存確率を計算
+   計算項目：
+     1. 各要因の単独リスクモデル
+     2. 複合リスクモデル（競合リスク）
+     3. 時間経過による生存確率曲線
+     4. 各要因の寄与度分析
+   グラフ：経過年数 vs 生存確率（要因別・複合）
+   出力先：/home/iwamura/ドキュメント/coupling/work_habitable/
+   ================================================================ */
+
+/* ---- 基本パラメータ ---- */
+current_year : 2025$
+max_years : 200$
+
+/* ---- 阻害要因1: 戦争リスク ---- */
+p_war_base : 0.003$
+p_war_escalation : 0.001$
+survival_if_war : 0.08$
+
+/* ---- 阻害要因2: 少子化リスク ---- */
+current_fertility : 2.3$
+replacement_fertility : 2.1$
+fertility_decline_rate : 0.015$
+fertility_floor : 1.2$
+initial_population : 8.0e9$
+population_decline_threshold : 1.0e6$
+
+/* ---- 阻害要因3: 環境破壊リスク ---- */
+climate_sensitivity : 3.0$
+current_CO2 : 420$
+preindustrial_CO2 : 280$
+CO2_growth_rate : 0.005$
+temp_collapse_threshold : 4.0$
+
+/* ---- 計算関数の定義 ---- */
+/* 注意：Maximaの記号処理ルールに従い、関数内では数値計算を明示 */
+
+/* 戦争リスクによる生存確率 */
+war_survival(t) := block(
+    [p_war_t, annual_survival],
+    p_war_t : min(p_war_base + p_war_escalation * t, 0.05),
+    annual_survival : 1 - p_war_t * (1 - survival_if_war),
+    return(float(annual_survival^t))
+)$
+
+/* 少子化リスクによる生存確率 */
+fertility_survival(t) := block(
+    [fertility_t, decline_rate, population_t],
+    fertility_t : max(current_fertility * (1 - fertility_decline_rate)^t, fertility_floor),
+    if fertility_t < replacement_fertility then (
+        decline_rate : (replacement_fertility - fertility_t) / replacement_fertility * 0.02,
+        population_t : initial_population * exp(-decline_rate * t)
+    ) else (
+        population_t : initial_population
+    ),
+    if population_t < population_decline_threshold then return(0.0)
+    else return(float(population_t / initial_population))
+)$
+
+/* 環境リスクによる生存確率 */
+environment_survival(t) := block(
+    [CO2_t, temp_rise],
+    CO2_t : current_CO2 * (1 + CO2_growth_rate)^t,
+    temp_rise : climate_sensitivity * log(CO2_t / preindustrial_CO2) / log(2),
+    return(float(1 / (1 + exp((temp_rise - temp_collapse_threshold) / 0.5))))
+)$
+
+/* ---- 各年次の生存確率計算 ---- */
+print("=== 地球人類生存確率解析 ===")$
+print("基準年: ", current_year)$
+print("解析期間: ", max_years, "年")$
+print("")$
+
+print("経過年数 | 戦争リスク | 少子化リスク | 環境リスク | 複合リスク")$
+print("---------+-----------+-------------+-----------+-----------")$
+
+for t in [0, 10, 25, 50, 75, 100, 150, 200] do block(
+    [sw, sf, se, sc],
+    sw : war_survival(t),
+    sf : fertility_survival(t),
+    se : environment_survival(t),
+    sc : sw * sf * se,
+    print(t, " | ", sw, " | ", sf, " | ", se, " | ", sc)
+)$
+
+/* ---- 各要因による人類消滅までの時間 ---- */
+extinction_threshold : 0.01$
+
+find_extinction_time(f) := block(
+    [t : 0],
+    while t <= max_years and f(t) >= extinction_threshold do t : t + 1,
+    return(t)
+)$
+
+t_war_ext : find_extinction_time(war_survival)$
+t_fert_ext : find_extinction_time(fertility_survival)$
+t_env_ext : find_extinction_time(environment_survival)$
+
+/* 複合リスクの消滅時間 */
+find_combined_extinction() := block(
+    [t : 0],
+    while t <= max_years and 
+          war_survival(t) * fertility_survival(t) * environment_survival(t) >= extinction_threshold 
+          do t : t + 1,
+    return(t)
+)$
+t_comb_ext : find_combined_extinction()$
+
+print("")$
+print("=== 各要因による人類消滅（生存率<1%）までの時間 ===")$
+print("戦争リスク単独: ", t_war_ext, "年")$
+print("少子化リスク単独: ", t_fert_ext, "年")$
+print("環境リスク単独: ", t_env_ext, "年")$
+print("複合リスク: ", t_comb_ext, "年")$
+
+/* ---- 50年後のリスク寄与度 ---- */
+print("")$
+print("=== 50年後のリスク寄与度 ===")$
+sw50 : war_survival(50)$
+sf50 : fertility_survival(50)$
+se50 : environment_survival(50)$
+sc50 : sw50 * sf50 * se50$
+
+risk_war_50 : 1 - sw50$
+risk_fert_50 : 1 - sf50$
+risk_env_50 : 1 - se50$
+total_risk_50 : 1 - sc50$
+
+print("戦争リスク寄与: ", risk_war_50 / total_risk_50 * 100, "%")$
+print("少子化リスク寄与: ", risk_fert_50 / total_risk_50 * 100, "%")$
+print("環境リスク寄与: ", risk_env_50 / total_risk_50 * 100, "%")$
+
+/* ---- グラフデータ生成 ---- */
+time_list : makelist(i, i, 0, max_years)$
+war_list : makelist(war_survival(t) * 100, t, time_list)$
+fert_list : makelist(fertility_survival(t) * 100, t, time_list)$
+env_list : makelist(environment_survival(t) * 100, t, time_list)$
+combined_list : makelist(war_survival(t) * fertility_survival(t) * environment_survival(t) * 100, t, time_list)$
+
+/* ---- グラフ1: 生存確率の時間変化 ---- */
+plot2d([
+    [discrete, time_list, war_list],
+    [discrete, time_list, fert_list],
+    [discrete, time_list, env_list],
+    [discrete, time_list, combined_list]
+], [xlabel, "経過年数 [年]"],
+   [ylabel, "人類生存確率 [%]"],
+   [style, [lines, 2], [lines, 2, 2], [lines, 2, 3], [lines, 3, 1]],
+   [legend, "戦争リスク", "少子化リスク", "環境リスク", "複合リスク"],
+   [title, "地球人類生存確率の時間変化（阻害要因別）"],
+   [gnuplot_preamble, "set grid; set key top right; set yrange [0:105];"])$
+
+/* ---- グラフ2: 各要因のリスク寄与度 ---- */
+risk_war_list : makelist((1 - war_survival(t)) * 100, t, time_list)$
+risk_fert_list : makelist((1 - fertility_survival(t)) * 100, t, time_list)$
+risk_env_list : makelist((1 - environment_survival(t)) * 100, t, time_list)$
+risk_combined_list : makelist((1 - war_survival(t) * fertility_survival(t) * environment_survival(t)) * 100, t, time_list)$
+
+plot2d([
+    [discrete, time_list, risk_war_list],
+    [discrete, time_list, risk_fert_list],
+    [discrete, time_list, risk_env_list],
+    [discrete, time_list, risk_combined_list]
+], [xlabel, "経過年数 [年]"],
+   [ylabel, "人類消滅リスク [%]"],
+   [style, [lines, 2], [lines, 2, 2], [lines, 2, 3], [lines, 3, 1]],
+   [legend, "戦争リスク", "少子化リスク", "環境リスク", "複合リスク（合計）"],
+   [title, "阻害要因別リスク寄与度"],
+   [gnuplot_preamble, "set grid; set key top left; set yrange [0:105];"])$
+
+/* ---- グラフ3: 環境リスク詳細（気温上昇） ---- */
+CO2_list : makelist(current_CO2 * (1 + CO2_growth_rate)^t, t, time_list)$
+temp_list : makelist(climate_sensitivity * log(CO2_list[t+1] / preindustrial_CO2) / log(2), t, time_list)$
+
+plot2d([
+    [discrete, time_list, temp_list],
+    [discrete, time_list, env_list]
+], [xlabel, "経過年数 [年]"],
+   [ylabel, "値"],
+   [style, [lines, 2], [lines, 2, 2]],
+   [legend, "気温上昇 [℃]", "環境生存確率 [%]"],
+   [title, "気温上昇と環境生存確率"],
+   [gnuplot_preamble, "set grid; set key top left;"])$
+
+/* ---- 結論 ---- */
+print("")$
+print("=== 結論 ===")$
+print("1. 戦争リスク：核戦争の確率は時間とともに増加。")$
+print("   50年後の生存確率: ", war_survival(50)*100, "%")$
+print("   100年後の生存確率: ", war_survival(100)*100, "%")$
+print("")$
+print("2. 少子化リスク：出生率低下による人口減少。")$
+print("   現在の出生率 2.3 → 100年後 ", 
+      max(current_fertility * (1-fertility_decline_rate)^100, fertility_floor))$
+print("   人口維持限界: 約1.2を下回ると不可逆的減少")$
+print("")$
+print("3. 環境リスク：CO2増加による気温上昇。")$
+print("   現在 420ppm → 100年後 ", current_CO2 * (1+CO2_growth_rate)^100, "ppm")$
+print("   気温上昇: ", climate_sensitivity * log(current_CO2 * (1+CO2_growth_rate)^100 / preindustrial_CO2) / log(2), "℃")$
+print("")$
+print("4. 複合リスク：3要因の相互作用により、")$
+print("   人類消滅（生存確率<1%）: 約", t_comb_ext, "年後")$
+print("")$
+print("5. 結論：地球人類の長期生存確率は極めて低い。")$
+print("   100年後には複合リスクで生存確率が10%を下回る。")$
+print("   恒星間移住は単なる選択肢ではなく、")$
+print("   人類存続のための必須戦略である。")$

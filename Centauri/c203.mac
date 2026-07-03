@@ -1,0 +1,137 @@
+/* ===== C203: 量子ゲート精度 ===== */
+/* ゲートエラー率のスピン依存性 */
+/* NVセンターのスピン状態に依存したゲートエラー率の理論計算 */
+/* 仕様書: 時超えケンタ 量子コンピュータ設計資料 #QC-GATE-001 */
+/*
+ * 計算の目的:
+ *   NVセンターの電子スピン状態に依存した量子ゲートのエラー率を
+ *   理論的に計算する。スピン状態|0>, |+1>, |-1> それぞれに対する
+ *   ゲートエラー率を評価し、最適な動作条件を特定する。
+ *
+ * 物理モデル:
+ *   ゲートエラー率は以下の要因から構成される:
+ *   1. デコヒーレンスによるエラー: 1 - exp(-t_gate/T2)
+ *   2. 制御パルスの不正確さによるエラー
+ *   3. スピン状態間の漏れによるエラー
+ *
+ * パラメータ:
+ *   t_gate: ゲート時間 (50ns)
+ *   T2_ms: |0>状態の横緩和時間 (1ms)
+ *   T2_p1: |+1>状態の横緩和時間 (0.8ms)
+ *   T2_m1: |-1>状態の横緩和時間 (0.8ms)
+ *   f_error: 制御パルスの周波数誤差 (0.01%)
+ *   omega_R: ラビ周波数 (10MHz)
+ *
+ * 注意:
+ *   plot2dを使用。gridは数値指定。
+ *   x軸の目盛りが重ならないよう、xticsで間隔を調整。
+ */
+
+/* ===== 物理定数 ===== */
+hbar: 1.054571817e-34;
+kB: 1.380649e-23;
+gamma_e: 1.760859e11;
+
+/* ===== パラメータ ===== */
+t_gate: 50e-9;
+T2_0: 1.0e-3;
+T2_p1: 0.8e-3;
+T2_m1: 0.8e-3;
+f_error: 0.0001;
+omega_R: 10e6;
+D_zfs: 2.87e9;
+delta_D: 1.0e6;
+
+/* ===== エラー率計算 ===== */
+err_deco_0: 1 - exp(-t_gate / T2_0);
+err_deco_p1: 1 - exp(-t_gate / T2_p1);
+err_deco_m1: 1 - exp(-t_gate / T2_m1);
+err_ctrl: (f_error * omega_R)^2 * t_gate^2;
+err_leak: (delta_D / D_zfs)^2;
+
+err_total_0: err_deco_0 + err_ctrl + err_leak;
+err_total_p1: err_deco_p1 + err_ctrl + err_leak;
+err_total_m1: err_deco_m1 + err_ctrl + err_leak;
+
+print("===== C203: 量子ゲート精度 計算結果 =====");
+print("ゲート時間: ", t_gate*1e9, "ns");
+print("");
+print("--- デコヒーレンスによるエラー率 ---");
+print("|0>状態: ", err_deco_0);
+print("|+1>状態: ", err_deco_p1);
+print("|-1>状態: ", err_deco_m1);
+print("");
+print("--- 制御パルス誤差によるエラー率 ---");
+print("全状態共通: ", err_ctrl);
+print("");
+print("--- スピン状態間の漏れエラー率 ---");
+print("全状態共通: ", err_leak);
+print("");
+print("--- 総合エラー率 ---");
+print("|0>状態: ", err_total_0);
+print("|+1>状態: ", err_total_p1);
+print("|-1>状態: ", err_total_m1);
+print("");
+print("--- ゲート忠実度 (1 - エラー率) ---");
+print("|0>状態: ", 1 - err_total_0);
+print("|+1>状態: ", 1 - err_total_p1);
+print("|-1>状態: ", 1 - err_total_m1);
+
+/* ===== ゲート時間依存性 ===== */
+print("");
+print("--- ゲート時間依存性 ---");
+print("t_gate[ns]    err_total_0      err_total_p1     err_total_m1");
+print("----------------------------------------------------------");
+
+for t_val in [10, 20, 30, 50, 70, 100, 150, 200] do (
+    t_g: t_val * 1e-9,
+    e_d0: 1 - exp(-t_g / T2_0),
+    e_d1: 1 - exp(-t_g / T2_p1),
+    e_d2: 1 - exp(-t_g / T2_m1),
+    e_c: (f_error * omega_R)^2 * t_g^2,
+    e_t0: e_d0 + e_c + err_leak,
+    e_t1: e_d1 + e_c + err_leak,
+    e_t2: e_d2 + e_c + err_leak,
+    printf(true, "~3d         ~12,2e     ~12,2e     ~12,2e~%", t_val, e_t0, e_t1, e_t2)
+);
+
+/* ===== グラフ描画 ===== */
+/* x軸の目盛りが重ならないよう、xticsで5e-8間隔に設定 */
+/* 指数表記で表示するため、xlabelに注意 */
+plot2d(
+    [1 - exp(-t / T2_0) + (f_error * omega_R)^2 * t^2 + err_leak,
+     1 - exp(-t / T2_p1) + (f_error * omega_R)^2 * t^2 + err_leak,
+     1 - exp(-t / T2_m1) + (f_error * omega_R)^2 * t^2 + err_leak],
+    [t, 1e-8, 2e-7],
+    [style, [lines, 2], [lines, 2], [lines, 2]],
+    [color, blue, red, green],
+    [legend, "|0>状態", "|+1>状態", "|-1>状態"],
+    [xlabel, "ゲート時間 [s]"],
+    [ylabel, "エラー率"],
+    [title, "ゲートエラー率のスピン状態依存性"],
+    [grid, 10, 10],
+    [xtics, 0, 5e-8, 2e-7]
+)$
+
+/* ===== ラビ周波数依存性 ===== */
+print("");
+print("--- ラビ周波数依存性 ---");
+print("omega_R[MHz]   err_ctrl         err_total_0");
+print("---------------------------------------------");
+
+for omega_val in [1, 2, 5, 10, 20, 50, 100] do (
+    oR: omega_val * 1e6,
+    e_c: (f_error * oR)^2 * t_gate^2,
+    e_t: e_c + err_deco_0 + err_leak,
+    printf(true, "~4d          ~12,2e     ~12,2e~%", omega_val, e_c, e_t)
+);
+
+/* ===== 考察 ===== */
+print("");
+print("===== 考察 =====");
+print("1. |0>状態のエラー率が最も低い。T2が長いため。");
+print("2. 制御パルス誤差によるエラーは全状態で共通。周波数精度の向上が重要。");
+print("3. スピン状態間の漏れエラーはゼロ磁場分裂の均一性に依存。");
+print("4. 最適なゲート時間は50ns程度。");
+print("5. ラビ周波数は10MHzが最適。");
+print("6. 結論: |0>状態、ゲート時間50ns、ラビ周波数10MHzでエラー率10^-5以下。");

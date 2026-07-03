@@ -1,0 +1,202 @@
+/* ============================================================ */
+/* LENR-VENUS-005: パラジウム・ニッケル触媒の水素吸蔵特性計算    */
+/* 高温版: 350℃, 50気圧 超臨界CO2環境                          */
+/* Maxima版: 記号処理ルールに従い、数値は後で代入                */
+/* 注意: Maximaの沼（floatとシンボル、diffの評価タイミング）回避 */
+/* ============================================================ */
+
+print("=== LENR-VENUS-005: パラジウム・ニッケル触媒の水素吸蔵特性 ===")$
+print("高温版: 350℃, 50気圧 超臨界CO2環境")$
+print("")$
+
+/* ---- 1. 物理定数 ---- */
+R_gas : 8.314;             /* 気体定数 (J/molK) */
+k_B : 1.380649e-23;        /* ボルツマン定数 (J/K) */
+N_A : 6.02214076e23;       /* アボガドロ数 */
+
+/* ---- 2. 温度条件 ---- */
+T_op : 350 + 273.15;       /* 動作温度 (K) = 623.15K */
+print("動作温度:", float(T_op - 273.15), "℃ (", T_op, "K)")$
+
+/* ---- 3. パラジウムの水素吸蔵特性 ---- */
+/*  Sievertsの法則: [H]/[Pd] = Ks * sqrt(P_H2) */
+/*  高温では水素溶解度が低下する */
+
+/* Sieverts定数（温度依存性: アレニウス型） */
+/*  Pd-H系: Ks = K0 * exp(-Ea/(R*T)) */
+K0_Pd : 0.015;              /* 頻度因子 (mol_H2/mol_Pd/atm^0.5) */
+Ea_Pd : 12000;              /* 活性化エネルギー (J/mol) */
+Ks_Pd : float(K0_Pd * exp(-Ea_Pd / (R_gas * T_op)));
+print("")$
+print("--- パラジウム触媒 ---")$
+print("Sieverts定数 Ks:", float(Ks_Pd), "(mol_H2/mol_Pd/atm^0.5)")$
+
+/* 水素分圧（金星大気中: 微量） */
+/* 金星大気中の水素分圧: 約0.1ppm程度 */
+P_H2_venus : 50 * 0.1e-6;   /* 50気圧中の水素分圧 (atm) */
+print("金星大気中水素分圧:", float(P_H2_venus * 1e6), "ppm")$
+
+/* 水素吸蔵量（Sievertsの法則） */
+H_Pd_ratio : float(Ks_Pd * sqrt(P_H2_venus));
+print("水素吸蔵量 [H]/[Pd]:", float(H_Pd_ratio * 100), "at%")$
+
+/* 吸蔵水素の拡散係数 */
+/*  Pd中での水素拡散: D = D0 * exp(-Ed/(R*T)) */
+D0_Pd : 2.9e-7;             /* 拡散頻度因子 (m2/s) */
+Ed_Pd : 22000;              /* 拡散活性化エネルギー (J/mol) */
+D_Pd : float(D0_Pd * exp(-Ed_Pd / (R_gas * T_op)));
+print("水素拡散係数 D:", float(D_Pd), "m2/s")$
+
+/* 拡散長（特性時間1時間あたり） */
+t_diff : 3600;              /* 1時間 (s) */
+L_diff_Pd : float(sqrt(D_Pd * t_diff));
+print("1時間の拡散長:", float(L_diff_Pd * 1e6), "μm")$
+
+/* ---- 4. ニッケルの水素吸蔵特性 ---- */
+/*  NiはPdより水素溶解度が低い */
+/*  Ni-H系: Ks_Ni = K0_Ni * exp(-Ea_Ni/(R*T)) */
+K0_Ni : 0.005;              /* 頻度因子 (mol_H2/mol_Ni/atm^0.5) */
+Ea_Ni : 18000;              /* 活性化エネルギー (J/mol) */
+Ks_Ni : float(K0_Ni * exp(-Ea_Ni / (R_gas * T_op)));
+print("")$
+print("--- ニッケル触媒 ---")$
+print("Sieverts定数 Ks:", float(Ks_Ni), "(mol_H2/mol_Ni/atm^0.5)")$
+
+/* 水素吸蔵量 */
+H_Ni_ratio : float(Ks_Ni * sqrt(P_H2_venus));
+print("水素吸蔵量 [H]/[Ni]:", float(H_Ni_ratio * 100), "at%")$
+
+/* ニッケル中の水素拡散係数 */
+D0_Ni : 6.9e-7;             /* 拡散頻度因子 (m2/s) */
+Ed_Ni : 38000;              /* 拡散活性化エネルギー (J/mol) */
+D_Ni : float(D0_Ni * exp(-Ed_Ni / (R_gas * T_op)));
+print("水素拡散係数 D:", float(D_Ni), "m2/s")$
+
+L_diff_Ni : float(sqrt(D_Ni * t_diff));
+print("1時間の拡散長:", float(L_diff_Ni * 1e6), "μm")$
+
+/* ---- 5. 水素供給手段の検討 ---- */
+/*  金星大気からの直接採取は困難（水素分圧が低い） */
+/*  地球からの水素輸送 or 金星大気中の微量水素を濃縮 */
+
+print("")$
+print("--- 水素供給手段の検討 ---")$
+
+/* 地球からの水素輸送コスト試算 */
+cost_per_kg_earth : 1e6;    /* 地球からの輸送コスト (yen/kg) 想定 */
+H2_mass_per_mol : 0.002016; /* 水素のモル質量 (kg/mol) */
+H2_mass_needed : float(H_Pd_ratio * 0.002016 * 1000); /* 1kgPdあたり必要水素量(g) */
+print("1kgのPdに必要な水素量:", float(H2_mass_needed * 1000), "g")$
+print("地球からの水素輸送コスト:", float(H2_mass_needed * cost_per_kg_earth / 1000), "yen/kgPd")$
+
+/* 金星大気からの水素濃縮 */
+/*  水素分圧0.1ppm → 濃縮には大規模な処理が必要 */
+P_H2_venus_Pa : float(P_H2_venus * 101325);  /* Pa */
+n_H2_per_m3 : float(P_H2_venus_Pa / (R_gas * T_op));  /* mol/m3 */
+print("")$
+print("金星大気からの水素採取:")$
+print("  単位体積あたりの水素量:", float(n_H2_per_m3 * 1000), "mmol/m3")$
+print("  1kgPdの水素を採取するのに必要な大気量:", 
+       float(H2_mass_needed / (n_H2_per_m3 * 0.002016 * 1000)), "m3")$
+
+/* ---- 6. 触媒活性評価 ---- */
+/*  水素吸蔵量と拡散係数から触媒活性を評価 */
+/*  活性指標: A = [H]/[M] * D / d^2 (d:粒子径) */
+d_particle : 10e-9;         /* 触媒粒子径 10nm */
+
+A_Pd : float(H_Pd_ratio * D_Pd / (d_particle^2));
+A_Ni : float(H_Ni_ratio * D_Ni / (d_particle^2));
+print("")$
+print("--- 触媒活性評価（粒子径10nm想定） ---")$
+print("Pd触媒活性指標 A:", float(A_Pd), "1/s")$
+print("Ni触媒活性指標 A:", float(A_Ni), "1/s")$
+
+if A_Pd > A_Ni then (
+    print("Pdの方が活性が高い")
+) else (
+    print("Niの方が活性が高い")
+)$
+
+/* ---- 7. 温度依存性の評価 ---- */
+print("")$
+print("--- 温度依存性（アレニウスプロット） ---")$
+print("温度(℃), Pd吸蔵量(at%), Ni吸蔵量(at%), Pd拡散係数(m2/s), Ni拡散係数(m2/s)")$
+
+for T_C : 100 thru 500 step 50 do (
+    T_K : T_C + 273.15,
+    Ks_Pd_T : float(K0_Pd * exp(-Ea_Pd / (R_gas * T_K))),
+    Ks_Ni_T : float(K0_Ni * exp(-Ea_Ni / (R_gas * T_K))),
+    H_Pd_T : float(Ks_Pd_T * sqrt(P_H2_venus) * 100),
+    H_Ni_T : float(Ks_Ni_T * sqrt(P_H2_venus) * 100),
+    D_Pd_T : float(D0_Pd * exp(-Ed_Pd / (R_gas * T_K))),
+    D_Ni_T : float(D0_Ni * exp(-Ed_Ni / (R_gas * T_K))),
+    print(concat(T_C, ", ", H_Pd_T, ", ", H_Ni_T, ", ", D_Pd_T, ", ", D_Ni_T))
+)$
+
+/* ---- 8. グラフ描画 ---- */
+/* 温度依存性のプロット */
+temp_data : makelist([100 + i*50, 
+    float(K0_Pd * exp(-Ea_Pd / (R_gas * (100 + i*50 + 273.15))) * sqrt(P_H2_venus) * 100)], 
+    i, 0, 8)$
+
+temp_data_Ni : makelist([100 + i*50, 
+    float(K0_Ni * exp(-Ea_Ni / (R_gas * (100 + i*50 + 273.15))) * sqrt(P_H2_venus) * 100)], 
+    i, 0, 8)$
+
+plot2d([
+    [discrete, temp_data],
+    [discrete, temp_data_Ni]
+    ],
+    [style, [lines, 2, 1], [lines, 2, 2]],
+    [legend, "Pd水素吸蔵量(at%)", "Ni水素吸蔵量(at%)"],
+    [xlabel, "温度 (℃)"], [ylabel, "水素吸蔵量 (at%)"],
+    [title, "LENR-VENUS-005: 触媒の水素吸蔵特性（温度依存性）"]
+)$
+
+/* 拡散係数の温度依存性（アレニウスプロット） */
+diff_data_Pd : makelist([1000/(100 + i*50 + 273.15),
+    float(log(D0_Pd * exp(-Ed_Pd / (R_gas * (100 + i*50 + 273.15)))))], 
+    i, 0, 8)$
+
+diff_data_Ni : makelist([1000/(100 + i*50 + 273.15),
+    float(log(D0_Ni * exp(-Ed_Ni / (R_gas * (100 + i*50 + 273.15)))))], 
+    i, 0, 8)$
+
+plot2d([
+    [discrete, diff_data_Pd],
+    [discrete, diff_data_Ni]
+    ],
+    [style, [lines, 2, 1], [lines, 2, 2]],
+    [legend, "Pd拡散係数(log)", "Ni拡散係数(log)"],
+    [xlabel, "1000/T (1/K)"], [ylabel, "log(D)"],
+    [title, "LENR-VENUS-005: 拡散係数のアレニウスプロット"]
+)$
+
+/* ---- 9. 総合評価 ---- */
+print("")$
+print("=== 総合評価 ===")$
+print("【パラジウム触媒】")$
+print("  350℃での水素吸蔵量:", float(H_Pd_ratio * 100), "at%")$
+print("  拡散係数:", float(D_Pd), "m2/s")$
+print("  活性指標:", float(A_Pd), "1/s")$
+print("  特徴: 水素吸蔵量は少ないが拡散が速い")$
+print("")$
+print("【ニッケル触媒】")$
+print("  350℃での水素吸蔵量:", float(H_Ni_ratio * 100), "at%")$
+print("  拡散係数:", float(D_Ni), "m2/s")$
+print("  活性指標:", float(A_Ni), "1/s")$
+print("  特徴: 水素吸蔵量・拡散ともにPdより低いが、コストは1/100以下")$
+print("")$
+print("【金星環境での課題】")$
+print("  1. 金星大気中の水素分圧が極めて低い（0.1ppm）")$
+print("  2. 地球からの水素輸送コストが高い")$
+print("  3. 超臨界CO2環境での触媒劣化")$
+print("  4. 高温での水素吸蔵量低下")$
+print("")$
+print("【推奨】")$
+if A_Pd > A_Ni then (
+    print("  Pd触媒を採用。ただし水素供給手段の確立が必須。")
+) else (
+    print("  Ni触媒を採用。コスト面で有利だが活性向上が必要。")
+)$
+print("  水素供給は地球からの輸送ではなく、金星大気からの濃縮を検討すべき。")$

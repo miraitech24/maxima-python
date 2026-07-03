@@ -1,0 +1,140 @@
+/* ============================================================ */
+/* BIO-507-04: Autophagy Activation Rate                         */
+/* Probability of maintaining cellular cleanup mechanism         */
+/*                                                              */
+/* 【Specification】                                             */
+/* 1. Autophagy model                                            */
+/*    dA/dt = k_act * S(t) - k_inact * A(t)                     */
+/*    S(t): stress signal intensity                              */
+/*                                                              */
+/* 2. Parameters                                                 */
+/*    A0: 0.8, k_act: 0.05, k_inact: 0.03, S0: 0.2, A_th: 0.4  */
+/*    t_max: 100, h: 0.1, n_steps: 1000                         */
+/*                                                              */
+/* 3. Graphics: draw2d with English labels                       */
+/* ============================================================ */
+
+display2d:false;
+load(draw)$
+
+A0: 0.8$ k_act: 0.05$ k_inact: 0.03$ S0: 0.2$ A_th: 0.4$ t_max: 100$ h: 0.1$ n_steps: 1000$
+
+print("==========================================")$
+print("BIO-507-04: Autophagy Activation Rate")$
+print("==========================================")$
+
+S(t) := S0 + (1 - S0) * (1 - exp(-0.03 * t))$
+
+A_vals: makelist(0, i, 1, n_steps+1)$
+A_vals[1]: A0$
+
+for i:2 thru n_steps+1 do (
+    t_val: (i-1) * h,
+    s_val: S(t_val),
+    A_vals[i]: A_vals[i-1] + h * (k_act * s_val - k_inact * A_vals[i-1])
+)$
+
+A_numeric(t) := block(
+    [idx, frac, a1, a2, tt],
+    tt: float(t),
+    idx: floor(tt / h) + 1,
+    if idx < 1 then idx: 1,
+    if idx > n_steps then idx: n_steps,
+    frac: (tt / h) - (idx - 1),
+    a1: A_vals[idx],
+    a2: A_vals[idx+1],
+    return(a1 + frac * (a2 - a1))
+)$
+
+P_maintain(t) := block(
+    [a_val: A_numeric(t)],
+    if a_val > A_th then 1.0 else a_val / A_th
+)$
+
+print("Parameters:")$
+print("  A0=", A0, " k_act=", k_act, " k_inact=", k_inact, " A_th=", A_th)$
+
+print("")$
+print("=== Autophagy activity and maintenance probability ===")$
+print("Year   A(t)      P_maintain")$
+for t_val:0 thru 100 step 10 do (
+    a_val: float(A_numeric(t_val)),
+    p_val: float(P_maintain(t_val)),
+    print(t_val, "  ", a_val, "  ", p_val)
+)$
+
+A_numeric_with_k(t, ka) := block(
+    [local_A: makelist(0, i, 1, n_steps+1), i, t_val, s_val, tt],
+    local_A[1]: A0,
+    for i:2 thru n_steps+1 do (
+        t_val: (i-1) * h,
+        s_val: S(t_val),
+        local_A[i]: local_A[i-1] + h * (ka * s_val - k_inact * local_A[i-1])
+    ),
+    tt: float(t),
+    return(local_A[floor(tt/h)+1])
+)$
+
+print("")$
+print("=== Effect of activation rate k_act (at 50 years) ===")$
+print("k_act     A(50)     P_maintain")$
+for ka in [0.01, 0.03, 0.05, 0.07, 0.1] do (
+    a50: float(A_numeric_with_k(50, ka)),
+    p50: if a50 > A_th then 1.0 else a50 / A_th,
+    print(ka, "  ", a50, "  ", p50)
+)$
+
+/* データ点を生成してプロット */
+A_points: makelist([i*h, A_numeric(i*h)], i, 0, n_steps)$
+P_points: makelist([i*h, P_maintain(i*h)], i, 0, n_steps)$
+
+/* Fig.1 */
+draw2d(
+    title = "Fig.1: Autophagy Activity over Time",
+    xlabel = "Time (years)", ylabel = "Autophagy Activity A(t)",
+    key = "A(t)",
+    points(A_points),
+    color = blue, line_width = 2, grid = true,
+    point_type = dot, point_size = 0.5
+)$
+
+/* Fig.2 */
+draw2d(
+    title = "Fig.2: Autophagy Maintenance Probability",
+    xlabel = "Time (years)", ylabel = "Maintenance Probability",
+    key = "P_maintain(t)",
+    points(P_points),
+    color = red, line_width = 2, grid = true,
+    point_type = dot, point_size = 0.5
+)$
+
+/* Fig.3 */
+ka_list: [0.01, 0.03, 0.05, 0.07, 0.1]$
+A50_list: makelist(float(A_numeric_with_k(50, ka)), ka, ka_list)$
+draw2d(
+    title = "Fig.3: Effect of Activation Rate at 50 Years",
+    xlabel = "Activation Rate k_act", ylabel = "Autophagy Activity at 50 Years",
+    key = "A(50)",
+    points(ka_list, A50_list),
+    color = green, line_width = 2, grid = true
+)$
+
+/* Fig.4 */
+S_points: makelist([i*h, S(i*h)], i, 0, n_steps)$
+draw2d(
+    title = "Fig.4: Stress Signal and Autophagy Activity",
+    xlabel = "Time (years)", ylabel = "Intensity",
+    key = "Stress S(t)",
+    points(S_points),
+    color = orange, line_width = 2,
+    key = "Autophagy A(t)",
+    points(A_points),
+    color = blue, line_width = 2, grid = true,
+    point_type = dot, point_size = 0.5
+)$
+
+print("")$
+print("All 4 figures displayed")$
+print("==========================================")$
+print("BIO-507-04 analysis complete")$
+print("==========================================")$

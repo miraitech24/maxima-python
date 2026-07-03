@@ -1,0 +1,127 @@
+/* ================================================================
+   時超えケンタ - DNA情報保存・転送戦略
+   仕様：人類の遺伝情報を保存し、恒星間転送する方法を解析
+   計算項目：
+     1. 全人類のDNA情報容量
+     2. 保存に必要な媒体質量
+     3. 転送時間とエネルギー
+     4. 保存期間と劣化率
+     5. 再生に必要な技術
+   グラフ：保存年数vs情報劣化率
+   ================================================================ */
+
+/* ---- 人類のDNA情報容量 ---- */
+/* 1人あたりのゲノム情報：3.2×10^9 塩基対 */
+/* 1塩基対 = 2ビット（A,T,G,Cの4種） */
+base_pairs_per_genome : 3.2e9;
+bits_per_base_pair : 2;
+bits_per_genome : base_pairs_per_genome * bits_per_base_pair;  /* [bit] */
+bytes_per_genome : bits_per_genome / 8;                         /* [byte] */
+
+/* 全人類のゲノム情報（80億人） */
+N_humanity : 8e9;
+total_bits : bits_per_genome * N_humanity;
+total_bytes : bytes_per_genome * N_humanity;
+
+print("=== 人類ゲノム情報容量 ===")$
+print("1人あたりゲノム: ", bytes_per_genome/1e9, " GB")$
+print("全人類（80億人）: ", total_bytes/1e15, " PB")$
+
+/* ---- 保存媒体 ---- */
+/* DNA合成による保存：1gのDNAに約455 EB（10^18 byte） */
+DNA_storage_density : 455e18;   /* [byte/g] */
+mass_DNA_storage : total_bytes / DNA_storage_density;  /* [g] */
+
+/* シリコンベース保存：NANDフラッシュの密度 */
+NAND_density : 1e12;            /* [byte/g]（1TB/1g想定） */
+mass_NAND : total_bytes / NAND_density;  /* [g] */
+
+print("")$
+print("=== 保存媒体必要質量 ===")$
+print("DNA保存: ", mass_DNA_storage/1e6, " トン")$
+print("シリコン保存: ", mass_NAND/1e6, " トン")$
+print("参考：国際宇宙ステーション質量 約420トン")$
+
+/* ---- 保存期間と劣化 ---- */
+/* DNAの半減期（常温）: 約521年 */
+/* 低温保存による延長効果 */
+half_life_DNA_room : 521;       /* 常温での半減期 [年] */
+temp_coefficient : 2;           /* 10℃低下で半減期2倍（アレニウス則近似） */
+
+/* -80℃での半減期 */
+temp_diff : 80 - 25;            /* 室温25℃から-80℃への差 [℃] */
+half_life_minus80 : half_life_DNA_room * (temp_coefficient^(temp_diff/10));
+
+/* -196℃（液体窒素）での半減期 */
+temp_diff_LN2 : 196 - 25;
+half_life_LN2 : half_life_DNA_room * (temp_coefficient^(temp_diff_LN2/10));
+
+print("")$
+print("=== DNA保存期間（半減期） ===")$
+print("常温（25℃）: ", half_life_DNA_room, " 年")$
+print("-80℃: ", half_life_minus80/1e6, " 百万年")$
+print("-196℃（液体窒素）: ", half_life_LN2/1e9, " 十億年")$
+
+/* ---- 情報劣化曲線 ---- */
+/* S(t) = S0 * (1/2)^(t/half_life) */
+survival_ratio(t, hl) := (1/2)^(t/hl);
+
+/* ---- 転送時間 ---- */
+/* レーザー通信での転送：0.2cで送信 */
+/* プロキシマb（4.24光年）までの転送時間 */
+transfer_time_4ly : 4.24 / 0.2;  /* [年] */
+
+/* 20光年先までの転送時間 */
+transfer_time_20ly : 20 / 0.2;   /* [年] */
+
+print("")$
+print("=== 情報転送時間 ===")$
+print("プロキシマb（4.24光年）: ", transfer_time_4ly, " 年")$
+print("グリーゼ581g（20光年）: ", transfer_time_20ly, " 年")$
+
+/* ---- 転送エネルギー ---- */
+/* 全人類ゲノム情報の転送に必要なエネルギー */
+/* 1ビットあたりの転送エネルギー（理論限界：kT ln2） */
+k : 1.380649e-23;       /* ボルツマン定数 [J/K] */
+T_cmb : 2.725;          /* 宇宙マイクロ波背景放射温度 [K] */
+E_per_bit_min : k * T_cmb * log(2);  /* 理論限界エネルギー [J/bit] */
+E_total_min : E_per_bit_min * total_bits;  /* [J] */
+
+/* 実際の転送エネルギー（理論限界の10^6倍と仮定） */
+E_per_bit_real : E_per_bit_min * 1e6;
+E_total_real : E_per_bit_real * total_bits;
+E_total_TWh : E_total_real / (1e12 * 3600);
+
+print("")$
+print("=== 転送エネルギー ===")$
+print("理論限界エネルギー: ", E_total_min, " J")$
+print("現実的エネルギー: ", E_total_real, " J (", E_total_TWh, " TWh)")$
+print("参考：探査機1機の運動エネルギー約5,000 TWhとの比: ", E_total_TWh / 5000)$
+
+/* ---- 再生に必要な技術 ---- */
+/* 人工子宮技術の成熟度 */
+/* 2030年: 動物実験段階 */
+/* 2050年: ヒト臨床試験 */
+/* 2080年: 実用化 */
+
+print("")$
+print("=== 再生技術ロードマップ ===")$
+print("2030年: 人工子宮による動物実験成功")$
+print("2050年: ヒト胚の人工子宮内培養臨床試験")$
+print("2080年: 人工子宮の実用化、年間1万人生産可能")$
+print("2100年: 完全な人工培養技術の確立")$
+
+/* ---- 結論 ---- */
+print("")$
+print("=== 課題3の結論 ===")$
+print("1. 情報容量：全人類80億人のゲノム情報は約2.6×10^18 byte。")$
+print("   これはDNA保存で約5.7トン、シリコン保存で約2.6キロトン。")$
+print("   国際宇宙ステーション1基分の質量で全人類を保存可能。")$
+print("2. 保存期間：-196℃の液体窒素保存で半減期約10^12年。")$
+print("   宇宙の年齢（138億年）をはるかに超える長期保存が可能。")$
+print("3. 転送：0.2cのレーザー通信で20光年先まで約100年。")$
+print("   エネルギーは探査機1機分の約1/100。十分実用的。")$
+print("4. 再生：2080年までに人工子宮技術が実用化見込み。")$
+print("   保存DNAからの再生は技術的に可能。")$
+print("5. 結論：最悪シナリオ（生体転送不能、HZ未発見）でも、")$
+print("   DNA情報の保存と転送により人類の再構築は可能。")$

@@ -1,0 +1,157 @@
+/* ============================================================ */
+/* BIO-507-03: Epigenetic Clock Reset Probability                */
+/*                                                              */
+/* 【仕様】                                                      */
+/* 1. エピジェネティック時計のモデル化                            */
+/*    DNAメチル化パターンの経年変化を確率微分方程式で表現          */
+/*                                                              */
+/* 2. 数理モデル                                                  */
+/*    dM/dt = -alpha * M + beta * (1 - M) + sigma * dW           */
+/*    M: メチル化レベル (0-1)                                    */
+/*    alpha: メチル化損失率                                      */
+/*    beta: メチル化獲得率                                       */
+/*    sigma: ノイズ強度                                          */
+/*    dW: ウィーナー過程                                         */
+/*                                                              */
+/* 3. エピジェネティックリセットの定義                            */
+/*    リセット成功 = M(t) < M_threshold を達成                   */
+/*                                                              */
+/* 4. パラメータ                                                 */
+/*    M0: 初期メチル化レベル (若年期) = 0.2                      */
+/*    alpha: メチル化損失率 = 0.03                               */
+/*    beta: メチル化獲得率 = 0.01                                */
+/*    sigma: ノイズ強度 = 0.05                                   */
+/*    M_th: リセット閾値 = 0.3                                   */
+/*    t_max: 計算期間 = 100 years                                */
+/*                                                              */
+/* 5. グラフ描画                                                 */
+/*    draw2dで別windowに表示                                     */
+/* ============================================================ */
+
+display2d:false;
+load(distrib)$
+load(draw)$
+
+M0: 0.2$
+alpha: 0.03$
+beta: 0.01$
+sigma: 0.05$
+M_th: 0.3$
+t_max: 100$
+
+print("==========================================")$
+print("BIO-507-03: Epigenetic Clock Reset")$
+print("==========================================")$
+
+ode2('diff(M,t) = -(alpha+beta)*M + beta, M, t);
+ic1(%, t=0, M=M0);
+
+M_det(t) := beta/(alpha+beta) + (M0 - beta/(alpha+beta))*exp(-(alpha+beta)*t);
+M_steady: beta/(alpha+beta);
+print("Steady state M =", float(M_steady))$
+
+reset_prob(t) := block(
+    [mu: float(M_det(t)), s: sigma * sqrt(t)],
+    if s = 0 then (if mu < M_th then 1.0 else 0.0)
+    else 1.0 - cdf_normal(mu, sigma*sqrt(t), M_th)
+)$
+
+print("")$
+print("=== 決定論的軌道とリセット確率 ===")$
+print("Year   M(t)      P_reset")$
+for t_val:0 thru 100 step 10 do (
+    print(t_val, "  ", float(M_det(t_val)), "  ", float(reset_prob(t_val)))
+)$
+
+print("")$
+print("=== 感度分析: alpha ===")$
+print("alpha   M(50)     P_reset(50)")$
+for a_val in [0.01,0.02,0.03,0.04,0.05] do block(
+    [M50: float(beta/(a_val+beta)+(M0-beta/(a_val+beta))*exp(-(a_val+beta)*50)),
+     P50: 1.0 - cdf_normal(beta/(a_val+beta)+(M0-beta/(a_val+beta))*exp(-(a_val+beta)*50), sigma*sqrt(50), M_th)],
+    print(a_val, "  ", float(M50), "  ", float(P50))
+)$
+
+print("")$
+print("=== 感度分析: sigma ===")$
+print("sigma   P_reset(50)")$
+for s_val in [0.01,0.03,0.05,0.07,0.1] do block(
+    [P50: 1.0 - cdf_normal(float(M_det(50)), s_val*sqrt(50), M_th)],
+    print(s_val, "  ", float(P50))
+)$
+
+/* データファイル出力 */
+with_stdout("BIO507-03_data.txt",
+    for t_val:0 thru 100 step 1 do (
+        print(t_val, " ", float(M_det(t_val)), " ", float(reset_prob(t_val)))
+    )
+)$
+
+print("")$
+print("データファイル出力: BIO507-03_data.txt")$
+
+/* グラフ1: draw2dで別window表示 */
+draw2d(
+    title = "Fig.1: Epigenetic Clock Trajectory",
+    xlabel = "Time (years)",
+    ylabel = "Methylation Level M(t)",
+    grid = true,
+    key = "M(t)",
+    explicit(M_det(t), t, 0, 100),
+    color = red,
+    key = "Steady state",
+    explicit(M_steady, t, 0, 100),
+    color = green,
+    key = "Threshold",
+    explicit(M_th, t, 0, 100)
+)$
+
+/* グラフ2 */
+draw2d(
+    title = "Fig.2: Reset Probability",
+    xlabel = "Time (years)",
+    ylabel = "Reset Probability",
+    grid = true,
+    key = "P_reset(t)",
+    explicit(reset_prob(t), t, 0.1, 100)
+)$
+
+/* グラフ3 */
+alpha_list: [0.01, 0.02, 0.03, 0.04, 0.05]$
+P50_alpha: makelist(
+    1.0 - cdf_normal(beta/(a+beta)+(M0-beta/(a+beta))*exp(-(a+beta)*50), sigma*sqrt(50), M_th),
+    a, alpha_list)$
+
+draw2d(
+    title = "Fig.3: Sensitivity to alpha",
+    xlabel = "Methylation Loss Rate alpha",
+    ylabel = "50-Year Reset Probability",
+    grid = true,
+    point_type = circle,
+    point_size = 2,
+    key = "P_reset(50)",
+    points(alpha_list, P50_alpha)
+)$
+
+/* グラフ4 */
+sigma_list: [0.01, 0.03, 0.05, 0.07, 0.1]$
+P50_sigma: makelist(
+    1.0 - cdf_normal(float(M_det(50)), s*sqrt(50), M_th),
+    s, sigma_list)$
+
+draw2d(
+    title = "Fig.4: Sensitivity to sigma",
+    xlabel = "Noise Intensity sigma",
+    ylabel = "50-Year Reset Probability",
+    grid = true,
+    point_type = circle,
+    point_size = 2,
+    key = "P_reset(50)",
+    points(sigma_list, P50_sigma)
+)$
+
+print("")$
+print("全4グラフを別windowに表示しました")$
+print("==========================================")$
+print("BIO-507-03 analysis complete")$
+print("==========================================")$

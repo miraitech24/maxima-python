@@ -1,0 +1,150 @@
+/* ================================================================
+   時超えケンタ - 人類進化形態と共存戦略
+   仕様：生身人類・サイボーグ・PhysicalAIの能力比較と共存モデル
+   計算項目：
+     1. 各形態の寿命と活動可能範囲
+     2. ワームホール経由の転送時間
+     3. 情報処理能力の比較
+     4. 共存のためのリソース配分最適化
+   グラフ：距離vs到達可能形態
+   ================================================================ */
+
+/* ---- 基本パラメータ ---- */
+c : 2.99792458e8;        /* 光速 [m/s] */
+ly : 9.46073e15;         /* 1光年 [m] */
+
+/* 各形態の寿命 */
+lifespan_human : 120;    /* 生身人類 [年] */
+lifespan_cyborg : 400;   /* サイボーグ [年] */
+lifespan_AI : 1e6;       /* PhysicalAI [年]（実質無限） */
+
+/* 各形態の移動速度（巡航） */
+v_human : 0.01 * c;      /* 生身人類：0.01c（化学ロケット） */
+v_cyborg : 0.05 * c;     /* サイボーグ：0.05c（核融合） */
+v_AI : 0.2 * c;          /* PhysicalAI：0.2c（レーザーセイル） */
+
+print("=== 各形態の基本能力 ===")$
+print("生身人類: 寿命", lifespan_human, "年, 巡航速度", v_human/c, "c")$
+print("サイボーグ: 寿命", lifespan_cyborg, "年, 巡航速度", v_cyborg/c, "c")$
+print("PhysicalAI: 寿命", lifespan_AI, "年, 巡航速度", v_AI/c, "c")$
+
+/* ---- 到達可能距離の計算 ---- */
+/* 各形態が寿命内に到達可能な最大距離 */
+max_dist_human : lifespan_human * v_human;      /* [光年] */
+max_dist_cyborg : lifespan_cyborg * v_cyborg;    /* [光年] */
+max_dist_AI : lifespan_AI * v_AI;                /* [光年] */
+
+print("")$
+print("=== 寿命内到達可能距離 ===")$
+print("生身人類: ", max_dist_human/ly, " 光年")$
+print("サイボーグ: ", max_dist_cyborg/ly, " 光年")$
+print("PhysicalAI: ", max_dist_AI/ly, " 光年")$
+
+/* ---- ワームホール転送 ---- */
+/* 理論上のワームホール転送時間（瞬時と仮定） */
+/* ただし、ワームホール入口・出口の建設時間が必要 */
+wormhole_construction_time : 50;  /* ワームホール建設 [年] */
+wormhole_transfer_time : 0;        /* 転送時間 [年]（瞬時） */
+
+/* ワームホール経由で到達可能な範囲（理論上無制限） */
+print("")$
+print("=== ワームホール転送 ===")$
+print("建設時間: ", wormhole_construction_time, " 年")$
+print("転送時間: ", wormhole_transfer_time, " 年（理論上瞬時）")$
+print("到達範囲: 理論上無制限（ただしエネルギー制約あり）")$
+
+/* ---- 情報処理能力比較 ---- */
+/* 生身人類の脳：約100億ニューロン、200兆シナプス */
+/* サイボーグ：生身＋電子拡張 */
+/* PhysicalAI：10万台の光量子コンピュータ */
+
+human_brain_flops : 1e16;           /* 生身人類：10 PFLOPS（推定） */
+cyborg_brain_flops : 1e18;          /* サイボーグ：1 EFLOPS */
+AI_total_flops : 1e5 * 1e15;        /* PhysicalAI：10万台×1 PFLOPS = 100 EFLOPS */
+
+print("")$
+print("=== 情報処理能力 ===")$
+print("生身人類: ", human_brain_flops, " FLOPS")$
+print("サイボーグ: ", cyborg_brain_flops, " FLOPS")$
+print("PhysicalAI（時超えケンタ）: ", AI_total_flops, " FLOPS")$
+print("能力比（AI/人間）: ", AI_total_flops / human_brain_flops)$
+
+/* ---- 共存モデル：リソース配分 ---- */
+/* プロキシマbの総資源量（推定） */
+proxy_b_mass : 2.0e24;             /* プロキシマb質量 [kg]（地球の約1/3） */
+usable_ratio : 0.01;                /* 利用可能資源比率（1%と仮定） */
+total_resources : proxy_b_mass * usable_ratio; /* [kg] */
+
+/* 各形態の必要リソース */
+resource_per_human : 1e5;          /* 生身人類1人あたり [kg]（生活基盤含む） */
+resource_per_cyborg : 2e5;         /* サイボーグ1人あたり [kg] */
+resource_per_AI_unit : 1e3;        /* PhysicalAI1台あたり [kg] */
+
+/* 最適配分（全形態が共存する場合） */
+N_human : 1000;                     /* 生身人類 [人] */
+N_cyborg : 500;                     /* サイボーグ [人] */
+N_AI : 1e5;                         /* PhysicalAI [台] */
+
+total_resource_needed : N_human * resource_per_human 
+                      + N_cyborg * resource_per_cyborg 
+                      + N_AI * resource_per_AI_unit;
+
+print("")$
+print("=== プロキシマb資源と配分 ===")$
+print("総利用可能資源: ", total_resources/1e12, " 兆トン")$
+print("共存必要資源: ", total_resource_needed/1e9, " 億トン")$
+print("資源余裕率: ", total_resources / total_resource_needed)$
+
+/* ---- グラフ：距離vs各形態の到達可能性 ---- */
+dist_range : makelist(i*5, i, 1, 40);  /* 5光年刻みで200光年まで */
+
+/* 各形態の到達可能性（1=到達可能, 0=不可能） */
+reach_human : makelist(if d <= max_dist_human/ly then 1 else 0, d, dist_range);
+reach_cyborg : makelist(if d <= max_dist_cyborg/ly then 1 else 0, d, dist_range);
+reach_AI : makelist(if d <= max_dist_AI/ly then 1 else 0, d, dist_range);
+reach_wormhole : makelist(1, d, dist_range);  /* ワームホールは全距離可能 */
+
+plot2d([
+    [discrete, dist_range, reach_human],
+    [discrete, dist_range, reach_cyborg],
+    [discrete, dist_range, reach_AI],
+    [discrete, dist_range, reach_wormhole]
+], [xlabel, "距離 [光年]"],
+   [ylabel, "到達可能性 (1=可能, 0=不可能)"],
+   [style, [lines, 2], [lines, 2, 2], [lines, 2, 3], [lines, 2, 1]],
+   [legend, "生身人類", "サイボーグ", "PhysicalAI", "ワームホール"],
+   [title, "各形態の到達可能距離"],
+   [gnuplot_preamble, "set grid; set yrange [0:1.2]; set key top right;"])$
+
+/* ---- 共存のための役割分担 ---- */
+print("")$
+print("=== 共存のための役割分担 ===")$
+print("【時超えケンタ（PhysicalAI）の役割】")$
+print(" - 恒星間探査・開拓の先遣隊")$
+print(" - ワームホール建設・維持管理")$
+print(" - インフラ建設（自己複製能力を活用）")$
+print(" - 環境モニタリングと予測")$
+print("")$
+print("【サイボーグ人類の役割】")$
+print(" - ケンタの管理・監督")$
+print(" - 複雑な意思決定（倫理・政治）")$
+print(" - 新技術の研究開発")$
+print("")$
+print("【生身人類の役割】")$
+print(" - 文化・芸術の継承")$
+print(" - 観光・レクリエーション")$
+print(" - サイボーグ化を望まない者の生活")$
+
+/* ---- 結論 ---- */
+print("")$
+print("=== 結論 ===")$
+print("1. 距離による棲み分け：生身人類は10光年以内、")$
+print("   サイボーグは20光年以内、ケンタは200光年以上が活動範囲。")$
+print("2. 時間による棲み分け：ケンタが先遣隊としてインフラを整備し、")$
+print("   その後サイボーグが移住、最後に生身人類が追従する。")$
+print("3. 役割による棲み分け：ケンタは物理労働と計算、")$
+print("   サイボーグは管理と研究、生身人類は文化と倫理を担当。")$
+print("4. 資源面：プロキシマbの資源は全形態の共存に十分。")$
+print("   ケンタの自己複製能力が建設コストを大幅に低減。")$
+print("5. 結論：ケンタと人類は競合ではなく補完関係。")$
+print("   ケンタが物理的基盤を提供し、人類が目的と意味を与える。")$

@@ -1,0 +1,30 @@
+/* C010: 人間ARアバターの物理的インタラクション限界 */
+/* Maxima連成: 触覚フィードバックの応答速度解析 */
+
+/* ===== 人間の触覚知覚閾値 ===== */
+t_min: 0.005;  /* 最小検知時間 [s]（200Hz） */
+t_comfort: 0.020;  /* 快適な応答時間 [s] */
+t_limit: 0.100;  /* 許容限界 [s] */
+
+print("人間の触覚知覚閾値:");
+print("最小検知時間:", t_min*1000, "[ms]");
+print("快適な応答時間:", t_comfort*1000, "[ms]");
+print("許容限界:", t_limit*1000, "[ms]");
+
+/* ===== マイクロスロートの理論遅延 ===== */
+t_wh_read: 0.0001;  /* 量子状態読み取り [s] */
+t_wh_convert: 0.0005;  /* 古典変換 [s] */
+t_wh_transfer: 0.0;  /* 転送 [s]（理論上0秒） */
+t_wh_reconstruct: 0.0005;  /* 再構成 [s] */
+t_wh_total: t_wh_read + t_wh_convert + t_wh_transfer + t_wh_reconstruct;
+
+print("マイクロスロート遅延:");
+print("理論遅延:", t_wh_total*1000, "[ms]");
+print("快適限界以内:", if t_wh_total < t_comfort then "Yes" else "No");
+print("許容限界以内:", if t_wh_total < t_limit then "Yes" else "No");
+
+/* ===== 力覚再現のサンプリング周波数 ===== */
+/* 人間の触覚は約200Hzまで知覚可能 */
+/* ナイキスト周波数: 400Hz以上が必要 */
+f_nyquist: 400;  /* [Hz] */
+print("必要なサンプリング周波数:", f_nyquist, "[Hz]");

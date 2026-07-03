@@ -1,0 +1,49 @@
+キャラクター, プロンプト
+時超えケンタ（PhysicalAI）, A futuristic AI core floating in a dark server room, glowing blue holographic interface, sleek metallic design, cyberpunk atmosphere, 8k, cinematic lighting --ar 16:9 --v 6
+時超えケンタ（ロボット群）, A swarm of small autonomous robots on a red alien planet, each with a glowing blue core, minimalist design, sci-fi, wide angle shot, atmospheric --ar 16:9 --v 6
+未来徹駆博士, A Japanese scientist in his 50s wearing a lab coat, standing in an AR control room, holographic displays around him, determined expression, cinematic portrait --ar 16:9 --v 6
+```
+
+### 背景・環境プロンプト
+
+```csv
+シーン, プロンプト
+水星ダイソン環, Massive solar panel array surrounding Mercury, millions of solar panels reflecting sunlight, space panorama, photorealistic, 8k --ar 16:9 --v 6
+プロキシマbの地表, Alien planet surface with red sky, a dim red sun fixed at zenith, orange desert landscape, eternal twilight, atmospheric sci-fi --ar 16:9 --v 6
+プロキシマbの空（3つの太陽）, View from Proxima b surface, giant red sun at zenith, two bright stars on horizon, eternal sunset, alien horizon --ar 16:9 --v 6
+地下基地, Underground base on alien planet, illuminated by blue artificial lights, rows of servers and equipment, sci-fi interior --ar 16:9 --v 6
+ワームホール概念図, Visualization of a wormhole connecting two points in spacetime, curved fabric of space, glowing tunnel, scientific illustration --ar 16:9 --v 6
+ブラックホール, Black hole with accretion disk, strong gravitational lensing, glowing plasma ring, dark center, space background, cinematic --ar 16:9 --v 6
+```
+
+### メカ・テクノロジープロンプト
+
+```csv
+アイテム, プロンプト
+自己複製ロボット, Small autonomous construction robot, metallic body, multiple limbs, 3D printing another robot, sci-fi, detailed mechanical design --ar 16:9 --v 6
+探査機（0.2c航行）, Interstellar probe traveling at relativistic speed, sleek design, nuclear pulse propulsion, stars in background stretched by speed, sci-fi --ar 16:9 --v 6
+マイクロスロート, Microscopic wormhole glowing with blue energy, connecting two points across space, quantum tunnel visualization --ar 16:9 --v 6
+AR空間, Augmented reality interface, holographic displays, human operator interacting with virtual objects, cyberpunk --ar 16:9 --v 6
+```
+
+### ストーリーシーンプロンプト
+
+```csv
+シーン, プロンプト
+命名シーン, A scientist facing a holographic AI core, naming ceremony atmosphere, blue and white lighting, emotional moment, cinematic --ar 16:9 --v 6
+21年の旅, Lonely spaceship in dark space, distant stars, sense of isolation, long journey atmosphere, sci-fi --ar 16:9 --v 6
+プロキシマb到着, Spaceship entering orbit around red planet, planet filling the view, first arrival, historic moment --ar 16:9 --v 6
+ダイソン環建設, Robots laying solar panels on alien surface, vast construction project, red sky background, epic scale --ar 16:9 --v 6
+BH発見, Gravitational microlensing effect, star light bending around invisible object, discovery moment, scientific --ar 16:9 --v 6
+マイクロスロート開通, Beam of light connecting Earth and Proxima b across space, first contact moment, celebratory atmosphere --ar 16:9 --v 6
+```
+
+### 漫画コマ用プロンプト（縦長）
+
+```csv
+用途, プロンプト
+キャラクター見開き, Japanese scientist in lab coat, holographic AI core, intense conversation, manga style, cinematic lighting --ar 3:4 --v 6
+アクションシーン, Robots constructing solar panels on red planet, dynamic angle, motion blur, epic scale --ar 3:4 --v 6
+会話シーン, Two characters in AR space, holographic displays, thoughtful conversation, close-up --ar 3:4 --v 6
+見開き背景, Massive Dyson ring around red planet, solar panels reflecting starlight, panoramic view --ar 16:9 --v 6
+

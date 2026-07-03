@@ -1,0 +1,82 @@
+/* ============================================================ */
+/* LENR-VENUS-010: 装置の耐圧・耐食性評価（超臨界CO2環境）       */
+/* 50気圧・350℃CO2環境での長期運用                               */
+/* 注意: Maximaの沼（floatとシンボル、diffの評価タイミング）回避 */
+/* ============================================================ */
+
+/* ---- 1. 設計条件 ---- */
+P_design : 50 * 0.101325;  /* 50気圧 → MPa */
+T_design : 350 + 273.15;   /* 350℃ → K */
+SF : 1.5;                  /* 安全率 */
+life : 20;                 /* 設計寿命 (年) */
+D_i : 0.5;                 /* 内径 (m) */
+
+/* ---- 2. 材料パラメータ ---- */
+/* [key, 降伏強度MPa, 腐食速度mm/year, 密度g/cm3, コストyen/kg] */
+materials : [
+    ["SUS316L",       205, 0.12, 7.98, 3000],
+    ["Inconel625",    345, 0.03, 8.44, 12000],
+    ["HastelloyC276", 283, 0.01, 8.89, 18000],
+    ["Ti-6Al-4V",     830, 0.05, 4.43, 15000],
+    ["Al2O3_coating", 235, 0.005, 7.85, 5000]
+];
+
+/* ---- 3. 肉厚計算（薄肉円筒の式） ---- */
+required_thickness(Sy) := block(
+    [t_req],
+    t_req : (P_design * D_i * SF) / (2 * Sy),
+    return(t_req)
+);
+
+/* ---- 4. 腐食代計算 ---- */
+corrosion_allowance(cr) := cr * life;
+
+/* ---- 5. 各材料の評価 ---- */
+print("=== 材料評価結果 ===")$
+print("材料名, 必要肉厚(mm), 腐食代(mm), 設計肉厚(mm), 重量(kg/m), コスト(yen/m)")$
+
+for mat in materials do (
+    key : mat[1],
+    Sy : mat[2],
+    cr : mat[3],
+    dens : mat[4],
+    cost_kg : mat[5],
+
+    t_req : required_thickness(Sy),
+    t_req_mm : float(t_req * 1000),
+
+    ca : corrosion_allowance(cr),
+
+    t_design : t_req + ca,
+    t_design_mm : float(t_design * 1000),
+
+    V : %pi * ((D_i/2 + t_design)^2 - (D_i/2)^2),
+    W : float(V * dens * 1000),
+
+    C : float(W * cost_kg),
+
+    print(concat(key, ", ", t_req_mm, ", ", ca, ", ", t_design_mm, ", ", W, ", ", C))
+)$
+
+/* ---- 6. グラフ描画（plot2dは数値処理に切り替わるので安全） ---- */
+data_t : makelist([i, required_thickness(materials[i][2]) * 1000], i, 1, length(materials))$
+data_ca : makelist([i, corrosion_allowance(materials[i][3])], i, 1, length(materials))$
+
+plot2d([[discrete, data_t], [discrete, data_ca]],
+       [style, [points, 2, 1, 1], [points, 2, 2, 2]],
+       [legend, "必要肉厚(mm)", "腐食代(mm)"],
+       [xlabel, "材料番号"], [ylabel, "厚さ (mm)"],
+       [title, "LENR-VENUS-010: 材料比較"])$
+
+/* ---- 7. 総合評価 ---- */
+print("")$
+print("=== 総合評価 ===")$
+print("SUS316L: 汎用性高いが高温クリープ注意")$
+print("Inconel625: 耐食性良好、コスト高")$
+print("HastelloyC276: 最高耐食性、非常に高コスト")$
+print("Ti-6Al-4V: 軽量高強度、水素脆化注意")$
+print("Al2O3_coating: コーティング剥離リスク")$
+
+print("")$
+print("【推奨】Inconel625: 耐食性と強度のバランス良好")$
+print("【条件付き推奨】Al2O3_coating: コーティング品質が確保できる場合")$

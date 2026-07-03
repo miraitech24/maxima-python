@@ -1,0 +1,167 @@
+/* ============================================================ */
+/* BIO-507-09: DNA Damage Repair Efficiency                       */
+/* Probability of maintaining genome integrity and repair         */
+/*                                                              */
+/* 【Specification】                                             */
+/* 1. DNA damage and repair model                                */
+/*    Genome integrity G(t) over time                             */
+/*    dG/dt = -k_damage * G + k_repair * (1 - G)                 */
+/*    G: genome integrity (0-1)                                  */
+/*    k_damage: damage accumulation rate                          */
+/*    k_repair: repair efficiency rate                            */
+/*                                                              */
+/* 2. Repair mechanisms                                          */
+/*    BER: Base Excision Repair                                  */
+/*    NER: Nucleotide Excision Repair                            */
+/*    MMR: Mismatch Repair                                       */
+/*    HR: Homologous Recombination                               */
+/*    NHEJ: Non-Homologous End Joining                           */
+/*                                                              */
+/* 3. Parameters                                                 */
+/*    G0: initial genome integrity = 1.0                         */
+/*    k_damage: damage rate = 0.03                               */
+/*    k_repair_base: base repair rate = 0.05                     */
+/*    k_repair_enhanced: enhanced repair rate = 0.12             */
+/*    G_crit: critical threshold = 0.4                           */
+/*    t_max: calculation period = 100 years                      */
+/*                                                              */
+/* 4. Graphics                                                   */
+/*    draw2d for 4 plots in separate windows                     */
+/* ============================================================ */
+
+display2d:false;
+load(draw)$
+
+G0: 1.0$
+k_damage: 0.03$
+k_repair_base: 0.05$
+k_repair_enhanced: 0.12$
+G_crit: 0.4$
+t_max: 100$
+
+print("==========================================")$
+print("BIO-507-09: DNA Damage Repair Efficiency")$
+print("==========================================")$
+
+/* Repair mechanism efficiencies */
+P_BER: 0.85$
+P_NER: 0.75$
+P_MMR: 0.70$
+P_HR: 0.60$
+P_NHEJ: 0.50$
+
+print("Parameters:")$
+print("  Initial genome integrity G0 = ", G0)$
+print("  Damage rate k_damage = ", k_damage)$
+print("  Base repair rate = ", k_repair_base)$
+print("  Enhanced repair rate = ", k_repair_enhanced)$
+print("  Critical threshold G_crit = ", G_crit)$
+
+print("")$
+print("=== Repair Mechanism Efficiencies ===")$
+print("BER (Base Excision): ", P_BER * 100, " %")$
+print("NER (Nucleotide Excision): ", P_NER * 100, " %")$
+print("MMR (Mismatch Repair): ", P_MMR * 100, " %")$
+print("HR (Homologous Recombination): ", P_HR * 100, " %")$
+print("NHEJ (Non-Homologous End Joining): ", P_NHEJ * 100, " %")$
+
+/* Overall repair efficiency */
+P_repair_overall: P_BER * P_NER * P_MMR * P_HR * P_NHEJ$
+print("")$
+print("Overall repair mechanism efficiency: ", float(P_repair_overall * 100), " %")$
+
+/* Genome integrity over time */
+G_base(t) := block(
+    [k_eff: k_repair_base * P_repair_overall],
+    return(k_eff/(k_damage+k_eff) + (G0 - k_eff/(k_damage+k_eff))*exp(-(k_damage+k_eff)*t))
+)$
+
+G_enhanced(t) := block(
+    [k_eff: k_repair_enhanced * P_repair_overall],
+    return(k_eff/(k_damage+k_eff) + (G0 - k_eff/(k_damage+k_eff))*exp(-(k_damage+k_eff)*t))
+)$
+
+print("")$
+print("=== Genome Integrity over Time ===")$
+print("Year   G_base   G_enhanced")$
+for t_val:0 thru 100 step 10 do (
+    gb: float(G_base(t_val)),
+    ge: float(G_enhanced(t_val)),
+    print(t_val, "  ", gb, "  ", ge)
+)$
+
+/* Time to reach critical threshold */
+t_crit_base: float(-log((G_crit*(k_damage+k_repair_base*P_repair_overall) - k_repair_base*P_repair_overall) / (G0*(k_damage+k_repair_base*P_repair_overall) - k_repair_base*P_repair_overall)) / (k_damage+k_repair_base*P_repair_overall))$
+t_crit_enhanced: float(-log((G_crit*(k_damage+k_repair_enhanced*P_repair_overall) - k_repair_enhanced*P_repair_overall) / (G0*(k_damage+k_repair_enhanced*P_repair_overall) - k_repair_enhanced*P_repair_overall)) / (k_damage+k_repair_enhanced*P_repair_overall))$
+
+print("")$
+print("=== Critical Threshold Analysis ===")$
+print("Time to reach G_crit (base repair): ", t_crit_base, " years")$
+print("Time to reach G_crit (enhanced repair): ", t_crit_enhanced, " years")$
+
+/* Sensitivity: repair rate effect at 50 years */
+print("")$
+print("=== Sensitivity: Repair Rate Effect at 50 Years ===")$
+print("k_repair  G(50)")$
+for kr in [0.03, 0.05, 0.08, 0.12, 0.15] do (
+    g50: float(kr*P_repair_overall/(k_damage+kr*P_repair_overall) + (G0 - kr*P_repair_overall/(k_damage+kr*P_repair_overall))*exp(-(k_damage+kr*P_repair_overall)*50)),
+    print(kr, "  ", g50)
+)$
+
+/* Fig.1: Genome integrity over time */
+draw2d(
+    title = "Fig.1: Genome Integrity over Time",
+    xlabel = "Time (years)", ylabel = "Genome Integrity G(t)",
+    key = "Base Repair",
+    explicit(G_base(t), t, 0, 100),
+    color = blue, line_width = 2,
+    key = "Enhanced Repair",
+    explicit(G_enhanced(t), t, 0, 100),
+    color = green, line_width = 2,
+    key = "Critical Threshold",
+    explicit(G_crit, t, 0, 100),
+    color = red, line_width = 2, line_type = dots,
+    grid = true
+)$
+
+/* Fig.2: Repair mechanism efficiencies */
+draw2d(
+    title = "Fig.2: Repair Mechanism Efficiencies",
+    xlabel = "Repair Mechanism", ylabel = "Efficiency",
+    key = "Efficiency",
+    points([1,2,3,4,5], [P_BER, P_NER, P_MMR, P_HR, P_NHEJ]),
+    color = blue, line_width = 2,
+    grid = true
+)$
+
+/* Fig.3: Sensitivity analysis */
+draw2d(
+    title = "Fig.3: Sensitivity to Repair Rate at 50 Years",
+    xlabel = "Repair Rate k_repair", ylabel = "Genome Integrity G(50)",
+    key = "G(50)",
+    explicit(x*P_repair_overall/(k_damage+x*P_repair_overall) + (G0 - x*P_repair_overall/(k_damage+x*P_repair_overall))*exp(-(k_damage+x*P_repair_overall)*50), x, 0.02, 0.20),
+    color = purple, line_width = 2,
+    grid = true
+)$
+
+/* Fig.4: Damage rate effect */
+draw2d(
+    title = "Fig.4: Effect of Damage Rate on Genome Integrity",
+    xlabel = "Time (years)", ylabel = "Genome Integrity G(t)",
+    key = "k_damage=0.01",
+    explicit(k_repair_enhanced*P_repair_overall/(0.01+k_repair_enhanced*P_repair_overall) + (G0 - k_repair_enhanced*P_repair_overall/(0.01+k_repair_enhanced*P_repair_overall))*exp(-(0.01+k_repair_enhanced*P_repair_overall)*t), t, 0, 100),
+    color = blue, line_width = 2,
+    key = "k_damage=0.03",
+    explicit(G_enhanced(t), t, 0, 100),
+    color = green, line_width = 2,
+    key = "k_damage=0.05",
+    explicit(k_repair_enhanced*P_repair_overall/(0.05+k_repair_enhanced*P_repair_overall) + (G0 - k_repair_enhanced*P_repair_overall/(0.05+k_repair_enhanced*P_repair_overall))*exp(-(0.05+k_repair_enhanced*P_repair_overall)*t), t, 0, 100),
+    color = red, line_width = 2,
+    grid = true
+)$
+
+print("")$
+print("All 4 figures displayed in separate windows")$
+print("==========================================")$
+print("BIO-507-09 analysis complete")$
+print("==========================================")$

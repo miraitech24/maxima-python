@@ -1,0 +1,129 @@
+/* E011 量子エネルギー 量子電池(量子充電・放電モデル) */
+/* ============================================ */
+/* 詳細仕様 */
+/* ============================================ */
+/* 
+ * 課題ID: E011
+ * 技術: 量子電池(量子充電・放電モデル)
+ * 目的: 2準位系量子電池の充電・放電特性を解析
+ * 
+ * ハミルトニアン: H = diag(1, 2) (E1=1, E2=2)
+ * 初期状態: |psi(0)> = (|0> + |1>)/sqrt(2) (重ね合わせ状態)
+ * 平均エネルギー: (E1+E2)/2 = 1.5
+ * 
+ * グラフ1: 充電エネルギー(実部)の時間発展
+ *    - 重ね合わせ状態ではエネルギーは1.5を中心に振動
+ *    - 振動数: omega = E2 - E1 = 1 (ラビ振動)
+ *    - 振幅: (E2-E1)/2 = 0.5
+ *    - 最小値: 1.5 - 0.5 = 1.0
+ *    - 最大値: 1.5 + 0.5 = 2.0
+ * 
+ * グラフ2: 充電電力(実部)の時間発展
+ *    - エネルギーの時間微分
+ *    - 充電・放電のタイミングを示す
+ * 
+ * グラフ3: 放電特性(減衰)
+ *    - 散逸率 gamma = 0.1 で指数減衰
+ *    - 開放系でのエネルギー損失をモデル化
+ */
+
+/* ============================================ */
+/* 縦軸の正しい説明 */
+/* ============================================ */
+/* 
+ * 誤: 「実部0.5不変」
+ * 正: 「実部は1.5を中心に振幅0.5で振動」
+ * 
+ * つまり:
+ *   縦軸(エネルギー)の範囲: 1.0 〜 2.0
+ *   中心値: 1.5
+ *   振幅: 0.5
+ *   
+ *   0.5は振幅であって、縦軸の値ではない！
+ *   縦軸の値は1.0〜2.0の間を振動する
+ */
+
+/* ハミルトニアン */
+H: matrix([1, 0], [0, 2]);
+
+/* 重ね合わせ初期状態 (|0> + |1>)/sqrt(2) */
+psi0: matrix([1/sqrt(2)], [1/sqrt(2)]);
+
+/* 充電エネルギー - 明示的な数値計算（修正版） */
+E_real(t) := block([psi0_re, psi0_im, e1_re, e1_im, e2_re, e2_im,
+                    psi1_re, psi1_im, psi2_re, psi2_im,
+                    conj1, conj2, val_re],
+    psi0_re: 1/sqrt(2),
+    psi0_im: 0,
+    /* 時間発展 e^{-i*E*t} */
+    e1_re: cos(t),
+    e1_im: -sin(t),
+    e2_re: cos(2*t),
+    e2_im: -sin(2*t),
+    /* psi1 = (1/sqrt(2)) * e^{-i*t} */
+    psi1_re: psi0_re * e1_re - psi0_im * e1_im,
+    psi1_im: psi0_re * e1_im + psi0_im * e1_re,
+    /* psi2 = (1/sqrt(2)) * e^{-i*2*t}  ← 修正: ゼロ固定を解除 */
+    psi2_re: psi0_re * e2_re - psi0_im * e2_im,
+    psi2_im: psi0_re * e2_im + psi0_im * e2_re,
+    /* 共役転置 */
+    conj1: psi1_re,
+    conj1_im: -psi1_im,
+    conj2: psi2_re,
+    conj2_im: -psi2_im,
+    /* <psi|H|psi> = conj1*1*psi1 + conj2*2*psi2 */
+    val_re: (conj1 * 1 * psi1_re - conj1_im * 1 * psi1_im) +
+            (conj2 * 2 * psi2_re - conj2_im * 2 * psi2_im),
+    float(val_re)
+);
+
+/* 充電電力 - 数値微分 */
+P_real(t) := block([dt, Ep, Em],
+    dt: 0.001,
+    Ep: E_real(t + dt),
+    Em: E_real(t - dt),
+    float((Ep - Em) / (2*dt))
+);
+
+/* 放電特性 - 指数減衰 */
+E_discharge_real(t) := block([gamma],
+    gamma: 0.1,
+    float(E_real(t) * exp(-gamma*t))
+);
+
+/* 数値リストを作成 */
+t_vals: makelist(float(i/10), i, 0, 100);
+E_vals: makelist(E_real(t_vals[i]), i, 1, length(t_vals));
+P_vals: makelist(P_real(t_vals[i]), i, 1, length(t_vals));
+Ed_vals: makelist(E_discharge_real(t_vals[i]), i, 1, length(t_vals));
+
+/* グラフ1: 充電エネルギー(実部) - 自動スケーリング */
+plot2d([discrete, t_vals, E_vals], [xlabel, "時間 t"], [ylabel, "充電エネルギー (実部)"],
+       [legend, "重ね合わせ状態"], [style, [lines, 2]],
+       [title, "量子電池 充電エネルギー時間発展"]);
+
+/* グラフ2: 充電電力(実部) */
+plot2d([discrete, t_vals, P_vals], [xlabel, "時間 t"], [ylabel, "充電電力 (実部)"],
+       [legend, "充電電力"], [style, [lines, 2]],
+       [title, "量子電池 充電電力時間発展"]);
+
+/* グラフ3: 放電特性(減衰) */
+plot2d([discrete, t_vals, Ed_vals], [xlabel, "時間 t"], [ylabel, "放電エネルギー (実部)"],
+       [legend, "放電特性 gamma=0.1"], [style, [lines, 2]],
+       [title, "量子電池 放電特性(減衰)"]);
+
+/* 結果表示 */
+print("=== 量子電池 解析結果 ===");
+print("ハミルトニアン: H = diag(1, 2)");
+print("初期状態: |psi(0)> = (|0> + |1>)/sqrt(2)");
+print("平均エネルギー: (E1+E2)/2 =", (1+2)/2);
+print("振動振幅: (E2-E1)/2 = 0.5");
+print("エネルギー最小値: 1.5 - 0.5 = 1.0");
+print("エネルギー最大値: 1.5 + 0.5 = 2.0");
+print("");
+
+print("=== エネルギー実部の値（抜粋）===");
+for i:0 thru 10 do (
+    t_val: float(i),
+    print("t=", t_val, " E_real=", E_real(t_val))
+);

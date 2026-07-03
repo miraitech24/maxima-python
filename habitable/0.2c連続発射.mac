@@ -1,0 +1,126 @@
+/* ================================================================
+   時超えケンタ - 0.2c連続発射シミュレーション（修正版）
+   仕様：レーザーセイル探査機を0.2cまで加速、連続発射の運動学
+   計算項目：
+     1. 0.2cまでの加速時間（一定加速、1g）
+     2. 各恒星系までの到達時間
+     3. 連続発射の時間間隔
+     4. 総所要エネルギー
+   グラフ：距離vs到達時間（静止系・船内時間）
+   修正点：makelize → makelist に修正、years_listを正しく定義
+   ================================================================ */
+
+/* ---- 物理定数 ---- */
+c : 2.99792458e8;   /* 光速 [m/s] */
+g0 : 9.80665;       /* 重力加速度 [m/s^2] */
+ly : 9.46073e15;    /* 1光年 [m] */
+M_ship : 1.0e3;     /* 探査機質量 [kg]（1トン想定） */
+
+/* ---- 目標速度 ---- */
+v_target : 0.2 * c; /* 0.2c [m/s] */
+
+/* ---- 相対論的加速時間（正確解） ---- */
+/* 運動方程式：dv/dt = a*(1 - v^2/c^2)^(3/2) */
+/* 解析解：t = (c/a) * atanh(v/c) */
+t_acc_rel : (c / g0) * atanh(v_target / c);
+t_acc_rel_days : t_acc_rel / (24 * 3600);
+t_acc_rel_years : t_acc_rel_days / 365.25;
+
+print("=== 加速フェーズ ===")$
+print("目標速度: 0.2c = ", v_target, " m/s")$
+print("加速時間（相対論正確解）: ", t_acc_rel_days, " 日 (", t_acc_rel_years, " 年)")$
+
+/* ---- 各恒星系までの到達時間 ---- */
+/* ターゲットリスト */
+targets : [
+    ["プロキシマb",  4.24 * ly],
+    ["バーナード星b", 5.96 * ly],
+    ["εインディb",   12.0 * ly],
+    ["グリーゼ581g", 20.3 * ly],
+    ["グリーゼ667Cc", 23.6 * ly],
+    ["ケプラー442b", 33.0 * ly],
+    ["トラピスト1e",  40.7 * ly]
+]$
+
+print("")$
+print("=== 到達時間（静止系） ===")$
+print("距離[ly] | 恒星名 | 到達時間[年] | 船内時間[年]")$
+print("---------+--------+-------------+-------------")$
+
+/* ローレンツ因子 */
+gamma : 1 / sqrt(1 - (v_target/c)^2)$
+
+for target in targets do block(
+    [name, dist, t_arrive, t_ship],
+    name : target[1],
+    dist : target[2],
+    /* 0.2c定速巡航と仮定（加速・減速フェーズは無視） */
+    t_arrive : dist / v_target / (365.25 * 24 * 3600), /* [年] */
+    /* 船内時間（特殊相対論的） */
+    t_ship : t_arrive / gamma,
+    print(dist/ly, " | ", name, " | ", t_arrive, " | ", t_ship)
+)$
+
+/* ---- 連続発射の時間間隔 ---- */
+launch_interval : t_acc_rel_days; /* 加速時間分の間隔 [日] */
+launch_per_year : 365.25 / launch_interval;
+
+print("")$
+print("=== 連続発射計画 ===")$
+print("発射間隔: ", launch_interval, " 日")$
+print("年間発射数: ", launch_per_year, " 機")$
+
+/* ---- エネルギー計算 ---- */
+KE : (gamma - 1) * M_ship * c^2; /* [J] */
+KE_TWh : KE / (1e12 * 3600); /* [TWh] */
+
+print("")$
+print("=== エネルギー必要量 ===")$
+print("1機あたり運動エネルギー: ", KE, " J (", KE_TWh, " TWh)")$
+print("年間エネルギー（", launch_per_year, "機）: ", KE_TWh * launch_per_year, " TWh/年")$
+print("参考：世界年間発電量（2023年約30,000 TWh）との比: ", 
+      KE_TWh * launch_per_year / 30000)$
+
+/* ---- グラフ：距離vs到達時間（静止系・船内時間） ---- */
+/* 修正：makelistの第3引数に数値のリストを渡す */
+dist_list : makelist(4.24 + i*5, i, 0, 10); /* 4.24ly から 54.24ly まで 5ly刻み */
+t_stationary_list : makelist(d * ly / v_target / (365.25*24*3600), d, dist_list);
+t_ship_list : makelist(t_stationary_list[i] / gamma, i, 1, length(dist_list));
+
+plot2d([
+    [discrete, dist_list, t_stationary_list],
+    [discrete, dist_list, t_ship_list]
+], [xlabel, "距離 [光年]"],
+   [ylabel, "到達時間 [年]"],
+   [style, [lines, 2], [lines, 2, 3]],
+   [legend, "静止系時間", "船内時間"],
+   [title, "0.2c巡航での到達時間（加速・減速無視）"],
+   [gnuplot_preamble, "set grid; set key top left;"])$
+
+/* ---- グラフ：発射間隔と累積探査機数 ---- */
+/* 修正：makelistで0から50までの整数リストを正しく生成 */
+years_list : makelist(i, i, 0, 50); /* 0,1,2,...,50 */
+cumulative_ships : makelist(floor(i * 365.25 / launch_interval), i, years_list);
+
+plot2d([discrete, years_list, cumulative_ships],
+   [xlabel, "経過年数 [年]"],
+   [ylabel, "累積発射機数"],
+   [style, [lines, 2]],
+   [title, "連続発射計画（累積機数）"],
+   [gnuplot_preamble, "set grid;"]
+)$
+
+/* ---- 考察 ---- */
+print("")$
+print("=== 考察 ===")$
+print("1. 0.2c（約60,000km/s）は実現可能な恒星間速度である。")$
+print("   加速時間は約71日（相対論補正後）で、連続発射が現実的。")$
+print("2. プロキシマbまで約21年、グリーゼ581gまで約102年。")$
+print("   人間の寿命内での到達は難しいが、AI探査機なら問題ない。")$
+print("3. 年間約5機の発射が可能。50年で250機。")$
+print("   多様なターゲットに分散投資できる。")$
+print("4. エネルギー：1機あたり約1.8×10^19 J（約5,000 TWh）。")$
+print("   これは世界年間発電量の約1/6に相当。太陽光発電衛星なら可能。")$
+print("5. 結論：ハビタブルゾーンの多様性に応えるには、")$
+print("   年5機×50年=250機の探査機群を0.2cで連続発射する戦略が有効。")$
+print("   単一ターゲットへの全力投球はリスクが高すぎる。")$

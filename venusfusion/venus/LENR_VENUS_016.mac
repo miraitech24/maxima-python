@@ -1,0 +1,222 @@
+/* ============================================================ */
+/* LENR-VENUS-016: 総合エネルギー収支シミュレーション              */
+/* 山頂-55km連携案                                               */
+/* Maxima版: 記号処理ルールに従い、数値は後で代入                */
+/* 注意: Maximaの沼（floatとシンボル、diffの評価タイミング）回避 */
+/* ============================================================ */
+
+/* ---- 1. システム構成 ---- */
+/* 山頂(11km): LENR熱源 350℃, 50気圧                          */
+/* 高度55km: 放熱先 25℃, 1気圧                                */
+/* 熱サイフォン: 作動流体CO2, パイプ長44km                     */
+
+print("=== LENR-VENUS-016: 総合エネルギー収支シミュレーション ===")$
+print("山頂(11km) - 高度55km 連携案")$
+print("")$
+
+/* ---- 2. 物理定数 ---- */
+sigma : 5.67e-8;       /* ステファン・ボルツマン定数 (W/m2K4) */
+R : 8.314;             /* 気体定数 (J/molK) */
+g_venus : 8.87;        /* 金星重力加速度 (m/s^2) */
+
+/* ---- 3. 温度条件 ---- */
+T_hot : 350 + 273.15;  /* 山頂温度 (K) = 623.15K */
+T_cold : 25 + 273.15;  /* 高度55km温度 (K) = 298.15K */
+dT : float(T_hot - T_cold);  /* 温度差 (K) */
+
+print("温度条件:")$
+print("  山頂(熱源):", float(T_hot - 273.15), "℃ (", T_hot, "K)")$
+print("  高度55km(放熱先):", float(T_cold - 273.15), "℃ (", T_cold, "K)")$
+print("  温度差:", float(dT), "K")$
+print("")$
+
+/* ---- 4. カルノー効率（理論最大効率） ---- */
+eta_carnot : float(1 - T_cold / T_hot);
+print("カルノー効率（理論最大）:", float(eta_carnot * 100), "%")$
+
+/* ---- 5. LENR熱出力（想定） ---- */
+P_lenr_thermal : 100e3;  /* LENR熱出力 100kW */
+print("LENR熱出力:", float(P_lenr_thermal / 1000), "kW")$
+
+/* ---- 6. 熱サイフォン設計 ---- */
+L_pipe : 44000;         /* パイプ長 (m) */
+D_pipe : 0.3;           /* パイプ内径 (m) */
+A_pipe : float(%pi * D_pipe^2 / 4);  /* 断面積 (m2) */
+
+rho_CO2 : 200;          /* 密度 (kg/m3) 超臨界CO2 */
+cp_CO2 : 1.2e3;         /* 比熱 (J/kgK) */
+mu_CO2 : 3.0e-5;        /* 粘度 (Pa*s) */
+k_CO2 : 0.08;           /* 熱伝導率 (W/mK) */
+
+print("")$
+print("熱サイフォン設計:")$
+print("  パイプ長:", L_pipe, "m (44km)")$
+print("  パイプ内径:", D_pipe, "m")$
+print("  断面積:", float(A_pipe), "m2")$
+print("  作動流体: CO2 (超臨界)")$
+
+/* ---- 7. 熱輸送量計算 ---- */
+beta : 1 / T_hot;       /* 熱膨張率 (1/K) */
+v_drift : float(sqrt(2 * g_venus * beta * dT * L_pipe));  /* ドリフト速度 (m/s) */
+
+print("")$
+print("熱輸送特性:")$
+print("  熱膨張率:", float(beta), "1/K")$
+print("  ドリフト速度:", float(v_drift), "m/s")$
+
+m_dot : float(rho_CO2 * v_drift * A_pipe);
+print("  質量流量:", float(m_dot), "kg/s")$
+
+Q_transport : float(m_dot * cp_CO2 * dT);
+print("  熱輸送量:", float(Q_transport / 1000), "kW")$
+
+/* ---- 8. 熱損失評価 ---- */
+k_insulation : 0.04;    /* 断熱材熱伝導率 (W/mK) */
+t_insulation : 0.1;     /* 断熱材厚さ (m) */
+D_outer : D_pipe + 2 * t_insulation;  /* 外径 (m) */
+
+R_thermal : float(log(D_outer/D_pipe) / (2 * %pi * k_insulation * L_pipe));
+Q_loss : float(dT / R_thermal);
+print("")$
+print("熱損失評価:")$
+print("  断熱材厚さ:", t_insulation, "m")$
+print("  熱抵抗:", float(R_thermal), "K/W")$
+print("  放熱損失:", float(Q_loss / 1000), "kW")$
+
+Q_net : float(Q_transport - Q_loss);
+print("  正味熱輸送量:", float(Q_net / 1000), "kW")$
+
+/* ---- 9. 発電効率 ---- */
+eta_conversion : 0.25;  /* 変換効率 25%（スターリング想定） */
+P_electric : float(Q_net * eta_conversion);
+print("")$
+print("発電出力:")$
+print("  変換効率:", eta_conversion * 100, "%")$
+print("  発電出力:", float(P_electric / 1000), "kW")$
+
+/* ---- 10. 自己消費電力 ---- */
+P_pump : 2e3;           /* 循環ポンプ 2kW */
+P_control : 1e3;        /* 制御系 1kW */
+P_comm : 0.5e3;         /* 通信機器 0.5kW */
+P_self : float(P_pump + P_control + P_comm);
+print("")$
+print("自己消費電力:")$
+print("  循環ポンプ:", float(P_pump / 1000), "kW")$
+print("  制御系:", float(P_control / 1000), "kW")$
+print("  通信機器:", float(P_comm / 1000), "kW")$
+print("  合計:", float(P_self / 1000), "kW")$
+
+/* ---- 11. 正味出力 ---- */
+P_net : float(P_electric - P_self);
+print("")$
+print("正味出力:", float(P_net / 1000), "kW")$
+
+/* ---- 12. Q値（エネルギー利得） ---- */
+E_input : 10e3;         /* 入力エネルギー 10kW（想定） */
+Q_value : float(P_net / E_input);
+print("")$
+print("=== Q値（エネルギー利得） ===")$
+print("  入力エネルギー:", float(E_input / 1000), "kW")$
+print("  正味出力:", float(P_net / 1000), "kW")$
+print("  Q値:", float(Q_value))$
+
+if Q_value > 1 then (
+    print("  判定: Q > 1 → エネルギー利得あり【実用可能】")
+) else (
+    print("  判定: Q <= 1 → エネルギー利得なし【要改善】")
+)$
+
+/* ---- 13. 総合効率 ---- */
+eta_total : float(P_net / P_lenr_thermal * 100);
+print("")$
+print("=== 総合効率 ===")$
+print("  LENR熱出力→正味電力変換効率:", float(eta_total), "%")$
+
+/* ---- 14. 昼夜サイクル対応 ---- */
+day_duration : 126 * 24 * 3600;  /* 昼間の秒数 */
+night_duration : 117 * 24 * 3600;  /* 夜間の秒数 */
+
+E_storage : float(P_net * night_duration);
+print("")$
+print("=== 昼夜サイクル対応 ===")$
+print("  昼間: 126地球日")$
+print("  夜間: 117地球日")$
+print("  必要蓄電容量:", float(E_storage / 1000 / 3600), "kWh")$
+
+battery_density : 200;  /* Wh/kg */
+battery_mass : float(E_storage / 1000 / 3600 / battery_density * 1000);
+print("  蓄電池重量（Li-ion想定）:", float(battery_mass / 1000), "トン")$
+
+/* ---- 15. グラフ描画（修正版: points + linespoints スタイル） ---- */
+/* 注意: Maximaのbars, boxesスタイルはバージョンによって非対応 */
+/* 代替: points + linespoints スタイルで棒グラフ風に表示 */
+energy_data : [
+    [1, P_lenr_thermal/1000],   /* LENR熱出力 */
+    [2, Q_transport/1000],      /* 熱輸送量 */
+    [3, Q_net/1000],            /* 正味熱輸送量 */
+    [4, P_electric/1000],       /* 発電出力 */
+    [5, P_net/1000]             /* 正味出力 */
+]$
+
+/* 方法1: points + linespoints スタイル（推奨） */
+plot2d(
+    [discrete, energy_data],
+    [style, [linespoints, 2, 3, 1]],
+    [legend, "エネルギー(kW)"],
+    [xlabel, "段階"], [ylabel, "エネルギー (kW)"],
+    [xtics, 1, 5],
+    [title, "LENR-VENUS-016: エネルギー収支"],
+    [gnuplot_preamble, "set xtics ('LENR熱' 1, '熱輸送' 2, '正味熱' 3, '発電' 4, '正味' 5)"]
+)$
+
+/* 方法2: points + impulses スタイル（棒グラフ風） */
+plot2d(
+    [discrete, energy_data],
+    [style, [points, 3, 1, 1], [impulses, 1, 1]],
+    [legend, "エネルギー(kW)"],
+    [xlabel, "段階"], [ylabel, "エネルギー (kW)"],
+    [xtics, 1, 5],
+    [title, "LENR-VENUS-016: エネルギー収支（impulses）"],
+    [gnuplot_preamble, "set xtics ('LENR熱' 1, '熱輸送' 2, '正味熱' 3, '発電' 4, '正味' 5)"]
+)$
+
+/* ---- 16. 感度分析 ---- */
+print("")$
+print("=== 感度分析: 温度差の影響 ===")$
+print("温度差(K), カルノー効率(%), 熱輸送量(kW), 発電出力(kW)")$
+
+for dT_var : 200 thru 400 step 50 do (
+    eta_c : float(1 - (T_cold) / (T_cold + dT_var)),
+    v_d : float(sqrt(2 * g_venus * (1/(T_cold + dT_var)) * dT_var * L_pipe)),
+    m_d : float(rho_CO2 * v_d * A_pipe),
+    Q_t : float(m_d * cp_CO2 * dT_var),
+    P_e : float(Q_t * 0.25),
+    print(concat(dT_var, ", ", float(eta_c*100), ", ", float(Q_t/1000), ", ", float(P_e/1000)))
+)$
+
+/* ---- 17. 総合評価 ---- */
+print("")$
+print("=== 総合評価 ===")$
+print("【システム概要】")$
+print("  熱源: LENR (山頂 350℃)")$
+print("  放熱先: 高度55km大気 (25℃)")$
+print("  熱輸送: CO2熱サイフォン (44km)")$
+print("  発電: スターリングエンジン (効率25%)")$
+print("")$
+print("【性能指標】")$
+print("  Q値:", float(Q_value))$
+print("  正味出力:", float(P_net / 1000), "kW")$
+print("  総合効率:", float(eta_total), "%")$
+print("")$
+print("【課題】")$
+print("  1. 44kmの熱サイフォン建設技術")$
+print("  2. 超臨界CO2の長期安定性")$
+print("  3. 蓄電システムの重量（", float(battery_mass/1000), "トン）")$
+print("  4. 金星の過酷環境でのメンテナンス")$
+print("")$
+print("【結論】")$
+if Q_value > 1 then (
+    print("  エネルギー利得あり。実用化に向けてさらなる効率改善が望まれる。")
+) else (
+    print("  現状ではエネルギー利得不十分。触媒効率向上または温度差拡大が必要。")
+)$

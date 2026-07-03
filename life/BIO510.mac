@@ -1,0 +1,154 @@
+/* ============================================================ */
+/* BIO-510: Group Adaptation                                     */
+/* Minimum Genetic Diversity in Space Colonies                   */
+/* 宇宙コロニー最小遺伝的多様性                                    */
+/*                                                              */
+/* 【仕様】                                                      */
+/* 1. 遺伝的多様性モデル                                         */
+/*    有効集団サイズ Ne と遺伝的多様性 H の関係                   */
+/*    H(t) = H0 * (1 - 1/(2*Ne))^t                               */
+/*    H0: 初期遺伝的多様性                                       */
+/*    Ne: 有効集団サイズ                                         */
+/*    t: 世代数                                                  */
+/*                                                              */
+/* 2. 最小個体数計算                                             */
+/*    遺伝的多様性を50%以上維持するために必要な最小個体数         */
+/*    Ne_min = 1 / (2 * (1 - H_target^(1/t)))                    */
+/*                                                              */
+/* 3. パラメータ                                                 */
+/*    H0: 初期遺伝的多様性 = 1.0                                 */
+/*    H_target: 目標多様性 = 0.5 (50%)                           */
+/*    t_max: 最大世代数 = 100                                    */
+/*    generations: 維持すべき世代数 = 50                         */
+/*                                                              */
+/* 4. グラフ描画                                                 */
+/*    draw2dで別ウィンドウに表示                                  */
+/* ============================================================ */
+
+display2d:false;
+load(draw)$
+
+/* パラメータ定義 */
+H0: 1.0$
+H_target: 0.5$
+t_max: 100$
+generations: 50$
+
+print("==========================================")$
+print("BIO-510: Minimum Genetic Diversity in Space Colonies")$
+print("==========================================")$
+
+/* 遺伝的多様性の時間変化 */
+H_func(Ne, t) := H0 * (1 - 1/(2*Ne))^t$
+
+/* 最小個体数計算 */
+Ne_min(H_target, t) := 1 / (2 * (1 - H_target^(1/t)))$
+
+print("パラメータ:")$
+print("  初期遺伝的多様性 H0 = ", H0)$
+print("  目標多様性 H_target = ", H_target)$
+print("  維持世代数 = ", generations)$
+
+/* 各集団サイズでの多様性推移 */
+print("")$
+print("=== 集団サイズと遺伝的多様性の推移 ===")$
+print("Ne       H(10)    H(25)    H(50)    H(100)")$
+for Ne_val in [10, 20, 50, 100, 200, 500] do (
+    H10: float(H_func(Ne_val, 10)),
+    H25: float(H_func(Ne_val, 25)),
+    H50: float(H_func(Ne_val, 50)),
+    H100: float(H_func(Ne_val, 100)),
+    print(Ne_val, "  ", H10, "  ", H25, "  ", H50, "  ", H100)
+)$
+
+/* 最小個体数計算 */
+Ne_required: float(Ne_min(H_target, generations))$
+print("")$
+print("=== 必要最小個体数 ===")$
+print("目標多様性 ", H_target, " を ", generations, "世代維持するには:")$
+print("  必要有効集団サイズ Ne = ", Ne_required)$
+print("  実際の個体数 N = Ne * 3 = ", Ne_required * 3, " (社会構造係数3)")$
+
+/* 異なる目標多様性での必要個体数 */
+print("")$
+print("=== 目標多様性と必要個体数 ===")$
+print("H_target   Ne_required  N_required")$
+for Ht in [0.3, 0.5, 0.7, 0.9, 0.95] do (
+    Ne_req: float(Ne_min(Ht, generations)),
+    print(Ht, "  ", Ne_req, "  ", Ne_req * 3)
+)$
+
+/* 異なる維持世代数での必要個体数 */
+print("")$
+print("=== 維持世代数と必要個体数 ===")$
+print("t_gen      Ne_required  N_required")$
+for tg in [10, 25, 50, 100, 200] do (
+    Ne_req: float(Ne_min(H_target, tg)),
+    print(tg, "  ", Ne_req, "  ", Ne_req * 3)
+)$
+
+/* グラフ1: 集団サイズ別の遺伝的多様性推移 */
+draw2d(
+    title = "Fig.1: Genetic Diversity over Generations",
+    xlabel = "Generations",
+    ylabel = "Genetic Diversity H(t)",
+    key = "Ne=10",
+    explicit(H_func(10, t), t, 0, 100),
+    color = red,
+    key = "Ne=20",
+    explicit(H_func(20, t), t, 0, 100),
+    color = blue,
+    key = "Ne=50",
+    explicit(H_func(50, t), t, 0, 100),
+    color = green,
+    key = "Ne=100",
+    explicit(H_func(100, t), t, 0, 100),
+    color = orange,
+    key = "Ne=200",
+    explicit(H_func(200, t), t, 0, 100),
+    color = purple,
+    line_width = 2,
+    grid = true
+)$
+
+/* グラフ2: 必要個体数 vs 目標多様性 */
+draw2d(
+    title = "Fig.2: Required Population vs Target Diversity",
+    xlabel = "Target Genetic Diversity H_target",
+    ylabel = "Required Effective Population Ne",
+    key = "Ne_required",
+    explicit(1 / (2 * (1 - x^(1/generations))), x, 0.3, 0.99),
+    color = red,
+    line_width = 2,
+    grid = true
+)$
+
+/* グラフ3: 必要個体数 vs 維持世代数 */
+draw2d(
+    title = "Fig.3: Required Population vs Generations",
+    xlabel = "Generations to Maintain",
+    ylabel = "Required Effective Population Ne",
+    key = "Ne_required",
+    explicit(1 / (2 * (1 - H_target^(1/t))), t, 10, 200),
+    color = blue,
+    line_width = 2,
+    grid = true
+)$
+
+/* グラフ4: 多様性維持確率 */
+draw2d(
+    title = "Fig.4: Diversity Maintenance Probability",
+    xlabel = "Effective Population Size Ne",
+    ylabel = "Probability of Maintaining H > 0.5",
+    key = "P_maintain",
+    explicit(1 - (1/(2*x))^generations, x, 5, 200),
+    color = green,
+    line_width = 2,
+    grid = true
+)$
+
+print("")$
+print("全4グラフを表示しました")$
+print("==========================================")$
+print("BIO-510 analysis complete")$
+print("==========================================")$
