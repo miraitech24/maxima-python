@@ -1,0 +1,333 @@
+/* ============================================================
+   DEV-06: 金星大気からの水素・炭素・窒素分離
+   目的：母船ヘスペラス（人工HZの走り）において、金星大気から
+         水素・炭素・窒素を分離・回収するプロセスを計算する。
+         ヘスペラスは居住空間と3Dプリンター工場を併設した
+         浮遊型プラットフォームである。
+   仕様：
+     - 金星大気組成: CO2 96.5%, N2 3.5%, SO2 0.015%, 他微量
+     - 分離方式: 高温電気分解 + 深冷分離 + 膜分離
+     - ヘスペラス: 浮遊型プラットフォーム（居住区+工場区）
+     - 生産物: 水素（水星ダイソン環へ）、炭素（3Dプリンター材料）、窒素（バッファガス）
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（別window表示）
+     - .png出力は行わない
+   出力:
+     1. DEV06_results.csv: 分離プロセスの計算結果
+     2. DEV06_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+print("===== DEV-06: 金星大気からの水素・炭素・窒素分離 =====")$
+print("")$
+
+/* ----- 物理定数 ----- */
+R_gas : 8.314462618;                 /* 気体定数 [J/mol/K] */
+k_B : 1.380649e-23;                  /* ボルツマン定数 [J/K] */
+NA : 6.02214076e23;                  /* アボガドロ数 [/mol] */
+
+/* ----- 金星大気パラメータ ----- */
+print("--- 金星大気パラメータ ---")$
+
+/* 金星大気組成（体積比） */
+CO2_ratio : 0.965;                   /* CO2 96.5% */
+N2_ratio : 0.035;                    /* N2 3.5% */
+SO2_ratio : 0.00015;                 /* SO2 0.015% */
+trace_ratio : 1.0 - CO2_ratio - N2_ratio - SO2_ratio;  /* 微量成分 */
+
+/* 金星大気条件 */
+T_atm : 737;                         /* 地表温度 [K]（464℃） */
+P_atm : 9.3e6;                       /* 地表圧力 [Pa]（92気圧） */
+rho_atm : 67.0;                      /* 地表大気密度 [kg/m^3] */
+
+/* ヘスペラス運用高度（上空50km） */
+T_op : 350;                          /* 運用高度温度 [K]（約77℃） */
+P_op : 5.0e4;                        /* 運用高度圧力 [Pa]（0.5気圧） */
+rho_op : 0.5;                        /* 運用高度大気密度 [kg/m^3] */
+
+printf(true, "金星大気組成:~%")$
+printf(true, "  CO2: ~,1f%~%", CO2_ratio*100)$
+printf(true, "  N2: ~,1f%~%", N2_ratio*100)$
+printf(true, "  SO2: ~,3f%~%", SO2_ratio*100)$
+printf(true, "  その他: ~,3f%~%~%", trace_ratio*100)$
+
+printf(true, "ヘスペラス運用条件:~%")$
+printf(true, "  高度: 50 km~%")$
+printf(true, "  温度: ~,0f K (~,0f℃)~%", T_op, T_op-273)$
+printf(true, "  圧力: ~,2e Pa (~,2f 気圧)~%", P_op, P_op/101325)$
+printf(true, "  密度: ~,2f kg/m^3~%~%", rho_op)$
+
+/* ----- ヘスペラス基本設計 ----- */
+print("--- ヘスペラス基本設計 ---")$
+
+/* ヘスペラス諸元 */
+hesperas_length : 500;               /* 全長 [m] */
+hesperas_width : 200;                /* 全幅 [m] */
+hesperas_height : 100;               /* 全高 [m] */
+hesperas_volume : hesperas_length * hesperas_width * hesperas_height;  /* 総容積 [m^3] */
+
+/* 区画配分 */
+living_ratio : 0.3;                  /* 居住区 30% */
+factory_ratio : 0.4;                 /* 工場区 40% */
+plant_ratio : 0.2;                   /* 分離プラント区 20% */
+storage_ratio : 0.1;                 /* 貯蔵区 10% */
+
+living_volume : hesperas_volume * living_ratio;
+factory_volume : hesperas_volume * factory_ratio;
+plant_volume : hesperas_volume * plant_ratio;
+storage_volume : hesperas_volume * storage_ratio;
+
+/* 収容人数 */
+crew_capacity : 100;                 /* 乗員定員 */
+
+printf(true, "ヘスペラス諸元:~%")$
+printf(true, "  全長: ~,0f m~%", hesperas_length)$
+printf(true, "  全幅: ~,0f m~%", hesperas_width)$
+printf(true, "  全高: ~,0f m~%", hesperas_height)$
+printf(true, "  総容積: ~,2e m^3~%", hesperas_volume)$
+printf(true, "  乗員定員: ~,0f 人~%", crew_capacity)$
+print("")$
+
+printf(true, "区画配分:~%")$
+printf(true, "  居住区: ~,0f m^3 (~,0f%)~%", living_volume, living_ratio*100)$
+printf(true, "  工場区: ~,0f m^3 (~,0f%)~%", factory_volume, factory_ratio*100)$
+printf(true, "  分離プラント区: ~,0f m^3 (~,0f%)~%", plant_volume, plant_ratio*100)$
+printf(true, "  貯蔵区: ~,0f m^3 (~,0f%)~%~%", storage_volume, storage_ratio*100)$
+
+/* ----- 大気処理能力の計算 ----- */
+print("--- 大気処理能力の計算 ---")$
+
+/* 1日あたりの大気処理量 */
+atm_processing_rate : 1.0e6;         /* 100万kg/日 = 1000トン/日 */
+
+/* CO2から炭素と酸素への分解 */
+/* CO2 → C + O2 */
+M_CO2 : 44.01e-3;                    /* CO2分子量 [kg/mol] */
+M_C : 12.01e-3;                      /* 炭素原子量 [kg/mol] */
+M_O2 : 32.00e-3;                     /* 酸素分子量 [kg/mol] */
+
+/* CO2 1kgあたりの炭素生成量 */
+carbon_per_kg_CO2 : M_C / M_CO2;     /* 0.273 kg-C/kg-CO2 */
+oxygen_per_kg_CO2 : M_O2 / M_CO2;    /* 0.727 kg-O2/kg-CO2 */
+
+/* 1日あたりの炭素生成量 */
+CO2_in_atm : atm_processing_rate * CO2_ratio;  /* 処理大気中のCO2量 [kg/日] */
+carbon_daily : CO2_in_atm * carbon_per_kg_CO2;
+oxygen_daily : CO2_in_atm * oxygen_per_kg_CO2;
+
+/* 水素生成（水の電気分解） */
+/* 金星大気中の水蒸気は微量。別途ヘスペラスで水を電気分解 */
+water_electrolysis_rate : 5.0e4;     /* 5万kg/日の水を電気分解 */
+M_H2O : 18.015e-3;                   /* 水分子量 [kg/mol] */
+M_H2 : 2.016e-3;                     /* 水素分子量 [kg/mol] */
+hydrogen_per_kg_H2O : M_H2 / M_H2O;  /* 0.112 kg-H2/kg-H2O */
+hydrogen_daily : water_electrolysis_rate * hydrogen_per_kg_H2O;
+
+/* 窒素生成（深冷分離） */
+N2_in_atm : atm_processing_rate * N2_ratio;  /* 処理大気中のN2量 [kg/日] */
+/* 深冷分離の効率 */
+N2_separation_efficiency : 0.85;     /* 85% */
+nitrogen_daily : N2_in_atm * N2_separation_efficiency;
+
+printf(true, "1日あたりの大気処理量: ~,2e kg/日 (~,0f トン/日)~%", atm_processing_rate, atm_processing_rate/1000)$
+print("")$
+
+printf(true, "生成物（1日あたり）:~%")$
+printf(true, "  炭素（3Dプリンター材料）: ~,2f kg/日 (~,2f トン/日)~%", carbon_daily, carbon_daily/1000)$
+printf(true, "  酸素（副産物）: ~,2f kg/日 (~,2f トン/日)~%", oxygen_daily, oxygen_daily/1000)$
+printf(true, "  水素（水星ダイソン環へ）: ~,2f kg/日 (~,2f トン/日)~%", hydrogen_daily, hydrogen_daily/1000)$
+printf(true, "  窒素（バッファガス）: ~,2f kg/日 (~,2f トン/日)~%~%", nitrogen_daily, nitrogen_daily/1000)$
+
+/* ----- エネルギー収支 ----- */
+print("--- エネルギー収支 ---")$
+
+/* CO2電気分解のエネルギー消費 */
+/* 高温電気分解（Solid Oxide Electrolysis）: 約3.5 kWh/m^3-CO2 */
+energy_per_m3_CO2 : 3.5;             /* [kWh/m^3] */
+rho_CO2_at_op : P_op * M_CO2 / (R_gas * T_op);  /* 運用高度でのCO2密度 [kg/m^3] */
+CO2_volume_daily : CO2_in_atm / rho_CO2_at_op;   /* 1日あたりCO2体積 [m^3] */
+energy_CO2_electrolysis : CO2_volume_daily * energy_per_m3_CO2;  /* [kWh/日] */
+
+/* 水電気分解のエネルギー消費 */
+energy_per_kg_H2 : 50.0;             /* 水素1kgあたり50kWh */
+energy_water_electrolysis : hydrogen_daily * energy_per_kg_H2;  /* [kWh/日] */
+
+/* 深冷分離のエネルギー消費 */
+energy_per_kg_N2 : 0.5;              /* 窒素1kgあたり0.5kWh */
+energy_N2_separation : nitrogen_daily * energy_per_kg_N2;  /* [kWh/日] */
+
+/* 3Dプリンター工場のエネルギー消費 */
+energy_per_kg_print : 10.0;          /* 3Dプリント1kgあたり10kWh */
+energy_3d_printing : carbon_daily * energy_per_kg_print;  /* [kWh/日] */
+
+/* 居住区のエネルギー消費 */
+energy_per_person : 10.0;            /* 1人あたり10kW */
+energy_living : crew_capacity * energy_per_person * 24;  /* [kWh/日] */
+
+/* 総エネルギー消費 */
+total_energy_daily : energy_CO2_electrolysis + energy_water_electrolysis + energy_N2_separation + energy_3d_printing + energy_living;
+
+printf(true, "エネルギー消費（1日あたり）:~%")$
+printf(true, "  CO2電気分解: ~,2f MWh/日~%", energy_CO2_electrolysis/1000)$
+printf(true, "  水電気分解: ~,2f MWh/日~%", energy_water_electrolysis/1000)$
+printf(true, "  深冷分離: ~,2f MWh/日~%", energy_N2_separation/1000)$
+printf(true, "  3Dプリント: ~,2f MWh/日~%", energy_3d_printing/1000)$
+printf(true, "  居住区: ~,2f MWh/日~%", energy_living/1000)$
+printf(true, "  総消費: ~,2f MWh/日~%~%", total_energy_daily/1000)$
+
+/* エネルギー源（LENR炉） */
+LENR_power : 10.0e6;                 /* LENR炉出力 10MW */
+LENR_daily : LENR_power * 24 / 1000; /* 1日あたり発電量 [MWh] */
+
+printf(true, "エネルギー供給:~%")$
+printf(true, "  LENR炉出力: ~,2f MW~%", LENR_power/1e6)$
+printf(true, "  1日あたり発電量: ~,2f MWh/日~%", LENR_daily)$
+printf(true, "  エネルギー自給率: ~,2f%~%~%", LENR_daily / (total_energy_daily/1000) * 100)$
+
+/* ----- 貯蔵能力 ----- */
+print("--- 貯蔵能力 ---")$
+
+/* 貯蔵タンク容量 */
+storage_days : 30;                    /* 30日分の貯蔵 */
+
+carbon_storage : carbon_daily * storage_days;
+hydrogen_storage : hydrogen_daily * storage_days;
+nitrogen_storage : nitrogen_daily * storage_days;
+oxygen_storage : oxygen_daily * storage_days;
+
+printf(true, "貯蔵能力（~,0f日分）:~%", storage_days)$
+printf(true, "  炭素: ~,2f トン~%", carbon_storage/1000)$
+printf(true, "  水素: ~,2f トン~%", hydrogen_storage/1000)$
+printf(true, "  窒素: ~,2f トン~%", nitrogen_storage/1000)$
+printf(true, "  酸素: ~,2f トン~%~%", oxygen_storage/1000)$
+
+/* ----- 水星ダイソン環への供給 ----- */
+print("--- 水星ダイソン環への供給 ---")$
+
+/* 水星ダイソン環に必要な年間供給量 */
+mercury_H2_yearly : 100;             /* 水素 100トン/年 */
+mercury_C_yearly : 50;               /* 炭素 50トン/年 */
+mercury_N2_yearly : 30;              /* 窒素 30トン/年 */
+
+/* ヘスペラスの年間生産量 */
+hesperas_H2_yearly : hydrogen_daily * 365 / 1000;  /* [トン/年] */
+hesperas_C_yearly : carbon_daily * 365 / 1000;      /* [トン/年] */
+hesperas_N2_yearly : nitrogen_daily * 365 / 1000;   /* [トン/年] */
+
+printf(true, "水星ダイソン環の年間必要量:~%")$
+printf(true, "  水素: ~,0f トン/年~%", mercury_H2_yearly)$
+printf(true, "  炭素: ~,0f トン/年~%", mercury_C_yearly)$
+printf(true, "  窒素: ~,0f トン/年~%", mercury_N2_yearly)$
+print("")$
+
+printf(true, "ヘスペラスの年間生産量:~%")$
+printf(true, "  水素: ~,2f トン/年 (必要量の ~,0f倍)~%", hesperas_H2_yearly, hesperas_H2_yearly/mercury_H2_yearly)$
+printf(true, "  炭素: ~,2f トン/年 (必要量の ~,0f倍)~%", hesperas_C_yearly, hesperas_C_yearly/mercury_C_yearly)$
+printf(true, "  窒素: ~,2f トン/年 (必要量の ~,0f倍)~%~%", hesperas_N2_yearly, hesperas_N2_yearly/mercury_N2_yearly)$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 生成物の内訳を表示します...")$
+
+/* グラフ1: 生成物内訳 */
+plot2d(
+    [discrete, [[1, carbon_daily/1000], [2, hydrogen_daily/1000],
+                [3, nitrogen_daily/1000], [4, oxygen_daily/1000]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Product"],
+    [ylabel, "Daily Production [tons/day]"],
+    [title, "Daily Production from Venus Atmosphere"],
+    [gnuplot_preamble, "set xtics ('Carbon' 1, 'Hydrogen' 2, 'Nitrogen' 3, 'Oxygen' 4);"])$
+
+print("グラフ2: エネルギー消費内訳を表示します...")$
+
+/* グラフ2: エネルギー消費内訳 */
+plot2d(
+    [discrete, [[1, energy_CO2_electrolysis/1000], [2, energy_water_electrolysis/1000],
+                [3, energy_N2_separation/1000], [4, energy_3d_printing/1000],
+                [5, energy_living/1000]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Process"],
+    [ylabel, "Energy Consumption [MWh/day]"],
+    [title, "Daily Energy Consumption by Process"],
+    [gnuplot_preamble, "set xtics ('CO2' 1, 'H2O' 2, 'N2' 3, '3DP' 4, 'Living' 5);"])$
+
+print("グラフ3: 水星必要量vsヘスペラス生産量を表示します...")$
+
+/* グラフ3: 供給能力比較 */
+plot2d(
+    [discrete, [[1, mercury_H2_yearly], [2, hesperas_H2_yearly],
+                [3, mercury_C_yearly], [4, hesperas_C_yearly],
+                [5, mercury_N2_yearly], [6, hesperas_N2_yearly]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Resource"],
+    [ylabel, "Amount [tons/year]"],
+    [title, "Mercury Demand vs Hesperas Supply"],
+    [gnuplot_preamble, "set xtics ('H2 need' 1, 'H2 supply' 2, 'C need' 3, 'C supply' 4, 'N2 need' 5, 'N2 supply' 6);"])$
+
+/* ----- CSV出力 ----- */
+csv_file : "DEV06_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "CO2_ratio,~,3f,-~%", CO2_ratio)$
+printf(f_csv, "N2_ratio,~,3f,-~%", N2_ratio)$
+printf(f_csv, "Atm_processing_rate,~,2e,kg/day~%", atm_processing_rate)$
+printf(f_csv, "Carbon_daily,~,2f,kg/day~%", carbon_daily)$
+printf(f_csv, "Hydrogen_daily,~,2f,kg/day~%", hydrogen_daily)$
+printf(f_csv, "Nitrogen_daily,~,2f,kg/day~%", nitrogen_daily)$
+printf(f_csv, "Oxygen_daily,~,2f,kg/day~%", oxygen_daily)$
+printf(f_csv, "Total_energy_daily,~,2f,MWh/day~%", total_energy_daily/1000)$
+printf(f_csv, "LENR_power,~,2f,MW~%", LENR_power/1e6)$
+printf(f_csv, "Energy_self_sufficiency,~,2f,%~%", LENR_daily / (total_energy_daily/1000) * 100)$
+printf(f_csv, "Hesperas_length,~,0f,m~%", hesperas_length)$
+printf(f_csv, "Hesperas_volume,~,2e,m^3~%", hesperas_volume)$
+printf(f_csv, "Crew_capacity,~,0f,persons~%", crew_capacity)$
+printf(f_csv, "Mercury_H2_yearly,~,0f,tons/year~%", mercury_H2_yearly)$
+printf(f_csv, "Mercury_C_yearly,~,0f,tons/year~%", mercury_C_yearly)$
+printf(f_csv, "Mercury_N2_yearly,~,0f,tons/year~%", mercury_N2_yearly)$
+printf(f_csv, "Hesperas_H2_yearly,~,2f,tons/year~%", hesperas_H2_yearly)$
+printf(f_csv, "Hesperas_C_yearly,~,2f,tons/year~%", hesperas_C_yearly)$
+printf(f_csv, "Hesperas_N2_yearly,~,2f,tons/year~%", hesperas_N2_yearly)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "DEV06_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "DEV-06: 金星大気からの水素・炭素・窒素分離 サマリー~%")$
+printf(f_sum, "================================================~%~%")$
+printf(f_sum, "【ヘスペラス基本設計】~%")$
+printf(f_sum, "  全長: ~,0f m, 全幅: ~,0f m, 全高: ~,0f m~%", hesperas_length, hesperas_width, hesperas_height)$
+printf(f_sum, "  総容積: ~,2e m^3~%", hesperas_volume)$
+printf(f_sum, "  乗員定員: ~,0f 人~%", crew_capacity)$
+printf(f_sum, "  区画: 居住~,0f% 工場~,0f% 分離~,0f% 貯蔵~,0f%~%~%", living_ratio*100, factory_ratio*100, plant_ratio*100, storage_ratio*100)$
+printf(f_sum, "【大気処理能力】~%")$
+printf(f_sum, "  処理量: ~,2e kg/日 (~,0f トン/日)~%", atm_processing_rate, atm_processing_rate/1000)$
+printf(f_sum, "  炭素生成: ~,2f トン/日~%", carbon_daily/1000)$
+printf(f_sum, "  水素生成: ~,2f トン/日~%", hydrogen_daily/1000)$
+printf(f_sum, "  窒素生成: ~,2f トン/日~%", nitrogen_daily/1000)$
+printf(f_sum, "  酸素生成: ~,2f トン/日~%~%", oxygen_daily/1000)$
+printf(f_sum, "【エネルギー収支】~%")$
+printf(f_sum, "  総消費: ~,2f MWh/日~%", total_energy_daily/1000)$
+printf(f_sum, "  LENR炉供給: ~,2f MWh/日~%", LENR_daily)$
+printf(f_sum, "  エネルギー自給率: ~,2f%~%~%", LENR_daily / (total_energy_daily/1000) * 100)$
+printf(f_sum, "【水星ダイソン環への供給】~%")$
+printf(f_sum, "  水素: 必要~,0f トン/年, 供給可能~,2f トン/年 (~,0f倍)~%", mercury_H2_yearly, hesperas_H2_yearly, hesperas_H2_yearly/mercury_H2_yearly)$
+printf(f_sum, "  炭素: 必要~,0f トン/年, 供給可能~,2f トン/年 (~,0f倍)~%", mercury_C_yearly, hesperas_C_yearly, hesperas_C_yearly/mercury_C_yearly)$
+printf(f_sum, "  窒素: 必要~,0f トン/年, 供給可能~,2f トン/年 (~,0f倍)~%~%", mercury_N2_yearly, hesperas_N2_yearly, hesperas_N2_yearly/mercury_N2_yearly)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "ヘスペラスは金星大気から水素・炭素・窒素を十分に供給可能。~%")$
+printf(f_sum, "水星ダイソン環の必要量を大幅に上回る生産能力を持つ。~%")$
+printf(f_sum, "余剰分は3Dプリンター工場の材料や居住区の資源として活用。~%")$
+printf(f_sum, "ヘスペラスは人工HZのプロトタイプとしても機能する。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== DEV-06 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

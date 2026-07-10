@@ -1,0 +1,22 @@
+課題ID,カテゴリ,サブカテゴリ,課題名,計算内容,入力変数,出力形式,備考
+MER-01,水星ダイソン環,着陸・基地,水星地表着陸モジュール設計,着陸質量M_lander[kg] 水星重力g_mercury[m/s²] 着陸速度v_land[m/s],M[kg] g[m/s²] v[m/s],着陸衝撃G_land[G] 必要燃料M_fuel[kg],水星0.38Gに対応した着陸脚・逆噴射設計
+MER-02,水星ダイソン環,着陸・基地,地表基地の与圧・防熱設計,外気温T_out[℃] 内部温度T_in[℃] 基地容積V_base[m³],T_out[℃] T_in[℃] V[m³],断熱材厚d_insul[m] 空調電力P_ac[W],昼側+430℃、夜側-180℃の温度差に対応
+MER-03,水星ダイソン環,着陸・基地,地表基地の放射線遮蔽設計,太陽フレア線量D_flare[Sv/回] 遮蔽材厚d_shield[cm] 遮蔽材密度ρ[kg/m³],D[Sv] d[cm] ρ[kg/m³],遮蔽後線量D_after[Sv] 遮蔽質量M_shield[kg],水星は太陽に近くフレア被曝が大きい
+MER-04,水星ダイソン環,採掘,水星表土の採掘効率,採掘機能力R_dig[ton/hr] 稼働時間T_op[hr/日] 採掘可能面積A_mine[m²],R[ton/hr] T[hr] A[m²],年間採掘量M_year[ton/年] 採掘可能年数Y_mine[年],表土レゴリスから鉄・シリコンを分離
+MER-05,水星ダイソン環,採掘,鉄・シリコン分離精錬プラント設計,鉱石処理量M_ore[ton/日] 鉄含有率R_iron[%] シリコン含有率R_silicon[%],M[ton/日] R_iron R_silicon,鉄生産量M_iron[ton/日] シリコン生産量M_silicon[ton/日] 所要電力P_smelt[MW],太陽熱溶解＋電気分解のハイブリッド精錬
+MER-06,水星ダイソン環,採掘,水星資源からの水素・炭素抽出,水星表土中の水素濃度C_hydrogen[ppm] 炭素濃度C_carbon[ppm],C_hydrogen C_carbon,年間抽出量M_H[ton/年] M_C[ton/年] 抽出コストC_extract[USD/ton],太陽風由来の微量水素・炭素を回収。不足分は地球輸送
+MER-07,水星ダイソン環,製造,パネル製造工場の設計,パネル生産速度R_panel[m²/日] パネル厚t[m] 密度ρ[kg/m³],R[m²/日] t[m] ρ[kg/m³],工場質量M_factory[kg] 所要電力P_factory[MW] 所要人員N_staff,自己複製ロボットによる無人運転を前提
+MER-08,水星ダイソン環,製造,自己複製ロボット工場の設計,ロボット生産速度R_robot[台/日] 1台あたり質量M_robot[kg],R[台/日] M[kg],工場質量M_factory[kg] 所要電力P_factory[MW],ロボットがロボットを作る自己複製の要
+MER-09,水星ダイソン環,エネルギー,地表太陽光発電と蓄電,水星日照時間T_day[h] 夜間時間T_night[h] 発電容量P_solar[MW],T_day T_night P_solar,必要蓄電容量E_battery[MWh] 蓄電質量M_battery[kg],水星は58日かけて1回転、長い夜に対応
+MER-10,水星ダイソン環,エネルギー,核融合補助電源の設計,必要出力P_req[MW] 燃料消費率R_fuel[kg/日] 運転期間T_op[年],P[MW] R[kg/日] T[年],炉心質量M_reactor[kg] 総燃料量M_fuel_total[kg],太陽光発電だけでは夜間電力が不足。D-He3核融合を想定
+MER-11,水星ダイソン環,輸送,地表-軌道間の資材輸送（スペースエレベータ）,水星重力g[m/s²] エレベータ長L_cable[m] 炭素ナノチューブ強度σ[Pa],g L σ,ケーブル質量M_cable[kg] 輸送能力C_transport[ton/日],水星0.38Gならエレベータ建設が現実的
+MER-12,水星ダイソン環,輸送,地表-軌道間の資材輸送（マスドライバー）,射出加速度a_accel[m/s²] 射出質量M_shot[kg] 射出頻度f_shot[回/日],a M f,必要電力P_accel[MW] 年間射出量M_year[ton/年],大気がない水星ではマスドライバーが効率的
+MER-13,水星ダイソン環,維持,基地運用に必要な要員数,基地機能数N_func 自動化率R_auto[%] 交代周期T_rotation[月],N_func R_auto T_rotation,最小要員数N_min[人] 総要員数N_total[人],完全無人化 vs 最小限有人運用の比較
+MER-14,水星ダイソン環,維持,地球との通信遅延と制御方式,地球-水星距離d[AU] 光速c[m/s],d[AU] c,通信遅延T_delay[min] 自律制御率R_auto[%],往復5〜22分の遅延。緊急時は自律制御が必須
+MER-15,水星ダイソン環,維持,基地の生命維持システム設計,要員数N[人] 1人あたり必要酸素O2_req[kg/日] 水H2O_req[kg/日] 食料F_req[kg/日],N O2 H2O F,総必要量O2_total H2O_total F_total[kg/日] リサイクル率R_recycle[%],閉鎖生態系＋地球からの補給のハイブリッド
+MER-16,水星ダイソン環,維持,廃熱管理（水星の高温環境対応）,外気温T_out[℃] 内部発熱Q_int[MW] 冷却効率η_cool,T_out Q_int η_cool,必要冷却能力Q_cool[MW] 冷却水必要量M_water[ton/日],昼側+430℃での放熱は極めて困難。ヒートポンプ必須
+MER-17,水星ダイソン環,リスク,太陽フレアによる基地被災リスク,フレア発生頻度F_flare[回/年] フレアエネルギーE_flare[J] 基地耐性R_base[J/m²],F E R,年間被害確率P_damage[%/年] 復旧コストC_repair[USD/回],水星は太陽に近くフレアリスク大。シェルター設計必須
+MER-18,水星ダイソン環,リスク,微小隕石による基地損傷リスク,隕石フラックスF_meteor[個/m²/年] 基地表面積A_base[m²] 装甲厚d_armor[m],F A d,年間被弾回数N_hit[回/年] 補修コストC_repair[USD/年],水星は大気がないため隕石対策が重要
+MER-19,水星ダイソン環,コスト,水星地表基地の総建設コスト,着陸モジュールC_lander 基地建設C_base 採掘設備C_mine 製造工場C_factory 輸送設備C_transport,C_lander C_base C_mine C_factory C_transport,総コストC_total[USD] 運用コストC_op[USD/年],初期投資と運用コストのバランス評価
+MER-20,水星ダイソン環,コスト,水星ダイソン環の投資回収期間,総建設コストC_total[USD] 年間発電収入R_power[USD/年] 年間運用コストC_op[USD/年],C_total R_power C_op,投資回収期間T_payback[年] ROI[%],1.2PWの発電能力によるエネルギー販売収入で回収
+

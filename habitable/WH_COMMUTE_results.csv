@@ -1,0 +1,8 @@
+Item,Value,Unit
+Distance,4.2,ly
+WH_transit_time,0.011,sec
+WH_energy_per_trip,1.21E+44,J
+WH_energy_daily_commute,2.43E+44,J
+WH_energy_yearly,8.86E+46,J
+Ratio_to_earth_energy,152747517885125000000000000.00,-
+Laser_delay,20.99,years

@@ -1,0 +1,22 @@
+課題ID,カテゴリ,サブカテゴリ,課題名,計算内容,入力変数,出力形式,備考
+DEV-01,技術開発,自己複製ロボット,ロボット複製倍率と所要時間の最適化,初期台数N_0 複製倍率R_double[倍/月] 目標台数N_target,N_0 R_double N_target,到達時間T_months 総消費エネルギーE_total[J],金星ヘスペラスから電力を供給。複製倍率とコストのトレードオフ
+DEV-02,技術開発,自己複製ロボット,ロボット1台あたりの製造エネルギー収支,ロボット質量M_robot[kg] 材料E_mat[J/kg] 組立E_assem[J],M_robot E_mat E_assem,製造E_total[J/台] エネルギーコストC_energy[USD/台],自己複製のエネルギー収支。E_total < 発電量が条件。金星電力を初期種として利用
+DEV-03,技術開発,自己複製ロボット,金星大気対応ロボットの防食設計,硫酸濃度C_H2SO4[%] 温度T[℃] 耐食材料コストC_mat[USD/kg],C_H2SO4 T C_mat,腐食速度R_corr[mm/年] ロボット寿命L_years[年],金星大気は硫酸の雲。ヘスペラスはこの中で運用
+DEV-04,技術開発,金星ヘスペラス,ヘスペラス浮遊構造の設計,浮力ガス密度ρ_gas[kg/m³] 外気密度ρ_atm[kg/m³] ペイロードM_payload[kg],ρ_gas ρ_atm M_payload,必要容積V_envelope[m³] 構造質量M_struct[kg],金星大気はCO2主体で密度高い。ヘリウム浮力が有効
+DEV-05,技術開発,金星ヘスペラス,ヘスペラスの大気中エネルギー生成,風力発電出力P_wind[W] 太陽光発電P_solar[W] LENR炉出力P_LENR[W],P_wind P_solar P_LENR,総発電量P_total[W] エネルギー自給率R_self[%],金星大気は濃く風力が有効。夜間はLENR炉で補完
+DEV-06,技術開発,金星ヘスペラス,金星大気からの水素・炭素・窒素分離,大気組成（CO2 96% N2 3.5%） 分離効率η_sep 処理量M_atm[kg/日],組成 η_sep M_atm,水素製造量M_H2[kg/日] 炭素M_C[kg/日] 窒素M_N2[kg/日] 所要電力P_sep[W],ヘスペラスの主要任務。水素は水星ダイソン環へ供給
+DEV-07,技術開発,金星ヘスペラス,ヘスペラス-水星間の資材輸送コスト,輸送距離d[AU] 輸送質量M_cargo[kg] 推進方式（化学/イオン）,d M_cargo 方式,所要燃料M_fuel[kg] 輸送コストC_trans[USD/ton],金星と水星は接近時0.3AU。定期的なシャトル便
+DEV-08,技術開発,水星採掘,水星レゴリスからの鉄・シリコン分離効率,鉱石処理量M_ore[kg/日] 鉄含有率R_iron[%] 分離効率η_sep,M_ore R_iron η_sep,鉄生産量M_iron[kg/日] シリコンM_silicon[kg/日] 所要電力P_sep[W],太陽熱溶解＋磁気分離。電力は初期はヘスペラスから
+DEV-09,技術開発,水星採掘,水星昼側+430℃対応の採掘機設計,動作温度T_op[℃] 冷却方式 冷却効率η_cool,T_op η_cool,必要冷却電力P_cool[W] 冷却器質量M_cooler[kg],水星昼側は極高温。ヒートパイプ＋放射冷却で対応
+DEV-10,技術開発,水星パネル製造,シリコンインゴット製造効率,シリコン純度Purity[%] 成長速度R_grow[mm/hr] エネルギー消費E_grow[J/kg],Purity R_grow E_grow,インゴット生産量M_ingot[kg/日] パネル変換効率η_panel[%],無重力・真空での結晶成長。ヘスペラスから水素供給
+DEV-11,技術開発,水星パネル製造,ソーラーパネル製造ラインのスループット,ライン速度R_line[m/hr] パネル幅W_panel[m] 歩留まりYield[%],R_line W_panel Yield,日産面積A_day[m²/日] 年産A_year[m²/年],完全無人24時間生産。目標1日100km²
+DEV-12,技術開発,AI制御,ヘスペラス-水星間の通信遅延と自律制御,距離d[AU] 往復遅延T_delay[min] タスク応答要件T_req[sec],d T_delay T_req,必要自律制御率R_auto[%] 介入頻度F_int[回/日],金星-水星間は0.3〜1.2AU。往復3〜12分の遅延
+DEV-13,技術開発,AI制御,マルチロボット協調制御の通信帯域,ロボット台数N_robot 1台あたりデータ量D_robot[bps] 制御周期T_cycle[sec],N_robot D_robot T_cycle,総通信帯域B_total[bps] 必要B_req[bps],1万台のロボットを同時制御。ヘスペラスが中継
+DEV-14,技術開発,AI制御,ヘスペラスと水星ロボット群の統合制御アーキテクチャ,ヘスペラスAI能力C_AI[FLOPS] 水星ロボット数N_robot 通信遅延T_delay,C_AI N_robot T_delay,統合制御効率E_ctrl[%] 異常対応時間T_response[sec],ヘスペラスが上位AI、水星ロボットが下位。階層型制御
+DEV-15,技術開発,統合試験,地球軌道上でのヘスペラス部分組み立て試験,試験項目数N_test 1項目あたり時間T_test[hr] 並行試験数N_parallel,N_test T_test N_parallel,総試験時間T_total[日] 試験コストC_test[USD],ヘスペラスは巨大構造。軌道上でモジュール単位で試験
+DEV-16,技術開発,統合試験,金星到着後のヘスペラス自動展開試験,展開モジュール数N_module 1モジュール展開時間T_deploy[hr] 自動化率R_auto[%],N_module T_deploy R_auto,総展開時間T_total[日] 失敗確率P_fail[%],無人での自動展開。失敗時のバックアップ手順
+DEV-17,技術開発,開発スケジュール,並行開発のクリティカルパス分析,各技術の開発期間T_dev[月] 依存関係Dependency リソース制約R_constraint,T_dev Dependency R_constraint,総開発期間T_total[月] クリティカルパス,ヘスペラスと水星ロボットは独立して並行開発可能
+DEV-18,技術開発,開発スケジュール,ヘスペラス-水星間の資源融通スケジュール,ヘスペラス水素生産開始時期T_H2[年] 水星ダイソン環着工時期T_dyson[年],T_H2 T_dyson,水素供給開始時期T_supply[年] ダイソン環完成時期T_complete[年],ヘスペラスが先に稼働し、水素を水星に供給してからダイソン環本格着工
+DEV-19,技術開発,コスト,ヘスペラス＋水星ダイソン環の総開発コスト,ヘスペラス開発C_hesperas 水星ロボットC_robot 水星基地C_base パネル工場C_factory AI開発C_AI,C_hesperas C_robot C_base C_factory C_AI,総コストC_total[USD] 内訳比率R_breakdown[%],10年で約6兆USD。内訳：ヘスペラス30% ロボット25% 基地15% 工場20% AI10%
+DEV-20,技術開発,コスト,ヘスペラス連携によるコスト削減効果,単独開発コストC_single 連携開発C_coop 資源融通効果S_synergy,C_single C_coop S_synergy,コスト削減額ΔC[USD] 削減率R_reduce[%],ヘスペラスから水素・炭素・窒素を調達することで地球からの輸送コストを80%削減
+

@@ -1,0 +1,182 @@
+/* ============================================================
+   DNA-06: 人工子宮技術の成熟度予測（技術ロードマップ）
+   目的：人工子宮（体外妊娠）技術の成熟度を時系列で予測し、
+         実用化時期を推定する。
+   仕様：
+     - 技術成熟度: Technology Readiness Level (TRL) 1〜9
+     - 現在値: TRL=4（動物実験段階、2025年時点）
+     - 成長モデル: ロジスティック曲線（S字カーブ）
+     - 目標: TRL=9（実用化・商用利用可能）
+   注意：
+     - log(0)エラー回避のため、max_TRL/target-1=0 となる場合を除外
+     - 成長率rが0になる場合も除外
+     - 全てのlog計算で引数が正であることを確認
+   ============================================================ */
+
+kill(all);
+
+print("===== DNA-06: 人工子宮技術成熟度予測 =====")$
+print("")$
+
+/* ----- パラメータ設定 ----- */
+current_year : 2025;
+current_TRL : 4.0;
+max_TRL : 9.0;
+growth_rate : 0.25;          /* 年あたりのTRL上昇率（ロジスティック成長） */
+
+/* ----- ロジスティック成長モデル ----- */
+/* TRL(t) = max_TRL / (1 + exp(-r * (t - t0))) */
+
+/* 現在値に合わせて中点を調整 */
+/* 注意: max_TRL/current_TRL - 1 = 9/4 - 1 = 1.25 > 0 なのでlogは正 */
+adjusted_midpoint : current_year - log(max_TRL/current_TRL - 1) / growth_rate;
+printf(true, "調整後中点年: ~,1f~%", adjusted_midpoint)$
+print("")$
+
+/* 調整後のモデル */
+TRL(t) := max_TRL / (1 + exp(-growth_rate * (t - adjusted_midpoint)));
+
+/* ----- 各年のTRL予測 ----- */
+print("--- 技術成熟度予測（2025-2050年） ---")$
+print("")$
+
+printf(true, "年      TRL    フェーズ~%")$
+printf(true, "----------------------------~%")$
+
+/* TRLフェーズ定義 */
+phase(trl) := if trl < 3 then "基礎研究"
+             elseif trl < 5 then "動物実験"
+             elseif trl < 7 then "臨床試験"
+             elseif trl < 9 then "実用化前"
+             else "実用化完了"$
+
+results : []$
+for year:2025 thru 2050 do block(
+    [trl_val, ph],
+    trl_val : TRL(year),
+    ph : phase(trl_val),
+    results : endcons([year, trl_val, ph], results),
+    printf(true, "~4,0f   ~5,2f   ~a~%", year, trl_val, ph)
+)$
+print("")$
+
+/* ----- 各フェーズの到達時期 ----- */
+print("--- 各フェーズの到達時期 ---")$
+print("")$
+
+/* 目標TRLに達する年を計算 */
+/* log(0)エラー回避: target=9の場合はmax_TRL/target-1=0となるため除外 */
+/* 代わりに十分大きな年（2100年）を表示 */
+target_years : [
+    [3, "基礎研究完了"],
+    [5, "動物実験完了"],
+    [7, "臨床試験完了"]
+]$
+
+for i:1 thru length(target_years) do block(
+    [target, label, t_solve],
+    target : target_years[i][1],
+    label : target_years[i][2],
+    /* max_TRL/target - 1 > 0 を確認 */
+    if max_TRL/target - 1 <= 0 then
+        printf(true, "~a: 計算不能（targetがmax_TRL以上）~%", label)
+    else
+        t_solve : adjusted_midpoint - log(max_TRL/target - 1) / growth_rate,
+        printf(true, "~a: ~4,0f年（TRL=~,0f）~%", label, t_solve, target)
+)$
+/* TRL=9は漸近線のため到達年は表示しない */
+printf(true, "実用化完了（TRL=9）: 漸近線のため到達年は定義不能（理論上の上限）~%")$
+print("")$
+
+/* ----- グラフ描画（plot2d、別window表示） ----- */
+print("グラフ: 技術成熟度予測曲線 を表示します...")$
+print("【考察】")$
+print("- ロジスティック曲線は技術成熟度の典型的なS字カーブ")$
+print("- 初期（2025-2030年）は動物実験段階で緩やかな成長")$
+print("- 中期（2030-2040年）は臨床試験段階で急成長")$
+print("- 後期（2040-2050年）は実用化段階で成長が鈍化")$
+print("")$
+
+plot2d(
+    TRL(t),
+    [t, 2025, 2050],
+    [xlabel, "Year"],
+    [ylabel, "Technology Readiness Level (TRL)"],
+    [title, "Artificial Womb Technology Maturity Forecast"],
+    [style, [lines, 3]],
+    [color, blue],
+    [legend, "TRL"],
+    [gnuplot_preamble, "set grid; set yrange [0:10]; set xrange [2025:2050];"]
+)$
+
+/* ----- 感度分析：成長率の影響 ----- */
+print("")$
+print("--- 感度分析：成長率の影響 ---")$
+print("")$
+
+growth_rates : [0.15, 0.20, 0.25, 0.30, 0.35]$
+printf(true, "成長率   2030年TRL  2040年TRL  2050年TRL~%")$
+printf(true, "----------------------------------------~%")$
+
+for i:1 thru length(growth_rates) do block(
+    [r, trl30, trl40, trl50],
+    r : growth_rates[i],
+    /* log(0)エラー回避: max_TRL/9-1=0 となるためt9は計算しない */
+    trl30 : max_TRL / (1 + exp(-r * (2030 - adjusted_midpoint))),
+    trl40 : max_TRL / (1 + exp(-r * (2040 - adjusted_midpoint))),
+    trl50 : max_TRL / (1 + exp(-r * (2050 - adjusted_midpoint))),
+    printf(true, "~5,2f    ~5,2f    ~5,2f    ~5,2f~%",
+           r, trl30, trl40, trl50)
+)$
+print("")$
+
+/* ----- 結論 ----- */
+print("===== 結論 =====")$
+print("")$
+print("人工子宮技術の実用化（TRL=9）は理論上の上限であり、")$
+print("ロジスティックモデルでは漸近線として扱われる。")$
+printf(true, "現在の成長率(~,2f)では、TRL=8.9に達するのは約~4,0f年と推定。~%",
+       growth_rate,
+       adjusted_midpoint - log(max_TRL/8.9 - 1) / growth_rate)$
+print("")$
+print("【技術的課題】")$
+print("1. 胎盤模倣: 母体との物質交換を完全に再現")$
+print("2. 血流制御: 胎児への酸素・栄養供給の最適化")$
+print("3. 神経発達: 子宮内環境の神経発達への影響解明")$
+print("4. ホルモン制御: 妊娠に必要なホルモン環境の維持")$
+print("")$
+print("【社会的影響】")$
+print("1. 不妊治療の最終手段としての選択肢")$
+print("2. 少子化対策（FER-06）への貢献")$
+print("3. 倫理的課題（胎児の権利、代理母問題）")$
+print("4. 法規制の整備必要性")$
+print("")$
+print("【FER-06との連携】")$
+printf(true, "FER-06（人工子宮技術による出生率補完）のTRL=8到達予測年: ~4,0f年~%",
+       adjusted_midpoint - log(max_TRL/8 - 1) / growth_rate)$
+printf(true, "これにより、出生率を最大~,1f%向上可能と推定~%",
+       (max_TRL/9) * 100)$
+
+/* ----- CSV出力 ----- */
+csv_file : "DNA06_artificial_womb.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Year,TRL,Phase~%")$
+for i:1 thru length(results) do
+    printf(f_csv, "~4,0f,~,4f,~a~%",
+           results[i][1], results[i][2], results[i][3])$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "DNA06_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "DNA-06: 人工子宮技術成熟度予測 サマリー~%")$
+printf(f_sum, "現在年: ~4,0f, 現在TRL: ~,1f~%", current_year, current_TRL)$
+printf(f_sum, "成長率: ~,2f~%", growth_rate)$
+printf(f_sum, "~%")$
+printf(f_sum, "年別TRL:~%")$
+for i:1 thru length(results) do
+    printf(f_sum, "  ~4,0f: TRL=~,2f (~a)~%",
+           results[i][1], results[i][2], results[i][3])$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$

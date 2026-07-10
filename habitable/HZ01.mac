@@ -1,0 +1,170 @@
+/* ============================================================
+   HZ-01: ハビタブルゾーン 期待発見数
+   目的：恒星の種類ごとにハビタブルゾーン（HZ）の半径を計算し、
+         期待発見数をドレイク方程式風に推定する。
+   仕様：
+     - 恒星タイプ: M, K, G, F, A
+     - HZ半径: r_HZ = sqrt(L/L_sun) * (T_eff/T_sun)^2
+     - 期待発見数: N = N_stars * fp * fh * fl * fi
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（別window表示）
+     - .png出力は行わない
+     - .mdファイルは出力しない
+   出力:
+     1. HZ01_results.csv: 恒星タイプ別のHZ半径と期待発見数
+     2. HZ01_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+/* ----- 物理定数 ----- */
+L_sun : 3.828e26;         /* 太陽光度 [W] */
+T_sun : 5778.0;           /* 太陽表面温度 [K] */
+N_stars_galaxy : 1.0e11;  /* 銀河系恒星数 */
+
+/* ----- ドレイク方程式パラメータ ----- */
+fp : 0.5;                 /* 惑星存在確率 */
+fh : 0.2;                 /* ハビタブル確率 */
+fl : 0.1;                 /* 生命発生確率 */
+fi : 0.01;                /* 知的文明確率 */
+
+/* ----- 恒星データ ----- */
+/* [タイプ, 質量(Msun), 温度(K), 光度(Lsun)] */
+star_data : [
+    ["M", 0.3, 3500, 0.01],
+    ["K", 0.7, 4500, 0.2],
+    ["G", 1.0, 5778, 1.0],
+    ["F", 1.3, 6500, 3.0],
+    ["A", 1.8, 8000, 10.0]
+];
+
+/* ----- HZ半径計算関数 ----- */
+/* r_HZ = sqrt(L/L_sun) * (T_eff/T_sun)^2 */
+habitable_radius(L_ratio, T_eff) := sqrt(L_ratio) * (T_eff / T_sun)^2;
+
+/* ----- 期待発見数（ドレイク方程式） ----- */
+expected_discoveries(N_stars, fp_val, fh_val, fl_val, fi_val) :=
+    N_stars * fp_val * fh_val * fl_val * fi_val;
+
+/* ----- メイン計算 ----- */
+print("===== HZ-01: ハビタブルゾーン計算 =====")$
+print("")$
+
+results : []$
+for i:1 thru length(star_data) do block(
+    [stype, mass, temp, lum_ratio, r_inner, r_outer, width, N_exp],
+    stype : star_data[i][1],
+    mass  : star_data[i][2],
+    temp  : star_data[i][3],
+    lum_ratio : star_data[i][4],
+
+    /* HZ半径（内側0.95、外側1.37の係数） */
+    r_inner : habitable_radius(lum_ratio, temp) * 0.95,
+    r_outer : habitable_radius(lum_ratio, temp) * 1.37,
+    width : r_outer - r_inner,
+
+    /* 期待発見数 */
+    N_exp : expected_discoveries(N_stars_galaxy, fp, fh, fl, fi),
+
+    results : endcons([stype, mass, temp, lum_ratio, r_inner, r_outer, width, N_exp], results),
+
+    /* コンソール表示 */
+    printf(true, "恒星 ~a型: M=~,1f Msun, T=~,0f K, L=~,2f Lsun~%", stype, mass, temp, lum_ratio),
+    printf(true, "  HZ半径: ~,2f - ~,2f AU (幅 ~,2f AU)~%", r_inner, r_outer, width),
+    printf(true, "  期待発見数: ~,2e~%~%", N_exp)
+)$
+
+/* ----- CSV出力 ----- */
+csv_file : "HZ01_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "StarType,Mass[Msun],Temp[K],Lum[Lsun],HZ_inner[AU],HZ_outer[AU],Width[AU],N_expected~%")$
+for i:1 thru length(results) do
+    printf(f_csv, "~a,~,1f,~,0f,~,2f,~,4f,~,4f,~,4f,~,2e~%",
+           results[i][1], results[i][2], results[i][3], results[i][4],
+           results[i][5], results[i][6], results[i][7], results[i][8])$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "HZ01_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "HZ-01 Habitable Zone Expected Discoveries Summary~%")$
+printf(f_sum, "Galaxy stars: ~,1e~%", N_stars_galaxy)$
+printf(f_sum, "fp=~,2f, fh=~,2f, fl=~,2f, fi=~,2f~%~%", fp, fh, fl, fi)$
+for i:1 thru length(results) do
+    printf(f_sum, "Star ~a: HZ=~,2f-~,2fAU, N_exp=~,2e~%",
+           results[i][1], results[i][5], results[i][6], results[i][8])$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ============================================================
+   グラフ描画（plot2dを使用、別window表示）
+   .png出力は行わない。drawのsubplotはエラーになるため使用しない
+   ============================================================ */
+
+/* ----- グラフ1: HZ半径 vs 恒星質量 ----- */
+/* 考察：恒星質量が大きいほどHZ半径は拡大する。
+   これは光度が質量の約3.5乗に比例するため。 */
+print("グラフ1: HZ半径 vs 恒星質量 を表示します...")$
+plot2d([
+    [discrete, makelist(0.1+i*0.02, i, 0, 95),
+              makelist(habitable_radius((0.1+i*0.02)^3.5, 5778*sqrt(0.1+i*0.02))*0.95, i, 0, 95)],
+    [discrete, makelist(0.1+i*0.02, i, 0, 95),
+              makelist(habitable_radius((0.1+i*0.02)^3.5, 5778*sqrt(0.1+i*0.02))*1.37, i, 0, 95)]
+],
+[xlabel, "Stellar Mass [Msun]"],
+[ylabel, "HZ Radius [AU]"],
+[title, "HZ Radius vs Stellar Mass"],
+[style, [lines, 2], [lines, 2]],
+[color, blue, red],
+[legend, "Inner HZ", "Outer HZ"])$
+
+/* ----- グラフ2: 期待発見数 vs fp ----- */
+/* 考察：惑星存在確率fpに比例して期待発見数は線形に増加する。
+   fp=1.0で最大値に達する。 */
+print("グラフ2: 期待発見数 vs fp を表示します...")$
+plot2d(
+    [discrete, makelist(0.1+i*0.01, i, 0, 90),
+              makelist(expected_discoveries(N_stars_galaxy, 0.1+i*0.01, fh, fl, fi), i, 0, 90)],
+[xlabel, "Planet Probability fp"],
+[ylabel, "Expected N"],
+[title, "Expected N vs fp"],
+[style, [lines, 2]],
+[color, blue])$
+
+/* ----- グラフ3: 期待発見数 vs fh ----- */
+/* 考察：ハビタブル確率fhに比例して期待発見数は線形に増加する。
+   現在の推定値fh=0.2は控えめな値。 */
+print("グラフ3: 期待発見数 vs fh を表示します...")$
+plot2d(
+    [discrete, makelist(0.05+i*0.005, i, 0, 90),
+              makelist(expected_discoveries(N_stars_galaxy, fp, 0.05+i*0.005, fl, fi), i, 0, 90)],
+[xlabel, "Habitable Probability fh"],
+[ylabel, "Expected N"],
+[title, "Expected N vs fh"],
+[style, [lines, 2]],
+[color, green])$
+
+/* ----- グラフ4: 期待発見数 vs fl（対数） ----- */
+/* 考察：生命発生確率flは対数スケールで広範囲に変動する。
+   flが10^-3から10^0に増加すると、期待発見数は1000倍になる。
+   これはドレイク方程式の中で最も不確実性の高いパラメータ。 */
+print("グラフ4: 期待発見数 vs fl を表示します...")$
+plot2d(
+    [discrete, makelist(10^(-3+i*0.033), i, 0, 90),
+              makelist(expected_discoveries(N_stars_galaxy, fp, fh, 10^(-3+i*0.033), fi), i, 0, 90)],
+[xlabel, "Life Probability fl"],
+[ylabel, "Expected N"],
+[title, "Expected N vs fl (log scale)"],
+[logx, true],
+[style, [lines, 2]],
+[color, magenta])$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== HZ-01 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

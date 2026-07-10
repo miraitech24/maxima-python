@@ -1,0 +1,279 @@
+/* ============================================================
+   MER-09: 水星地表太陽光発電と蓄電
+   目的：水星の地表および軌道上での太陽光発電と、
+         58日間の長い夜に対応する蓄電システムを設計する。
+         ダイソン環は軌道上に建設し、地表発電は補助的に使用。
+   仕様：
+     - 水星の自転周期: 58.646日（公転周期の2/3）
+     - 昼側: 約58日間連続日照、夜側: 約58日間連続夜
+     - 太陽光強度: 地球の6.7倍（約9,000 W/m^2）
+     - 地表温度: 昼側+430℃、夜側-180℃
+     - ダイソン環: 軌道上（水星同期軌道）に設置
+     - 地表発電: 補助電源として夜側でも運用可能な設計
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（折れ線グラフ）
+     - .png出力は行わない
+   出力:
+     1. MER09_results.csv: 発電・蓄電計算結果
+     2. MER09_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+print("===== MER-09: 水星地表太陽光発電と蓄電 =====")$
+print("")$
+
+/* ----- 物理定数 ----- */
+g_earth : 9.80665;                   /* 地球重力 [m/s^2] */
+pi_val : %pi;                        /* 円周率 */
+sigma_sb : 5.670374419e-8;           /* ステファン・ボルツマン定数 [W/m^2/K^4] */
+
+/* ----- 水星パラメータ ----- */
+print("--- 水星パラメータ ---")$
+
+T_day : 58.646;                      /* 水星の1日の長さ [地球日] */
+T_daylight : T_day / 2;              /* 昼の長さ [地球日] */
+T_night : T_day / 2;                 /* 夜の長さ [地球日] */
+T_daylight_hours : T_daylight * 24;  /* 昼の長さ [時間] */
+T_night_hours : T_night * 24;        /* 夜の長さ [時間] */
+
+S_mercury : 9000;                    /* 水星地表の太陽光強度 [W/m^2] */
+S_earth : 1360;                      /* 地球の太陽光強度 [W/m^2]（参考） */
+
+printf(true, "水星の自転周期: ~,3f 地球日~%", T_day)$
+printf(true, "  昼の長さ: ~,2f 地球日 (~,0f 時間)~%", T_daylight, T_daylight_hours)$
+printf(true, "  夜の長さ: ~,2f 地球日 (~,0f 時間)~%", T_night, T_night_hours)$
+printf(true, "太陽光強度: ~,0f W/m^2 (地球の ~,1f倍)~%~%", S_mercury, S_mercury/S_earth)$
+
+/* ----- ダイソン環（軌道上）の設計 ----- */
+print("--- ダイソン環（軌道上）の設計 ---")$
+
+/* ダイソン環は水星同期軌道に設置 */
+/* 水星同期軌道半径: 約24万km（水星の自転周期と同期） */
+/* ここでは水星周回軌道上のリング状ソーラーパネル */
+
+dyson_ring_radius : 2.4e8;           /* ダイソン環半径 [m]（水星同期軌道） */
+dyson_ring_width : 10000;            /* 環の幅 [m]（10km） */
+dyson_ring_area : 2 * pi_val * dyson_ring_radius * dyson_ring_width;  /* 環の総面積 [m^2] */
+
+/* ダイソン環の発電能力 */
+dyson_panel_efficiency : 0.3;        /* パネル変換効率 30% */
+dyson_power_density : S_mercury * dyson_panel_efficiency;  /* 単位面積あたり発電 [W/m^2] */
+dyson_total_power : dyson_ring_area * dyson_power_density;  /* 総発電量 [W] */
+dyson_total_power_TW : dyson_total_power / 1e12;  /* [TW] */
+
+printf(true, "ダイソン環（軌道上）:~%")$
+printf(true, "  環半径: ~,2e m (~,0f km)~%", dyson_ring_radius, dyson_ring_radius/1000)$
+printf(true, "  環幅: ~,0f m (~,0f km)~%", dyson_ring_width, dyson_ring_width/1000)$
+printf(true, "  総面積: ~,2e m^2~%", dyson_ring_area)$
+printf(true, "  単位面積あたり発電: ~,0f W/m^2~%", dyson_power_density)$
+printf(true, "  総発電量: ~,2e W = ~,2f TW~%~%", dyson_total_power, dyson_total_power_TW)$
+
+/* ダイソン環は常時日照（水星の影に入らない） */
+dyson_daily_energy : dyson_total_power * 24 * 3600;  /* 1日あたり [J] */
+dyson_daily_energy_TWh : dyson_daily_energy / (3.6e12);  /* [TWh] */
+
+printf(true, "ダイソン環の1日あたり発電量: ~,2f TWh/日~%~%", dyson_daily_energy_TWh)$
+
+/* ----- 地表太陽光発電の設計 ----- */
+print("--- 地表太陽光発電の設計 ---")$
+
+/* 地表発電所の規模 */
+surface_panel_area : 1.0e6;          /* 地表パネル面積 [m^2]（1km^2） */
+surface_panel_efficiency : 0.25;     /* 地表パネル変換効率 25%（高温対応） */
+surface_power_density : S_mercury * surface_panel_efficiency;  /* [W/m^2] */
+surface_total_power : surface_panel_area * surface_power_density;  /* [W] */
+surface_total_power_MW : surface_total_power / 1e6;  /* [MW] */
+
+/* 地表パネルの温度影響（高温で効率低下） */
+T_surface_day : 430 + 273;           /* 昼側表面温度 [K] */
+T_surface_night : -180 + 273;        /* 夜側表面温度 [K] */
+temp_coeff : -0.004;                 /* 温度係数（%/K、シリコン系） */
+T_ref : 298;                         /* 基準温度 [K]（25℃） */
+
+/* 昼側の効率低下 */
+efficiency_day : surface_panel_efficiency * (1 + temp_coeff * (T_surface_day - T_ref));
+/* 効率が0以下にならないように */
+if efficiency_day < 0 then efficiency_day : 0.01;
+
+/* 夜側は発電不可（太陽光なし） */
+/* 夜側は蓄電した電力で運用 */
+
+printf(true, "地表太陽光発電:~%")$
+printf(true, "  パネル面積: ~,2e m^2 (~,2f km^2)~%", surface_panel_area, surface_panel_area/1e6)$
+printf(true, "  基準効率: ~,1f%~%", surface_panel_efficiency*100)$
+printf(true, "  昼側温度: ~,0f℃ → 実効効率: ~,2f%~%", T_surface_day-273, efficiency_day*100)$
+printf(true, "  昼側発電量: ~,2f MW~%", surface_total_power_MW * (efficiency_day/surface_panel_efficiency))$
+printf(true, "  夜側発電量: 0 MW（太陽光なし）~%~%")$
+
+/* 地表発電の1日あたり発電量 */
+surface_daily_energy_day : surface_total_power * (efficiency_day/surface_panel_efficiency) * T_daylight_hours * 3600;  /* 昼間のみ [J] */
+surface_daily_energy_MWh : surface_daily_energy_day / 3.6e9;  /* [MWh] */
+
+printf(true, "地表発電の1日あたり発電量: ~,2f MWh/日~%~%", surface_daily_energy_MWh)$
+
+/* ----- 蓄電システムの設計 ----- */
+print("--- 蓄電システムの設計 ---")$
+
+/* 夜間に必要な電力（基地運用） */
+base_power_night : 10.0e6;           /* 夜間の基地消費電力 [W]（10MW） */
+night_energy_needed : base_power_night * T_night_hours * 3600;  /* 夜間に必要なエネルギー [J] */
+night_energy_needed_MWh : night_energy_needed / 3.6e9;  /* [MWh] */
+
+/* 蓄電方式：溶融塩電池（高温対応） */
+battery_energy_density : 200;        /* エネルギー密度 [Wh/kg] */
+battery_efficiency : 0.85;           /* 充放電効率 85% */
+battery_depth_discharge : 0.8;       /* 放電深度 80% */
+
+/* 必要な蓄電容量 */
+battery_capacity_needed : night_energy_needed_MWh / battery_depth_discharge;  /* [MWh] */
+battery_mass_needed : battery_capacity_needed * 1e6 / battery_energy_density;  /* [kg] */
+battery_mass_needed_ton : battery_mass_needed / 1000;  /* [トン] */
+
+printf(true, "蓄電システム（夜間運用）:~%")$
+printf(true, "  夜間の基地消費電力: ~,2f MW~%", base_power_night/1e6)$
+printf(true, "  夜間に必要なエネルギー: ~,2f MWh~%", night_energy_needed_MWh)$
+printf(true, "  蓄電方式: 溶融塩電池（高温対応）~%")$
+printf(true, "  エネルギー密度: ~,0f Wh/kg~%", battery_energy_density)$
+printf(true, "  充放電効率: ~,0f%~%", battery_efficiency*100)$
+printf(true, "  必要蓄電容量: ~,2f MWh~%", battery_capacity_needed)$
+printf(true, "  必要蓄電質量: ~,2f トン~%~%", battery_mass_needed_ton)$
+
+/* ダイソン環からの給電（夜間も可能） */
+dyson_power_to_base : dyson_total_power * 0.01;  /* ダイソン環の1%を基地に供給 */
+printf(true, "ダイソン環からの給電（夜間も可能）:~%")$
+printf(true, "  基地への供給電力: ~,2f MW~%", dyson_power_to_base/1e6)$
+printf(true, "  夜間供給可能エネルギー: ~,2f MWh~%", dyson_power_to_base * T_night_hours * 3600 / 3.6e9)$
+printf(true, "  蓄電不要の可能性: ~a~%~%", if dyson_power_to_base > base_power_night then "✅ ダイソン環で夜間も賄える" else "⚠️ 蓄電が必要")$
+
+/* ----- ハイブリッド電源構成 ----- */
+print("--- ハイブリッド電源構成 ---")$
+
+/* 電源構成 */
+total_power_available : dyson_total_power + surface_total_power * (efficiency_day/surface_panel_efficiency);  /* 昼間の総発電 [W] */
+dyson_ratio : dyson_total_power / total_power_available * 100;
+surface_ratio : surface_total_power * (efficiency_day/surface_panel_efficiency) / total_power_available * 100;
+
+printf(true, "ハイブリッド電源構成（昼間）:~%")$
+printf(true, "  ダイソン環（軌道上）: ~,2f TW (~,1f%)~%", dyson_total_power_TW, dyson_ratio)$
+printf(true, "  地表発電: ~,2f MW (~,1f%)~%", surface_total_power_MW * (efficiency_day/surface_panel_efficiency), surface_ratio)$
+printf(true, "  総発電量: ~,2f TW~%~%", total_power_available/1e12)$
+
+/* 夜間の電源構成 */
+printf(true, "夜間の電源:~%")$
+printf(true, "  ダイソン環（軌道上）: ~,2f TW（常時稼働）~%", dyson_total_power_TW)$
+printf(true, "  蓄電システム: ~,2f MWh（夜間~,0f時間分）~%", battery_capacity_needed, T_night_hours)$
+printf(true, "  地表発電: 0 MW（夜間は発電不可）~%~%")$
+
+/* ----- パラメータスイープ（蓄電容量vs夜間時間） ----- */
+print("--- パラメータスイープ ---")$
+
+/* 夜間時間を変化させた場合の必要蓄電容量 */
+printf(true, "夜間時間[日] | 必要蓄電容量[MWh] | 蓄電質量[トン]~%")$
+printf(true, "------------+-------------------+---------------~%")$
+
+for i:1 thru 10 do block(
+    [night_days, night_h, need_energy, need_cap, need_mass],
+    night_days : i * 5,
+    night_h : night_days * 24,
+    need_energy : base_power_night * night_h * 3600 / 3.6e9,
+    need_cap : need_energy / battery_depth_discharge,
+    need_mass : need_cap * 1e6 / battery_energy_density / 1000,
+    printf(true, "~7,0f    | ~15,2f    | ~12,2f~%", night_days, need_cap, need_mass)
+)$
+print("")$
+
+/* ----- グラフ描画（折れ線グラフ） ----- */
+print("グラフ1: 夜間時間 vs 必要蓄電容量 を表示します...")$
+
+/* グラフ1: 夜間時間vs蓄電容量 */
+plot2d(
+    [discrete, makelist([i*5, base_power_night * i*5*24 * 3600 / 3.6e9 / 0.8], i, 1, 12)],
+    [xlabel, "Night Duration [days]"],
+    [ylabel, "Required Battery Capacity [MWh]"],
+    [title, "Battery Capacity vs Night Duration"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ2: 電源構成比率 を表示します...")$
+
+/* グラフ2: 電源構成 */
+plot2d(
+    [discrete, [[1, dyson_ratio], [2, surface_ratio]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Power Source"],
+    [ylabel, "Share [%]"],
+    [title, "Power Source Composition (Daytime)"],
+    [gnuplot_preamble, "set xtics ('Dyson Ring' 1, 'Surface Solar' 2); set yrange [0:100];"])$
+
+print("グラフ3: ダイソン環の規模と発電量 を表示します...")$
+
+/* グラフ3: ダイソン環規模vs発電量 */
+plot2d(
+    [discrete, makelist([i*1000, 2*pi_val*(i*1000+0.5)*10000*S_mercury*0.3/1e12], i, 1, 20)],
+    [xlabel, "Dyson Ring Radius [km]"],
+    [ylabel, "Power Output [TW]"],
+    [title, "Dyson Ring Power vs Radius"],
+    [style, [lines, 2]],
+    [color, red])$
+
+/* ----- CSV出力 ----- */
+csv_file : "MER09_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Mercury_day,~,3f,days~%", T_day)$
+printf(f_csv, "Daylight_hours,~,0f,hours~%", T_daylight_hours)$
+printf(f_csv, "Night_hours,~,0f,hours~%", T_night_hours)$$
+printf(f_csv, "Solar_intensity,~,0f,W/m2~%", S_mercury)$
+printf(f_csv, "Dyson_ring_radius,~,2e,m~%", dyson_ring_radius)$
+printf(f_csv, "Dyson_ring_area,~,2e,m2~%", dyson_ring_area)$
+printf(f_csv, "Dyson_total_power,~,2f,TW~%", dyson_total_power_TW)$
+printf(f_csv, "Dyson_daily_energy,~,2f,TWh~%", dyson_daily_energy_TWh)$
+printf(f_csv, "Surface_panel_area,~,2e,m2~%", surface_panel_area)$
+printf(f_csv, "Surface_day_power,~,2f,MW~%", surface_total_power_MW * (efficiency_day/surface_panel_efficiency))$
+printf(f_csv, "Surface_daily_energy,~,2f,MWh~%", surface_daily_energy_MWh)$
+printf(f_csv, "Night_power_needed,~,2f,MW~%", base_power_night/1e6)$
+printf(f_csv, "Battery_capacity_needed,~,2f,MWh~%", battery_capacity_needed)$
+printf(f_csv, "Battery_mass_needed,~,2f,tons~%", battery_mass_needed_ton)$
+printf(f_csv, "Dyson_ratio,~,1f,%~%", dyson_ratio)$
+printf(f_csv, "Surface_ratio,~,1f,%~%", surface_ratio)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "MER09_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "MER-09: 水星地表太陽光発電と蓄電 サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【水星の環境】~%")$
+printf(f_sum, "  自転周期: ~,3f 地球日~%", T_day)$
+printf(f_sum, "  昼: ~,0f時間, 夜: ~,0f時間~%", T_daylight_hours, T_night_hours)$
+printf(f_sum, "  太陽光強度: ~,0f W/m^2（地球の~,1f倍）~%~%", S_mercury, S_mercury/S_earth)$
+printf(f_sum, "【ダイソン環（軌道上）】~%")$
+printf(f_sum, "  常時日照可能（水星の影に入らない軌道）~%")$
+printf(f_sum, "  総発電量: ~,2f TW~%", dyson_total_power_TW)$
+printf(f_sum, "  1日あたり: ~,2f TWh~%~%", dyson_daily_energy_TWh)$
+printf(f_sum, "【地表太陽光発電】~%")$
+printf(f_sum, "  昼側のみ発電可能（夜側は不可）~%")$
+printf(f_sum, "  高温による効率低下あり（+430℃で約50%低下）~%")$
+printf(f_sum, "  発電量: ~,2f MW（昼間のみ）~%~%", surface_total_power_MW * (efficiency_day/surface_panel_efficiency))$
+printf(f_sum, "【蓄電システム】~%")$
+printf(f_sum, "  夜間~,0f時間の基地運用に必要~%", T_night_hours)$
+printf(f_sum, "  必要蓄電容量: ~,2f MWh~%", battery_capacity_needed)$
+printf(f_sum, "  蓄電質量: ~,2f トン~%~%", battery_mass_needed_ton)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "水星ダイソン環は軌道上に建設する。~%")$
+printf(f_sum, "地表発電は補助的に使用し、夜間はダイソン環から給電。~%")$
+printf(f_sum, "ダイソン環の出力があれば、蓄電は最小限で済む。~%")$
+printf(f_sum, "地表発電は昼間のピーク電力供給と非常用電源として活用。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== MER-09 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

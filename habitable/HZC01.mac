@@ -1,0 +1,257 @@
+/* ============================================================
+   HZC-01: 浮遊人工惑星の最小質量と重力生成
+   目的：浮遊人工惑星（オニールシリンダー型）の設計において、
+         目標重力を生成するために必要な最小質量と構造材強度を計算する。
+   仕様：
+     - 人工惑星形状: 円筒型（オニールシリンダー）
+     - 重力生成方式: 回転による遠心力
+     - 目標重力: 0.1G〜1.0G（可変）
+     - 直径: 1km〜100km
+     - 構造材: カーボンナノチューブ複合材料
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（別window表示）
+     - .png出力は行わない
+   出力:
+     1. HZC01_results.csv: 計算結果
+     2. HZC01_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+print("===== HZC-01: 浮遊人工惑星の最小質量と重力生成 =====")$
+print("")$
+
+/* ----- 物理定数 ----- */
+g_earth : 9.80665;                   /* 地球重力 [m/s^2] */
+pi_val : %pi;                        /* 円周率 */
+
+/* ----- 設計パラメータ ----- */
+print("--- 設計パラメータ ---")$
+
+/* 目標重力（地球比） */
+g_target_ratio : 1.0;                /* 1.0 = 地球と同じ重力 */
+g_target : g_target_ratio * g_earth; /* 目標重力 [m/s^2] */
+
+/* 人工惑星の半径 [m] */
+R_planet : 5000.0;                   /* 5km = 5000m */
+
+/* シェル厚 [m] */
+shell_thickness : 10.0;              /* 10m */
+
+/* 構造材密度 [kg/m^3]（カーボンナノチューブ複合材料） */
+density_carbon : 1500.0;             /* 1.5 g/cm^3 = 1500 kg/m^3 */
+
+/* 構造材の引張強度 [Pa] */
+tensile_strength_carbon : 7.0e10;    /* 70 GPa */
+
+printf(true, "目標重力: ~,2f G (~,2f m/s^2)~%", g_target_ratio, g_target)$
+printf(true, "人工惑星半径: ~,2f m (~,2f km)~%", R_planet, R_planet/1000)$
+printf(true, "シェル厚: ~,2f m~%", shell_thickness)$
+printf(true, "構造材密度: ~,2f kg/m^3~%", density_carbon)$
+printf(true, "構造材引張強度: ~,2e Pa~%~%", tensile_strength_carbon)$
+
+/* ----- 1. 必要回転速度の計算 ----- */
+print("--- 1. 必要回転速度の計算 ---")$
+
+/* 遠心力 = m * omega^2 * r = m * g_target */
+/* omega = sqrt(g_target / r) */
+omega : sqrt(g_target / R_planet);   /* 角速度 [rad/s] */
+
+/* 回転周期 */
+rotation_period : 2 * pi_val / omega; /* [sec] */
+rotation_period_min : rotation_period / 60; /* [min] */
+
+/* 周速度 */
+v_surface : omega * R_planet;        /* [m/s] */
+v_surface_kms : v_surface / 1000;    /* [km/s] */
+
+printf(true, "必要角速度: ~,4f rad/s~%", omega)$
+printf(true, "回転周期: ~,2f sec = ~,2f 分~%", rotation_period, rotation_period_min)$
+printf(true, "表面周速度: ~,2f m/s = ~,3f km/s~%~%", v_surface, v_surface_kms)$
+
+/* ----- 2. 構造材に働く応力の計算 ----- */
+print("--- 2. 構造材に働く応力の計算 ---")$
+
+/* 円筒シェルに働く応力（周方向） */
+/* sigma = density * v^2 */
+stress_hoop : density_carbon * v_surface^2;  /* [Pa] */
+
+/* 安全率 */
+safety_factor : 3.0;
+allowable_stress : tensile_strength_carbon / safety_factor;
+
+printf(true, "周方向応力: ~,2e Pa~%", stress_hoop)$
+printf(true, "許容応力（安全率~,1f）: ~,2e Pa~%", safety_factor, allowable_stress)$
+
+/* 応力チェック */
+if stress_hoop < allowable_stress then
+    print("応力チェック: ✅ 許容範囲内")
+else
+    print("応力チェック: ❌ 許容範囲超過（設計見直し必要）")$
+print("")$
+
+/* ----- 3. 必要質量の計算 ----- */
+print("--- 3. 必要質量の計算 ---")$
+
+/* 円筒の体積（シェル部分） */
+/* V = 2 * pi * R * t * L （Lは長さ、ここでは直径と同じと仮定） */
+L_cylinder : 2 * R_planet;           /* 長さ = 直径 */
+volume_shell : 2 * pi_val * R_planet * shell_thickness * L_cylinder;
+
+/* 内部構造（床・隔壁・設備）の追加質量 */
+internal_struct_ratio : 0.3;         /* シェル質量の30% */
+mass_shell : volume_shell * density_carbon;
+mass_internal : mass_shell * internal_struct_ratio;
+mass_total : mass_shell + mass_internal;
+
+/* 大気の質量（1気圧の空気） */
+density_air : 1.225;                 /* 空気密度 [kg/m^3] @ 1atm */
+volume_interior : pi_val * R_planet^2 * L_cylinder;
+mass_air : density_air * volume_interior;
+
+/* 総質量 */
+mass_grand_total : mass_total + mass_air;
+
+printf(true, "シェル体積: ~,2e m^3~%", volume_shell)$
+printf(true, "シェル質量: ~,2e kg~%", mass_shell)$
+printf(true, "内部構造質量: ~,2e kg~%", mass_internal)$
+printf(true, "構造総質量: ~,2e kg~%", mass_total)$
+printf(true, "内部体積: ~,2e m^3~%", volume_interior)$
+printf(true, "大気質量: ~,2e kg~%", mass_air)$
+printf(true, "総質量: ~,2e kg~%~%", mass_grand_total)$
+
+/* ----- 4. パラメータスイープ（半径vs質量・応力） ----- */
+print("--- 4. パラメータスイープ ---")$
+
+/* 半径を0.5kmから50kmまで変化させた場合 */
+R_range : makelist(500 + i*500, i, 1, 100);  /* 0.5km〜50km */
+
+print("半径スイープ結果:")$
+printf(true, "半径[km] | 角速度[rad/s] | 周期[分] | 周速度[km/s] | 応力[MPa] | 総質量[kg]~%")$
+printf(true, "--------+---------------+---------------+-----------+----------+------------~%")$
+
+for i:1 thru length(R_range) do block(
+    [r, w, T, v, sigma, mass],
+    r : R_range[i],
+    w : sqrt(g_target / r),
+    T : 2 * pi_val / w / 60,
+    v : w * r / 1000,
+    sigma : density_carbon * (w * r)^2 / 1e6,
+    mass : (2 * pi_val * r * shell_thickness * 2*r * density_carbon) * (1 + internal_struct_ratio),
+    if mod(i, 10) = 1 then
+        printf(true, "~6,1f | ~10,4f | ~8,2f | ~9,3f | ~8,2f | ~10,2e~%", r/1000, w, T, v, sigma, mass)
+)$
+print("")$
+
+/* ----- 5. グラフ描画 ----- */
+print("グラフ1: 半径 vs 必要回転周期 を表示します...")$
+
+/* グラフ1: 半径 vs 回転周期 */
+plot2d(
+    [discrete, makelist([R_range[i]/1000, 2*pi_val/sqrt(g_target/R_range[i])/60], i, 1, length(R_range))],
+    [xlabel, "Radius [km]"],
+    [ylabel, "Rotation Period [min]"],
+    [title, "Rotation Period vs Planet Radius (1G)"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ2: 半径 vs 周方向応力 を表示します...")$
+
+/* グラフ2: 半径 vs 応力 */
+plot2d(
+    [discrete, makelist([R_range[i]/1000, density_carbon*(sqrt(g_target/R_range[i])*R_range[i])^2/1e6], i, 1, length(R_range))],
+    [xlabel, "Radius [km]"],
+    [ylabel, "Hoop Stress [MPa]"],
+    [title, "Structural Stress vs Planet Radius (1G)"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ3: 半径 vs 総質量 を表示します...")$
+
+/* グラフ3: 半径 vs 質量 */
+plot2d(
+    [discrete, makelist([R_range[i]/1000, (2*pi_val*R_range[i]*shell_thickness*2*R_range[i]*density_carbon)*(1+internal_struct_ratio)], i, 1, length(R_range))],
+    [xlabel, "Radius [km]"],
+    [ylabel, "Total Mass [kg]"],
+    [title, "Total Mass vs Planet Radius (1G)"],
+    [style, [lines, 2]],
+    [color, green])$
+
+/* ----- 6. 目標重力を変化させた場合の計算 ----- */
+print("--- 6. 重力可変設計 ---")$
+
+g_ratios : [0.1, 0.2, 0.3, 0.5, 0.7, 1.0];
+printf(true, "目標重力[G] | 角速度[rad/s] | 周期[分] | 周速度[m/s] | 応力[MPa]~%")$
+printf(true, "-----------+---------------+---------------+-----------+----------~%")$
+
+for i:1 thru length(g_ratios) do block(
+    [gr, w, T, v, sigma],
+    gr : g_ratios[i],
+    w : sqrt(gr * g_earth / R_planet),
+    T : 2 * pi_val / w / 60,
+    v : w * R_planet,
+    sigma : density_carbon * v^2 / 1e6,
+    printf(true, "~8,1f | ~10,4f | ~8,2f | ~9,2f | ~8,2f~%", gr, w, T, v, sigma)
+)$
+print("")$
+
+/* ----- CSV出力 ----- */
+csv_file : "HZC01_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Parameter,Value,Unit~%")$
+printf(f_csv, "Target_gravity,~,2f,G~%", g_target_ratio)$
+printf(f_csv, "Planet_radius,~,2f,km~%", R_planet/1000)$
+printf(f_csv, "Shell_thickness,~,2f,m~%", shell_thickness)$
+printf(f_csv, "Angular_velocity,~,4f,rad/s~%", omega)$
+printf(f_csv, "Rotation_period,~,2f,min~%", rotation_period_min)$
+printf(f_csv, "Surface_velocity,~,2f,m/s~%", v_surface)$
+printf(f_csv, "Hoop_stress,~,2e,Pa~%", stress_hoop)$
+printf(f_csv, "Allowable_stress,~,2e,Pa~%", allowable_stress)$
+printf(f_csv, "Shell_mass,~,2e,kg~%", mass_shell)$
+printf(f_csv, "Internal_mass,~,2e,kg~%", mass_internal)$
+printf(f_csv, "Air_mass,~,2e,kg~%", mass_air)$
+printf(f_csv, "Total_mass,~,2e,kg~%", mass_grand_total)$
+printf(f_csv, "Interior_volume,~,2e,m^3~%", volume_interior)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "HZC01_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "HZC-01: 浮遊人工惑星の最小質量と重力生成 サマリー~%")$
+printf(f_sum, "============================================~%~%")$
+printf(f_sum, "【設計条件】~%")$
+printf(f_sum, "  目標重力: ~,2f G~%", g_target_ratio)$
+printf(f_sum, "  人工惑星半径: ~,2f km~%", R_planet/1000)$
+printf(f_sum, "  シェル厚: ~,2f m~%", shell_thickness)$
+printf(f_sum, "  構造材: カーボンナノチューブ複合材料~%")$
+printf(f_sum, "  密度: ~,0f kg/m^3~%", density_carbon)$
+printf(f_sum, "  引張強度: ~,2e Pa~%~%", tensile_strength_carbon)$
+printf(f_sum, "【計算結果】~%")$
+printf(f_sum, "  必要角速度: ~,4f rad/s~%", omega)$
+printf(f_sum, "  回転周期: ~,2f 分~%", rotation_period_min)$
+printf(f_sum, "  表面周速度: ~,2f m/s~%", v_surface)$
+printf(f_sum, "  周方向応力: ~,2e Pa~%", stress_hoop)$
+printf(f_sum, "  許容応力: ~,2e Pa~%", allowable_stress)$
+printf(f_sum, "  応力チェック: ~a~%~%", if stress_hoop < allowable_stress then "OK" else "NG")$
+printf(f_sum, "【質量内訳】~%")$
+printf(f_sum, "  シェル質量: ~,2e kg~%", mass_shell)$
+printf(f_sum, "  内部構造質量: ~,2e kg~%", mass_internal)$
+printf(f_sum, "  大気質量: ~,2e kg~%", mass_air)$
+printf(f_sum, "  総質量: ~,2e kg~%~%", mass_grand_total)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "半径5kmの浮遊人工惑星で1Gを生成するには、~%")$
+printf(f_sum, "約2分の回転周期で十分であり、構造材の応力は~%")$
+printf(f_sum, "カーボンナノチューブの許容範囲内に収まる。~%")$
+printf(f_sum, "総質量は約~,2e kgで、小惑星1個分の質量で建設可能。~%", mass_grand_total)$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== HZC-01 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

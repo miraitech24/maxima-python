@@ -1,0 +1,161 @@
+/* ============================================================
+   WH-COMMUTE: ワームホール通勤の可行性計算
+   目的：ワームホール（マイクロスロート）を「どこでもドア」として
+         日常的な通勤に使用できるかの物理的・工学的可行性を評価する。
+   仕様：
+     - 通勤パターン: 地球（朝）→ プロキシマb（昼）→ 地球（夕方）
+     - 移動距離: 4.2光年（片道）
+     - 通勤時間: 朝9時出社、夕方5時退社、地球時間ベース
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（別window表示）
+   ============================================================ */
+
+kill(all);
+
+print("===== WH-COMMUTE: ワームホール通勤の可行性 =====")$
+print("")$
+
+/* ----- 物理定数 ----- */
+c_light : 3.0e8;                     /* 光速 [m/s] */
+ly_to_m : 9.461e15;                  /* 1光年 = 9.461e15 m */
+
+/* ----- 通勤パラメータ ----- */
+distance_ly : 4.2;                   /* 地球-プロキシマb距離 [光年] */
+distance_m : distance_ly * ly_to_m;  /* [m] */
+
+/* ワームホール（マイクロスロート）通過時間 */
+/* 理論上: 瞬時（プランク時間オーダー） */
+wh_transit_time_theoretical : 5.39e-44;  /* プランク時間 [sec] */
+
+/* 実用的なワームホール開通・安定化時間 */
+wh_stabilization_time : 0.001;        /* 1ms = 実用的な安定化時間 [sec] */
+wh_opening_time : 0.01;               /* 10ms = ワームホール開口時間 [sec] */
+
+/* 通勤スケジュール */
+printf(true, "--- 通勤スケジュール ---~%")$
+printf(true, "  出勤: 地球時間 9:00 → プロキシマb 9:00（同日）~%")$
+printf(true, "  退社: プロキシマb 17:00 → 地球 17:00（同日）~%")$
+printf(true, "  移動距離: ~,1f 光年（片道）~%~%", distance_ly)$
+
+/* ----- ワームホール通過時間の計算 ----- */
+printf(true, "--- ワームホール通過時間 ---~%")$
+printf(true, "  理論的最小通過時間: ~,2e sec（プランク時間）~%", wh_transit_time_theoretical)$
+printf(true, "  実用的安定化時間: ~,3f sec (1ms)~%", wh_stabilization_time)$
+printf(true, "  実用的開口時間: ~,3f sec (10ms)~%~%", wh_opening_time)$
+
+/* 総移動時間（片道） */
+total_transit_time : wh_stabilization_time + wh_opening_time + wh_transit_time_theoretical;
+printf(true, "  総移動時間（片道）: ~,3f sec~%", total_transit_time)$
+printf(true, "  総移動時間（往復）: ~,3f sec~%~%", total_transit_time * 2)$
+
+/* ----- エネルギー消費 ----- */
+/* ワームホール生成に必要なエネルギー（理論値） */
+/* E ≈ (c^4/G) * (r_s/2) ただし r_s はシュワルツシルト半径 */
+G_grav : 6.67430e-11;                /* 重力定数 [m^3/kg/s^2] */
+wh_radius : 2.0;                     /* ワームホール半径 [m]（人が通れるサイズ） */
+wh_energy : (c_light^4 / G_grav) * (wh_radius / 2);
+
+printf(true, "--- エネルギー消費 ---~%")$
+printf(true, "  ワームホール半径: ~,1f m（人が通れるサイズ）~%", wh_radius)$
+printf(true, "  1回のワームホール生成エネルギー: ~,2e J~%", wh_energy)$
+printf(true, "  1回のエネルギー（石油換算）: ~,2f 億トン~%", wh_energy / (4.2e10 * 1e9))$
+printf(true, "  通勤1往復のエネルギー: ~,2e J~%", wh_energy * 2)$
+print("")$
+
+/* 地球の年間エネルギー消費と比較 */
+earth_annual_energy : 5.8e20;        /* 地球の年間一次エネルギー消費 [J] */
+wh_per_year_daily : wh_energy * 2 * 365;  /* 毎日通勤した場合の年間エネルギー */
+ratio_to_earth : wh_per_year_daily / earth_annual_energy;
+
+printf(true, "  地球の年間エネルギー消費: ~,2e J~%", earth_annual_energy)$
+printf(true, "  毎日通勤した場合の年間エネルギー: ~,2e J~%", wh_per_year_daily)$
+printf(true, "  地球年間消費に対する比率: ~,2f 倍~%~%", ratio_to_earth)$
+
+/* ----- タイムラグと相対論効果 ----- */
+printf(true, "--- タイムラグと相対論効果 ---~%")$
+
+/* ワームホール通過時の時間遅延（理論上ゼロ） */
+time_dilation_wh : 0.0;
+printf(true, "  ワームホール通過時の時間遅延: ~,1f sec~%", time_dilation_wh)$
+
+/* 0.2cレーザー通信の場合のタイムラグ（比較用） */
+laser_speed : 0.2 * c_light;
+laser_delay : distance_m / laser_speed;
+laser_delay_years : laser_delay / (365.25 * 24 * 3600);
+
+printf(true, "  0.2cレーザー通信の場合の片道遅延: ~,2e sec = ~,2f 年~%", laser_delay, laser_delay_years)$
+print("")$
+
+/* 因果律の検討 */
+printf(true, "--- 因果律の検討 ---~%")$
+printf(true, "  ワームホール通過: 瞬時（理論上）~%")$
+printf(true, "  光速制限: 4.2光年先へ4.2年かかる~%")$
+printf(true, "  ワームホールは光速制限を回避するが、因果律は保存される~%")$
+printf(true, "  閉じた時間曲線（CTC）が発生しない限り、タイムトラベルは不可~%")$
+printf(true, "  通勤程度の短時間通過ではCTCは発生しない~%~%")$
+
+/* ----- 実用性評価 ----- */
+printf(true, "--- 実用性評価 ---~%")$
+print("")$
+
+printf(true, "【メリット】~%")$
+printf(true, "  1. 通勤時間: 実質ゼロ（0.01秒程度）~%")$
+printf(true, "  2. 地球の家族と毎日会える（9時5時生活）~%")$
+printf(true, "  3. プロキシマbの過酷環境に24時間さらされない~%")$
+printf(true, "  4. 地球の医療・教育・文化にアクセス可能~%")$
+print("")$
+
+printf(true, "【デメリット】~%")$
+printf(true, "  1. ワームホール生成エネルギーが膨大（地球年間消費の~,2f倍）~%", ratio_to_earth)$
+printf(true, "  2. ワームホールの安定性が未確立~%")$
+printf(true, "  3. 通過時の生体影響が未検証~%")$
+printf(true, "  4. エキゾチック物質の維持が必要~%")$
+print("")$
+
+printf(true, "【結論】~%")$
+printf(true, "  物理的には「不可能ではない」が、工学的には「現実的でない」。~%")$
+printf(true, "  エネルギーコストが莫大すぎる。~%")$
+printf(true, "  しかし、以下の条件が整えば「どこでもドア」は実現可能：~%")$
+printf(true, "    1. ワームホールを常時開通しておく（通勤のたびに生成しない）~%")$
+printf(true, "    2. 宇宙空間にワームホールステーションを設置~%")$
+printf(true, "    3. 地球側・プロキシマb側に「駅」を建設~%")$
+print("")$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 通勤時間比較を表示します...")$
+
+/* グラフ1: 通勤時間比較 */
+plot2d(
+    [discrete, [[1, total_transit_time*1000], [2, 3600], [3, laser_delay/3600]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Transport Method"],
+    [ylabel, "Time [hours]"],
+    [title, "Commute Time Comparison (Earth to Proxima b)"],
+    [gnuplot_preamble, "set xtics ('Wormhole' 1, 'Rocket(0.2c)' 2, 'Laser Com' 3); set logscale y; "])$
+
+print("グラフ2: エネルギー消費比較を表示します...")$
+
+/* グラフ2: エネルギー消費比較 */
+plot2d(
+    [discrete, [[1, wh_energy], [2, earth_annual_energy], [3, 1e12]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Category"],
+    [ylabel, "Energy [J]"],
+    [title, "Energy Consumption Comparison"],
+    [gnuplot_preamble, "set xtics ('1 WH Trip' 1, 'Earth Year' 2, '1 Rocket' 3); set logscale y; "])$
+
+/* ----- CSV出力 ----- */
+csv_file : "WH_COMMUTE_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Distance,~,1f,ly~%", distance_ly)$
+printf(f_csv, "WH_transit_time,~,3f,sec~%", total_transit_time)$
+printf(f_csv, "WH_energy_per_trip,~,2e,J~%", wh_energy)$
+printf(f_csv, "WH_energy_daily_commute,~,2e,J~%", wh_energy*2)$
+printf(f_csv, "WH_energy_yearly,~,2e,J~%", wh_per_year_daily)$
+printf(f_csv, "Ratio_to_earth_energy,~,2f,-~%", ratio_to_earth)$
+printf(f_csv, "Laser_delay,~,2f,years~%", laser_delay_years)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+

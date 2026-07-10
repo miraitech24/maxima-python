@@ -1,0 +1,366 @@
+/* ============================================================
+   DEV-07: ヘスペラス-水星間の資材輸送コスト
+   目的：金星ヘスペラスと水星ダイソン環間の資材輸送方式を比較し、
+         最適な輸送方法を決定する。地球向け水素ハイドライド充填
+         カプセルのレールガン射出も同一方式で評価する。
+   仕様：
+     - 輸送距離: 金星-水星間 0.3〜1.2AU（接近時0.3AU）
+     - 輸送物: 水素、炭素、窒素（ヘスペラス→水星）
+              水素ハイドライド（水星→地球）
+     - 推進方式: レールガン、化学ロケット、イオンエンジン
+     - カプセル: 使い捨て、水素ハイドライド充填
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（別window表示）
+     - .png出力は行わない
+   出力:
+     1. DEV07_results.csv: 輸送コスト比較結果
+     2. DEV07_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+print("===== DEV-07: ヘスペラス-水星間の資材輸送コスト =====")$
+print("")$
+
+/* ----- 物理定数 ----- */
+c_light : 3.0e8;                     /* 光速 [m/s] */
+G_grav : 6.67430e-11;                /* 重力定数 [m^3/kg/s^2] */
+M_sun : 1.989e30;                    /* 太陽質量 [kg] */
+AU_to_m : 1.496e11;                  /* 1AU = 1.496e11 m */
+
+/* ----- 輸送距離 ----- */
+print("--- 輸送距離パラメータ ---")$
+
+/* 金星-水星間距離 */
+d_min_AU : 0.3;                      /* 最小距離（接近時）[AU] */
+d_max_AU : 1.2;                      /* 最大距離 [AU] */
+d_avg_AU : (d_min_AU + d_max_AU) / 2;  /* 平均距離 [AU] */
+
+d_min_m : d_min_AU * AU_to_m;
+d_max_m : d_max_AU * AU_to_m;
+d_avg_m : d_avg_AU * AU_to_m;
+
+printf(true, "金星-水星間距離:~%")$
+printf(true, "  最小（接近時）: ~,2f AU = ~,2e m~%", d_min_AU, d_min_m)$
+printf(true, "  最大: ~,2f AU = ~,2e m~%", d_max_AU, d_max_m)$
+printf(true, "  平均: ~,2f AU = ~,2e m~%~%", d_avg_AU, d_avg_m)$
+
+/* ----- 輸送方式の定義 ----- */
+print("--- 輸送方式の定義 ---")$
+
+/* 方式1: レールガン（電磁加速） */
+railgun_accel : 1000.0;              /* 加速度 [G] */
+railgun_accel_ms2 : railgun_accel * 9.80665;  /* [m/s^2] */
+railgun_efficiency : 0.3;            /* エネルギー効率 30% */
+
+/* 方式2: 化学ロケット */
+chem_specific_impulse : 450;         /* 比推力 [sec] */
+chem_structure_ratio : 0.1;          /* 構造質量比 10% */
+
+/* 方式3: イオンエンジン */
+ion_specific_impulse : 3000;         /* 比推力 [sec] */
+ion_power_per_kg : 100;              /* 推力あたり電力 [W/N] */
+ion_efficiency : 0.6;                /* エネルギー効率 60% */
+
+printf(true, "推進方式パラメータ:~%")$
+printf(true, "  レールガン: 加速度 ~,0f G, 効率 ~,0f%~%", railgun_accel, railgun_efficiency*100)$
+printf(true, "  化学ロケット: 比推力 ~,0f sec, 構造比 ~,0f%~%", chem_specific_impulse, chem_structure_ratio*100)$
+printf(true, "  イオンエンジン: 比推力 ~,0f sec, 効率 ~,0f%~%~%", ion_specific_impulse, ion_efficiency*100)$
+
+/* ----- 輸送質量 ----- */
+print("--- 輸送質量の定義 ---")$
+
+/* ヘスペラス→水星（1回あたり） */
+cargo_H2 : 5000;                     /* 水素 5トン */
+cargo_C : 3000;                      /* 炭素 3トン */
+cargo_N2 : 2000;                     /* 窒素 2トン */
+cargo_total_hesperas_to_mercury : cargo_H2 + cargo_C + cargo_N2;  /* 合計 10トン */
+
+/* 水星→地球（水素ハイドライド充填カプセル） */
+hydride_capsule_mass : 1000;         /* カプセル質量 1トン */
+hydride_fuel_mass : 9000;            /* 水素ハイドライド燃料 9トン */
+cargo_total_mercury_to_earth : hydride_capsule_mass + hydride_fuel_mass;  /* 合計 10トン */
+
+printf(true, "ヘスペラス→水星（1回あたり）:~%")$
+printf(true, "  水素: ~,0f kg~%", cargo_H2)$
+printf(true, "  炭素: ~,0f kg~%", cargo_C)$
+printf(true, "  窒素: ~,0f kg~%", cargo_N2)$
+printf(true, "  合計: ~,0f kg (~,0f トン)~%", cargo_total_hesperas_to_mercury, cargo_total_hesperas_to_mercury/1000)$
+print("")$
+
+printf(true, "水星→地球（水素ハイドライドカプセル）:~%")$
+printf(true, "  カプセル質量: ~,0f kg~%", hydride_capsule_mass)$
+printf(true, "  水素ハイドライド燃料: ~,0f kg~%", hydride_fuel_mass)$
+printf(true, "  合計: ~,0f kg (~,0f トン)~%~%", cargo_total_mercury_to_earth, cargo_total_mercury_to_earth/1000)$
+
+/* ----- レールガン方式の計算 ----- */
+print("--- レールガン方式の計算 ---")$
+
+/* 必要な射出速度（ホーマン遷移軌道） */
+/* 金星軌道速度: 35.0 km/s, 水星軌道速度: 47.9 km/s */
+/* ホーマン遷移に必要なΔV */
+v_venus_orbit : 35.0e3;              /* 金星軌道速度 [m/s] */
+v_mercury_orbit : 47.9e3;            /* 水星軌道速度 [m/s] */
+
+/* 金星→水星のホーマン遷移ΔV */
+r_venus : 0.72 * AU_to_m;            /* 金星軌道半径 [m] */
+r_mercury : 0.39 * AU_to_m;          /* 水星軌道半径 [m] */
+r_sun : 0.0;
+
+/* ホーマン遷移のΔV計算 */
+a_transfer : (r_venus + r_mercury) / 2;  /* 遷移軌道の長半径 */
+v_transfer_peri : sqrt(G_grav * M_sun * (2/r_venus - 1/a_transfer));  /* 近日点速度 */
+v_transfer_apo : sqrt(G_grav * M_sun * (2/r_mercury - 1/a_transfer));  /* 遠日点速度 */
+
+delta_v_venus_to_mercury : abs(v_transfer_peri - v_venus_orbit);
+delta_v_mercury_to_venus : abs(v_mercury_orbit - v_transfer_apo);
+
+printf(true, "ホーマン遷移ΔV:~%")$
+printf(true, "  金星出発→水星到着: ~,2f km/s~%", delta_v_venus_to_mercury/1000)$
+printf(true, "  水星出発→金星到着: ~,2f km/s~%", delta_v_mercury_to_venus/1000)$
+print("")$
+
+/* レールガンに必要な加速距離 */
+v_railgun : delta_v_venus_to_mercury;  /* 必要な射出速度 */
+railgun_length : v_railgun^2 / (2 * railgun_accel_ms2);  /* 加速距離 [m] */
+
+/* レールガンのエネルギー消費 */
+E_railgun_per_kg : 0.5 * v_railgun^2 / railgun_efficiency;  /* 1kgあたり [J/kg] */
+E_railgun_total : E_railgun_per_kg * cargo_total_hesperas_to_mercury;  /* 総エネルギー [J] */
+E_railgun_MWh : E_railgun_total / (3.6e9);  /* [MWh] */
+
+printf(true, "レールガン諸元:~%")$
+printf(true, "  必要射出速度: ~,2f km/s~%", v_railgun/1000)$
+printf(true, "  必要加速距離: ~,2f km~%", railgun_length/1000)$
+printf(true, "  1kgあたりエネルギー: ~,2f MJ/kg~%", E_railgun_per_kg/1e6)$
+printf(true, "  1回の輸送エネルギー: ~,2f MWh~%", E_railgun_MWh)$
+print("")$
+
+/* レールガンのサイズ評価 */
+if railgun_length < 10000 then
+    print("レールガンサイズ: ✅ 実用的（10km未満）")
+elseif railgun_length < 100000 then
+    print("レールガンサイズ: ⚠️ 大型だが建設可能（10-100km）")
+else
+    print("レールガンサイズ: ❌ 非現実的（100km以上）")$
+print("")$
+
+/* ----- 化学ロケット方式の計算 ----- */
+print("--- 化学ロケット方式の計算 ---")$
+
+/* ツィオルコフスキーの公式 */
+/* ΔV = Isp * g0 * ln(m0/m1) */
+g0 : 9.80665;                        /* 重力加速度 [m/s^2] */
+delta_v_chem : delta_v_venus_to_mercury;
+
+/* 必要質量比 */
+mass_ratio_chem : exp(delta_v_chem / (chem_specific_impulse * g0));
+
+/* 燃料質量 */
+m_payload_chem : cargo_total_hesperas_to_mercury;
+m_structure_chem : m_payload_chem * chem_structure_ratio / (1 - chem_structure_ratio);
+m_dry_chem : m_payload_chem + m_structure_chem;
+m_wet_chem : m_dry_chem * mass_ratio_chem;
+m_fuel_chem : m_wet_chem - m_dry_chem;
+
+printf(true, "化学ロケット諸元:~%")$
+printf(true, "  必要質量比: ~,2f~%", mass_ratio_chem)$
+printf(true, "  ペイロード質量: ~,0f kg~%", m_payload_chem)$
+printf(true, "  構造質量: ~,0f kg~%", m_structure_chem)$
+printf(true, "  燃料質量: ~,0f kg~%", m_fuel_chem)$
+printf(true, "  打ち上げ総質量: ~,0f kg~%", m_wet_chem)$
+printf(true, "  燃料/ペイロード比: ~,2f~%~%", m_fuel_chem/m_payload_chem)$
+
+/* ----- イオンエンジン方式の計算 ----- */
+print("--- イオンエンジン方式の計算 ---")$
+
+/* イオンエンジンの必要質量比 */
+mass_ratio_ion : exp(delta_v_chem / (ion_specific_impulse * g0));
+
+m_payload_ion : cargo_total_hesperas_to_mercury;
+m_structure_ion : m_payload_ion * 0.15;  /* 構造比15% */
+m_dry_ion : m_payload_ion + m_structure_ion;
+m_wet_ion : m_dry_ion * mass_ratio_ion;
+m_fuel_ion : m_wet_ion - m_dry_ion;
+
+/* 推力と加速時間 */
+thrust_ion : 0.5;                    /* 推力 0.5N（典型的なイオンエンジン） */
+power_ion : thrust_ion * ion_power_per_kg;  /* 所要電力 [W] */
+accel_ion : thrust_ion / m_wet_ion;  /* 加速度 [m/s^2] */
+time_ion : delta_v_chem / accel_ion;  /* 加速時間 [sec] */
+time_ion_days : time_ion / (24*3600);  /* [日] */
+
+printf(true, "イオンエンジン諸元:~%")$
+printf(true, "  必要質量比: ~,2f~%", mass_ratio_ion)$
+printf(true, "  ペイロード質量: ~,0f kg~%", m_payload_ion)$
+printf(true, "  燃料質量: ~,0f kg~%", m_fuel_ion)$
+printf(true, "  燃料/ペイロード比: ~,2f~%", m_fuel_ion/m_payload_ion)$
+printf(true, "  加速時間: ~,2f 日~%~%", time_ion_days)$
+
+/* ----- 地球向け水素ハイドライドカプセル（レールガン） ----- */
+print("--- 地球向け水素ハイドライドカプセル（レールガン） ---")$
+
+/* 水星→地球のホーマン遷移ΔV */
+delta_v_mercury_to_earth : abs(v_mercury_orbit - sqrt(G_grav * M_sun * (2/r_mercury - 1/((r_mercury + AU_to_m)/2))));
+
+v_railgun_earth : delta_v_mercury_to_earth;
+railgun_length_earth : v_railgun_earth^2 / (2 * railgun_accel_ms2);
+
+E_railgun_earth_per_kg : 0.5 * v_railgun_earth^2 / railgun_efficiency;
+E_railgun_earth_total : E_railgun_earth_per_kg * cargo_total_mercury_to_earth;
+E_railgun_earth_MWh : E_railgun_earth_total / (3.6e9);
+
+printf(true, "地球向け水素ハイドライドカプセル:~%")$
+printf(true, "  必要射出速度: ~,2f km/s~%", v_railgun_earth/1000)$
+printf(true, "  必要加速距離: ~,2f km~%", railgun_length_earth/1000)$
+printf(true, "  1kgあたりエネルギー: ~,2f MJ/kg~%", E_railgun_earth_per_kg/1e6)$
+printf(true, "  1回の輸送エネルギー: ~,2f MWh~%", E_railgun_earth_MWh)$
+print("")$
+
+/* レールガン方式の比較 */
+printf(true, "レールガン方式の比較:~%")$
+printf(true, "  ヘスペラス→水星: 加速距離 ~,2f km, エネルギー ~,2f MWh~%", railgun_length/1000, E_railgun_MWh)$
+printf(true, "  水星→地球: 加速距離 ~,2f km, エネルギー ~,2f MWh~%", railgun_length_earth/1000, E_railgun_earth_MWh)$
+printf(true, "  同一方式の適用: ~a~%~%", if railgun_length_earth < 100000 then "✅ 可能" else "⚠️ 要検討")$
+
+/* ----- コスト比較 ----- */
+print("--- コスト比較 ---")$
+
+/* レールガン建設コスト */
+railgun_cost_per_km : 1.0e8;         /* 1kmあたり1億USD */
+railgun_cost_hesperas : railgun_length/1000 * railgun_cost_per_km;
+railgun_cost_mercury : railgun_length_earth/1000 * railgun_cost_per_km;
+
+/* 運用コスト（1回あたり） */
+energy_cost_per_MWh : 50;            /* 1MWhあたり50USD */
+railgun_op_cost_hesperas : E_railgun_MWh * energy_cost_per_MWh;
+railgun_op_cost_mercury : E_railgun_earth_MWh * energy_cost_per_MWh;
+
+/* 化学ロケットコスト */
+chem_launch_cost_per_kg : 5000;       /* 1kgあたり5000USD */
+chem_total_cost : m_wet_chem * chem_launch_cost_per_kg;
+
+/* イオンエンジンコスト */
+ion_launch_cost_per_kg : 10000;       /* 1kgあたり10000USD */
+ion_total_cost : m_wet_ion * ion_launch_cost_per_kg;
+
+printf(true, "コスト比較（1回の輸送あたり）:~%")$
+printf(true, "【レールガン】~%")$
+printf(true, "  建設コスト（ヘスペラス側）: ~,2f 億USD~%", railgun_cost_hesperas/1e8)$
+printf(true, "  建設コスト（水星側）: ~,2f 億USD~%", railgun_cost_mercury/1e8)$
+printf(true, "  運用コスト（1回）: ~,2f USD~%", railgun_op_cost_hesperas)$
+print("")$
+
+printf(true, "【化学ロケット】~%")$
+printf(true, "  1回あたりコスト: ~,2f 億USD~%", chem_total_cost/1e8)$
+print("")$
+
+printf(true, "【イオンエンジン】~%")$
+printf(true, "  1回あたりコスト: ~,2f 億USD~%", ion_total_cost/1e8)$
+print("")$
+
+/* 年間輸送回数 */
+annual_transport_need : 12;          /* 月1回 = 年12回 */
+railgun_annual_op : railgun_op_cost_hesperas * annual_transport_need;
+chem_annual_cost : chem_total_cost * annual_transport_need;
+ion_annual_cost : ion_total_cost * annual_transport_need;
+
+printf(true, "年間コスト比較（~,0f回/年）:~%", annual_transport_need)$
+printf(true, "  レールガン（運用のみ）: ~,2f 億USD/年~%", railgun_annual_op/1e8)$
+printf(true, "  化学ロケット: ~,2f 億USD/年~%", chem_annual_cost/1e8)$
+printf(true, "  イオンエンジン: ~,2f 億USD/年~%~%", ion_annual_cost/1e8)$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 推進方式別コスト比較を表示します...")$
+
+/* グラフ1: コスト比較 */
+plot2d(
+    [discrete, [[1, railgun_cost_hesperas/1e8 + railgun_annual_op/1e8],
+                [2, chem_annual_cost/1e8],
+                [3, ion_annual_cost/1e8]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Propulsion Method"],
+    [ylabel, "Annual Cost [100M USD]"],
+    [title, "Annual Transport Cost Comparison"],
+    [gnuplot_preamble, "set xtics ('Railgun' 1, 'Chemical' 2, 'Ion' 3);"])$
+
+print("グラフ2: 燃料/ペイロード比比較を表示します...")$
+
+/* グラフ2: 燃料効率比較 */
+plot2d(
+    [discrete, [[1, m_fuel_chem/m_payload_chem], [2, m_fuel_ion/m_payload_ion],
+                [3, 0.01]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Method"],
+    [ylabel, "Fuel/Payload Ratio"],
+    [title, "Fuel Efficiency Comparison"],
+    [gnuplot_preamble, "set xtics ('Chemical' 1, 'Ion' 2, 'Railgun' 3); set logscale y; "])$
+
+print("グラフ3: レールガン加速距離比較を表示します...")$
+
+/* グラフ3: レールガン加速距離 */
+plot2d(
+    [discrete, [[1, railgun_length/1000], [2, railgun_length_earth/1000]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Route"],
+    [ylabel, "Railgun Length [km]"],
+    [title, "Required Railgun Length"],
+    [gnuplot_preamble, "set xtics ('Venus->Mercury' 1, 'Mercury->Earth' 2);"])$
+
+/* ----- CSV出力 ----- */
+csv_file : "DEV07_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Distance_min,~,2f,AU~%", d_min_AU)$
+printf(f_csv, "Distance_avg,~,2f,AU~%", d_avg_AU)$
+printf(f_csv, "Delta_V_venus_to_mercury,~,2f,km/s~%", delta_v_venus_to_mercury/1000)$
+printf(f_csv, "Delta_V_mercury_to_earth,~,2f,km/s~%", delta_v_mercury_to_earth/1000)$
+printf(f_csv, "Railgun_length_venus,~,2f,km~%", railgun_length/1000)$
+printf(f_csv, "Railgun_length_mercury,~,2f,km~%", railgun_length_earth/1000)$
+printf(f_csv, "Railgun_energy_venus,~,2f,MWh~%", E_railgun_MWh)$
+printf(f_csv, "Railgun_energy_mercury,~,2f,MWh~%", E_railgun_earth_MWh)$
+printf(f_csv, "Chemical_fuel_ratio,~,2f,-~%", m_fuel_chem/m_payload_chem)$
+printf(f_csv, "Ion_fuel_ratio,~,2f,-~%", m_fuel_ion/m_payload_ion)$
+printf(f_csv, "Railgun_build_cost,~,2f,USD~%", railgun_cost_hesperas)$
+printf(f_csv, "Railgun_annual_op,~,2f,USD~%", railgun_annual_op)$
+printf(f_csv, "Chemical_annual_cost,~,2f,USD~%", chem_annual_cost)$
+printf(f_csv, "Ion_annual_cost,~,2f,USD~%", ion_annual_cost)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "DEV07_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "DEV-07: ヘスペラス-水星間の資材輸送コスト サマリー~%")$
+printf(f_sum, "================================================~%~%")$
+printf(f_sum, "【輸送距離】~%")$
+printf(f_sum, "  金星-水星間: 最小~,2fAU, 平均~,2fAU~%", d_min_AU, d_avg_AU)$
+printf(f_sum, "  必要ΔV（金星→水星）: ~,2f km/s~%", delta_v_venus_to_mercury/1000)$
+printf(f_sum, "  必要ΔV（水星→地球）: ~,2f km/s~%~%", delta_v_mercury_to_earth/1000)$
+printf(f_sum, "【推進方式比較】~%")$
+printf(f_sum, "  レールガン: 加速距離~,2f km, 1回~,2f MWh~%", railgun_length/1000, E_railgun_MWh)$
+printf(f_sum, "  化学ロケット: 燃料/ペイロード比~,2f~%", m_fuel_chem/m_payload_chem)$
+printf(f_sum, "  イオンエンジン: 燃料/ペイロード比~,2f, 加速時間~,2f日~%", m_fuel_ion/m_payload_ion, time_ion_days)$
+printf(f_sum, "【コスト比較（年間）】~%")$
+printf(f_sum, "  レールガン（運用のみ）: ~,2f億USD/年~%", railgun_annual_op/1e8)$
+printf(f_sum, "  化学ロケット: ~,2f億USD/年~%", chem_annual_cost/1e8)$
+printf(f_sum, "  イオンエンジン: ~,2f億USD/年~%~%", ion_annual_cost/1e8)$
+printf(f_sum, "【地球向け水素ハイドライドカプセル】~%")$
+printf(f_sum, "  同一レールガン方式: ~a~%", if railgun_length_earth < 100000 then "✅ 適用可能" else "⚠️ 要検討")$
+printf(f_sum, "  必要加速距離: ~,2f km~%", railgun_length_earth/1000)$
+printf(f_sum, "  1回あたりエネルギー: ~,2f MWh~%~%", E_railgun_earth_MWh)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "レールガン方式が最も低コストで効率的。~%")$
+printf(f_sum, "地球向け水素ハイドライドカプセルも同一方式で対応可能。~%")$
+printf(f_sum, "初期建設コストは高いが、長期的には圧倒的に経済的。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== DEV-07 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

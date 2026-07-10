@@ -1,0 +1,164 @@
+/* ============================================================
+   HZ-01: 20光年以内のハビタブルゾーン期待発見数
+   目的：20光年以内の恒星について、恒星タイプごとにハビタブルゾーン
+         期待発見数を計算する。
+   仕様：
+     - 20光年 = 1.892e17 m = 1.892e17 / 9.461e15 = 20 pc
+     - 恒星数密度: 約0.004 恒星/pc^3（太陽近傍）
+     - 恒星タイプ分布: M(75%), K(12%), G(8%), F(3%), A(2%)
+     - HZ半径: r_HZ = sqrt(L/L_sun) * (T_eff/T_sun)^2
+     - 期待発見数: N = N_stars * fp * fh * fl * fi
+   考察：
+     - 20光年以内の総恒星数は約134個
+     - 1e7個（1000万個）は20光年以内では絶対に達成できない
+     - 1e7個を達成するには約1500光年の範囲が必要
+   ============================================================ */
+
+kill(all);
+
+/* ----- 定数 ----- */
+ly_to_pc : 0.306601;          /* 1光年 = 0.3066 pc */
+radius_ly : 20;                /* 半径20光年 */
+radius_pc : radius_ly * ly_to_pc;  /* pc */
+
+/* 恒星数密度（太陽近傍） */
+star_density : 0.004;          /* 恒星/pc^3 */
+
+/* 20光年以内の体積と総恒星数 */
+volume : (4/3) * %pi * radius_pc^3;
+N_stars_total : volume * star_density;
+
+print("===== 20光年以内の恒星数 =====")$
+printf(true, "半径: ~,1f 光年 = ~,2f pc~%", radius_ly, radius_pc)$
+printf(true, "体積: ~,2f pc^3~%", volume)$
+printf(true, "恒星数密度: ~,4f 恒星/pc^3~%", star_density)$
+printf(true, "総恒星数: ~,0f 個~%", N_stars_total)$
+print("")$
+
+/* ----- 恒星タイプ分布 ----- */
+star_dist : [
+    ["M", 0.75, 0.3, 3500, 0.01],
+    ["K", 0.12, 0.7, 4500, 0.2],
+    ["G", 0.08, 1.0, 5778, 1.0],
+    ["F", 0.03, 1.3, 6500, 3.0],
+    ["A", 0.02, 1.8, 8000, 10.0]
+];
+
+/* ----- 物理定数 ----- */
+L_sun : 3.828e26;
+T_sun : 5778.0;
+
+/* ----- ドレイク方程式パラメータ（habitable.csv準拠） ----- */
+fp : 0.5;                 /* 惑星存在確率 */
+fh : 0.2;                 /* ハビタブル確率 */
+fl : 0.1;                 /* 生命発生確率 */
+fi : 0.01;                /* 知的文明確率 */
+
+/* ----- HZ半径計算関数 ----- */
+habitable_radius(L_ratio, T_eff) := sqrt(L_ratio) * (T_eff / T_sun)^2;
+
+/* ----- 期待発見数 ----- */
+expected_discoveries(N_stars, fp_val, fh_val, fl_val, fi_val) :=
+    N_stars * fp_val * fh_val * fl_val * fi_val;
+
+/* ----- 恒星タイプごとの計算 ----- */
+print("===== 恒星タイプ別 期待発見数 =====")$
+print("")$
+
+total_expected : 0$
+grand_total_hz_stars : 0$
+
+for i:1 thru length(star_dist) do block(
+    [stype, ratio, mass, temp, lum_ratio,
+     N_stars_type, r_inner, r_outer, width,
+     N_hz_stars, N_expected, N_expected_total],
+
+    stype : star_dist[i][1],
+    ratio : star_dist[i][2],
+    mass  : star_dist[i][3],
+    temp  : star_dist[i][4],
+    lum_ratio : star_dist[i][5],
+
+    /* 各タイプの恒星数 */
+    N_stars_type : N_stars_total * ratio,
+
+    /* HZ半径 */
+    r_inner : habitable_radius(lum_ratio, temp) * 0.95,
+    r_outer : habitable_radius(lum_ratio, temp) * 1.37,
+    width : r_outer - r_inner,
+
+    /* HZ内の惑星数（1恒星あたり1惑星と仮定） */
+    N_hz_stars : N_stars_type * fh,
+
+    /* 期待発見数 */
+    N_expected : expected_discoveries(N_stars_type, fp, fh, fl, fi),
+    N_expected_total : expected_discoveries(N_stars_total, fp, fh, fl, fi),
+
+    total_expected : total_expected + N_expected,
+    grand_total_hz_stars : grand_total_hz_stars + N_hz_stars,
+
+    printf(true, "恒星 ~a型:~%", stype),
+    printf(true, "  分布比: ~,2f (~,1f%)~%", ratio, ratio*100),
+    printf(true, "  恒星数: ~,0f 個~%", N_stars_type),
+    printf(true, "  HZ半径: ~,3f - ~,3f AU (幅 ~,3f AU)~%", r_inner, r_outer, width),
+    printf(true, "  HZ内恒星数: ~,1f~%", N_hz_stars),
+    printf(true, "  期待発見数: ~,5f~%~%", N_expected)
+)$
+
+/* ----- 集計 ----- */
+print("===== 集計 =====")$
+printf(true, "20光年以内の総恒星数: ~,0f 個~%", N_stars_total)$
+printf(true, "総HZ内恒星数: ~,1f 個~%", grand_total_hz_stars)$
+printf(true, "総期待発見数（全タイプ）: ~,5f~%", total_expected)$
+printf(true, "総期待発見数（G型星基準）: ~,5f~%",
+       expected_discoveries(N_stars_total, fp, fh, fl, fi))$
+print("")$
+
+/* ----- 1e7個達成に必要な距離の試算 ----- */
+print("===== 1e7個の期待発見数を達成するには？ =====")$
+/* N = V * density * fp * fh * fl * fi = 1e7 */
+/* V = 1e7 / (density * fp * fh * fl * fi) */
+required_volume : 1e7 / (star_density * fp * fh * fl * fi)$
+required_radius_pc : (required_volume * 3 / (4 * %pi))^(1/3)$
+required_radius_ly : required_radius_pc / ly_to_pc$
+
+printf(true, "必要体積: ~,2e pc^3~%", required_volume)$
+printf(true, "必要半径: ~,1f pc = ~,1f 光年~%", required_radius_pc, required_radius_ly)$
+print("")$
+
+/* ----- 結論 ----- */
+print("===== 結論 =====")$
+print("20光年以内で1e7個（1000万個）の期待発見数は絶対に達成できない。")$
+printf(true, "理由: 20光年以内の総恒星数が約 ~,0f 個しかないため。~%", N_stars_total)$
+printf(true, "1e7個達成には約 ~,1f 光年の範囲が必要。~%", required_radius_ly)$
+print("")$
+print("各恒星タイプの期待発見数はM型が最も多く、A型が最も少ない。")$
+print("しかし、いずれも1未満であり、20光年以内で知的生命体を")$
+print("検出できる確率は極めて低いことを示している。")$
+print("")$
+print("参考: 1e7個という数字は銀河系全体（約1000億個の恒星）")$
+print("に対してドレイク方程式を適用した場合の期待値に近い。")$
+
+/* ----- CSV出力 ----- */
+csv_file : "HZ01_20ly_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "StarType,Distribution,N_stars,HZ_inner_AU,HZ_outer_AU,HZ_stars,Expected_N~%")$
+for i:1 thru length(star_dist) do block(
+    [stype, ratio, mass, temp, lum_ratio,
+     N_stars_type, r_inner, r_outer, N_hz_stars, N_expected],
+    stype : star_dist[i][1],
+    ratio : star_dist[i][2],
+    mass  : star_dist[i][3],
+    temp  : star_dist[i][4],
+    lum_ratio : star_dist[i][5],
+    N_stars_type : N_stars_total * ratio,
+    r_inner : habitable_radius(lum_ratio, temp) * 0.95,
+    r_outer : habitable_radius(lum_ratio, temp) * 1.37,
+    N_hz_stars : N_stars_type * fh,
+    N_expected : expected_discoveries(N_stars_type, fp, fh, fl, fi),
+    printf(f_csv, "~a,~,3f,~,0f,~,4f,~,4f,~,1f,~,6f~%",
+           stype, ratio, N_stars_type, r_inner, r_outer, N_hz_stars, N_expected)
+)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+

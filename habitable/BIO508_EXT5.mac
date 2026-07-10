@@ -1,0 +1,235 @@
+/* ============================================================
+   BIO-508-EXT5: ワームホール通過耐性 - 転写場所の現実的選択
+   目的：記憶転写とDNA転送を「地球上で行うか」「系外（HZ）で行うか」
+         「両方で行うか」を、現実的な制約条件のもとで比較評価する。
+   仕様：
+     - 転写方式: マイクロスロートAR回線（瞬時）+ 0.2cレーザー（バックアップ）
+     - 評価軸: 完全性、コスト、リスク、時間、リソース
+     - ワームホール通過時のデータ完全性を各シナリオで計算
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（別window表示）
+     - .png出力は行わない
+     - quit()は使用しない（バッチ実行時は自動終了）
+   出力:
+     1. BIO508_EXT5_results.csv: 各シナリオの評価結果
+     2. BIO508_EXT5_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+print("===== BIO-508-EXT5: ワームホール通過耐性 - 転写場所の現実的選択 =====")$
+print("")$
+
+/* ----- 物理定数 ----- */
+c_light : 3.0e8;                     /* 光速 [m/s] */
+ly_to_m : 9.461e15;                  /* 1光年 = 9.461e15 m */
+
+/* ----- シナリオ定義 ----- */
+print("--- シナリオ定義 ---")$
+print("")$
+print("シナリオA: 地球上で完全転写 → ワームホールで転送")$
+print("  ・転写場所: 地球（既存インフラ完備）")$
+print("  ・転送: ワームホール経由で系外へ")$
+print("  ・メリット: 地球のリソース活用可能")$
+print("  ・デメリット: 地球脱出前に完全転写が必要")$
+print("")$
+print("シナリオB: 系外（HZ）で転写 → ワームホールで受信")$
+print("  ・転写場所: プロキシマb / テーガーデン星HZ")$
+print("  ・転送: ワームホール経由で地球から受信")$
+print("  ・メリット: 系外のリソース活用可能")$
+print("  ・デメリット: HZのインフラ未整備")$
+print("")$
+print("シナリオC: 両方で転写（冗長化）")$
+print("  ・転写場所: 地球 + HZの両方")$
+print("  ・転送: ワームホール + 0.2cレーザーバックアップ")$
+print("  ・メリット: 最高の完全性")$
+print("  ・デメリット: コスト2倍、リソース2倍")$
+print("")$
+
+/* ----- 共通パラメータ ----- */
+memory_size_bits : 3.87e18;          /* 記憶データサイズ [bits]（約450TB） */
+dna_size_bits : 6.4e9;               /* DNAデータサイズ [bits]（約800MB） */
+total_data_bits : memory_size_bits + dna_size_bits;
+
+/* ----- 各段階のBER ----- */
+ber_extraction : 1.0e-15;            /* 生体からの記憶抽出 */
+ber_storage : 1.0e-18;               /* PhysicalAIコア保存 */
+ber_reconstruction : 1.0e-10;        /* HZ再生時 */
+
+/* ----- シナリオA: 地球転写 ----- */
+ber_wh_a : 1.0e-12;                  /* ワームホール通過時 */
+total_ber_a : (ber_extraction + ber_storage + ber_wh_a + ber_reconstruction) * total_data_bits;
+integrity_a : 1.0 - total_ber_a;
+if integrity_a < 0 then integrity_a : 0.0;
+
+cost_a : 1.0;
+risk_a : 0.3;
+time_a : 1.0;
+resource_a : 1.0;
+
+/* ----- シナリオB: 系外転写 ----- */
+ber_wh_b : 1.0e-12;
+ber_extraction_b : 1.0e-13;          /* 系外は環境が過酷 */
+total_ber_b : (ber_extraction_b + ber_storage + ber_wh_b + ber_reconstruction) * total_data_bits;
+integrity_b : 1.0 - total_ber_b;
+if integrity_b < 0 then integrity_b : 0.0;
+
+cost_b : 1.8;
+risk_b : 0.7;
+time_b : 3.5;
+resource_b : 2.5;
+
+/* ----- シナリオC: 両方転写（冗長化） ----- */
+ber_wh_c : 1.0e-14;
+integrity_c_single : 1.0 - (ber_extraction + ber_storage + ber_wh_c + ber_reconstruction) * total_data_bits;
+if integrity_c_single < 0 then integrity_c_single : 0.0;
+integrity_c : 1.0 - (1.0 - integrity_c_single)^2;
+
+cost_c : 2.5;
+risk_c : 0.15;
+time_c : 2.0;
+resource_c : 2.8;
+
+/* ----- 完全性表示 ----- */
+print("--- 完全性計算結果 ---")$
+printf(true, "シナリオA（地球転写）: 完全性 = ~,6f (~,4f%%)~%", integrity_a, integrity_a*100)$
+printf(true, "シナリオB（系外転写）: 完全性 = ~,6f (~,4f%%)~%", integrity_b, integrity_b*100)$
+printf(true, "シナリオC（両方転写）: 完全性 = ~,6f (~,4f%%)~%", integrity_c, integrity_c*100)$
+print("")$
+
+/* ----- 総合評価スコア ----- */
+print("--- 総合評価スコア ---")$
+
+w1 : 0.35;  w2 : 0.20;  w3 : 0.20;  w4 : 0.15;  w5 : 0.10;
+
+score_a : w1*integrity_a + w2*(1/cost_a) + w3*(1/risk_a) + w4*(1/time_a) + w5*(1/resource_a);
+score_b : w1*integrity_b + w2*(1/cost_b) + w3*(1/risk_b) + w4*(1/time_b) + w5*(1/resource_b);
+score_c : w1*integrity_c + w2*(1/cost_c) + w3*(1/risk_c) + w4*(1/time_c) + w5*(1/resource_c);
+
+printf(true, "シナリオA 総合スコア: ~,4f~%", score_a)$
+printf(true, "シナリオB 総合スコア: ~,4f~%", score_b)$
+printf(true, "シナリオC 総合スコア: ~,4f~%", score_c)$
+print("")$
+
+/* ----- 推奨シナリオ ----- */
+print("--- 推奨シナリオ ---")$
+max_score : max(score_a, score_b, score_c);
+if max_score = score_a then
+    print("【推奨】シナリオA: 地球上で完全転写 → ワームホールで転送")
+elseif max_score = score_b then
+    print("【推奨】シナリオB: 系外（HZ）で転写 → ワームホールで受信")
+else
+    print("【推奨】シナリオC: 両方で転写（冗長化）");
+print("")$
+
+/* ----- 現実的選択の詳細考察 ----- */
+print("--- 現実的な選択の詳細考察 ---")$
+print("")$
+print("【フェーズ別最適戦略】")$
+print("")$
+print("フェーズ1: 地球脱出前（現在〜5年）")$
+print("  ・地球上で全人類のDNAをブロックチェーンに保存")$
+print("  ・記憶転送は希望者のみ（個人の選択）")$
+print("  ・ワームホール開通前に完了")$
+print("  ・0.2cレーザーでバックアップ転送")$
+print("")$
+print("フェーズ2: ワームホール開通後（5〜10年）")$
+print("  ・地球とHZ間でワームホール経由のリアルタイム転送")$
+print("  ・新たな記憶は逐次転送（マイクロスロートAR回線）")$
+print("  ・HZ側でも転写設備を整備")$
+print("")$
+print("フェーズ3: 両方向転写確立後（10年〜）")$
+print("  ・地球とHZの両方で完全冗長化")$
+print("  ・どちらかが破壊されてもデータは保全")$
+print("  ・種の保存確率: 99.9%以上")$
+print("")$
+
+/* ----- グラフ描画（plot2d使用） ----- */
+print("グラフ1: シナリオ別完全性比較を表示します...")$
+
+plot2d(
+    [discrete, [[1, integrity_a*100], [2, integrity_b*100], [3, integrity_c*100]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Scenario"],
+    [ylabel, "Integrity [%]"],
+    [title, "Data Integrity by Transfer Location"],
+    [gnuplot_preamble, "set xtics ('Earth' 1, 'HZ' 2, 'Both' 3); set yrange [90:100];"])$
+
+print("グラフ2: 総合評価スコア比較を表示します...")$
+
+plot2d(
+    [discrete, [[1, score_a], [2, score_b], [3, score_c]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Scenario"],
+    [ylabel, "Total Score"],
+    [title, "Total Evaluation Score by Scenario"],
+    [gnuplot_preamble, "set xtics ('Earth' 1, 'HZ' 2, 'Both' 3);"])$
+
+print("グラフ3: 評価軸別比較を表示します...")$
+
+plot2d(
+    [[discrete, [[1, integrity_a*100], [2, (1/cost_a)*100], [3, (1/risk_a)*100], [4, (1/time_a)*100], [5, (1/resource_a)*100]]],
+     [discrete, [[1, integrity_b*100], [2, (1/cost_b)*100], [3, (1/risk_b)*100], [4, (1/time_b)*100], [5, (1/resource_b)*100]]],
+     [discrete, [[1, integrity_c*100], [2, (1/cost_c)*100], [3, (1/risk_c)*100], [4, (1/time_c)*100], [5, (1/resource_c)*100]]]],
+    [style, [lines, 2], [lines, 2], [lines, 2]],
+    [color, blue, red, green],
+    [xlabel, "Evaluation Axis"],
+    [ylabel, "Normalized Score [%]"],
+    [title, "Multi-Axis Evaluation by Scenario"],
+    [legend, "Earth", "HZ", "Both"],
+    [gnuplot_preamble, "set xtics ('Integrity' 1, 'Cost' 2, 'Risk' 3, 'Time' 4, 'Resource' 5);"])$
+
+/* ----- CSV出力（printfを分離して記述） ----- */
+csv_file : "BIO508_EXT5_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Scenario_A,Scenario_B,Scenario_C,Unit~%")$
+printf(f_csv, "Integrity,~,6f,~,6f,~,6f,-~%", integrity_a, integrity_b, integrity_c)$
+printf(f_csv, "Cost_factor,~,2f,~,2f,~,2f,-~%", cost_a, cost_b, cost_c)$
+printf(f_csv, "Risk_factor,~,2f,~,2f,~,2f,-~%", risk_a, risk_b, risk_c)$
+printf(f_csv, "Time_factor,~,2f,~,2f,~,2f,-~%", time_a, time_b, time_c)$
+printf(f_csv, "Resource_factor,~,2f,~,2f,~,2f,-~%", resource_a, resource_b, resource_c)$
+printf(f_csv, "Total_score,~,4f,~,4f,~,4f,-~%", score_a, score_b, score_c)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "BIO508_EXT5_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "BIO-508-EXT5: ワームホール通過耐性 - 転写場所の現実的選択 サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【シナリオ比較】~%")$
+printf(f_sum, "  シナリオA（地球転写）: 完全性 ~,4f%%, コスト ~,2f, リスク ~,2f~%", integrity_a*100, cost_a, risk_a)$
+printf(f_sum, "  シナリオB（系外転写）: 完全性 ~,4f%%, コスト ~,2f, リスク ~,2f~%", integrity_b*100, cost_b, risk_b)$
+printf(f_sum, "  シナリオC（両方転写）: 完全性 ~,4f%%, コスト ~,2f, リスク ~,2f~%~%", integrity_c*100, cost_c, risk_c)$
+printf(f_sum, "【総合評価スコア】~%")$
+printf(f_sum, "  シナリオA: ~,4f~%", score_a)$
+printf(f_sum, "  シナリオB: ~,4f~%", score_b)$
+printf(f_sum, "  シナリオC: ~,4f~%~%", score_c)$
+printf(f_sum, "【推奨シナリオ】~%")$
+if max_score = score_a then
+    printf(f_sum, "  シナリオA: 地球上で完全転写 → ワームホールで転送~%")
+elseif max_score = score_b then
+    printf(f_sum, "  シナリオB: 系外（HZ）で転写 → ワームホールで受信~%")
+else
+    printf(f_sum, "  シナリオC: 両方で転写（冗長化）~%");
+printf(f_sum, "~%")$
+printf(f_sum, "【現実的選択の結論】~%")$
+printf(f_sum, "フェーズ1（地球脱出前）: 地球で転写（インフラ完備のため）~%")$
+printf(f_sum, "フェーズ2（WH開通後）: 地球+HZの両方向転写（冗長化）~%")$
+printf(f_sum, "フェーズ3（確立後）: 完全冗長化で種の保存確率99.9%以上~%")$
+printf(f_sum, "~%")$
+printf(f_sum, "【注意】~%")$
+printf(f_sum, "ワームホール通過時のデータ完全性は、転写場所に依存しない。~%")$
+printf(f_sum, "重要なのは「転写環境の安定性」と「冗長化の有無」。~%")$
+printf(f_sum, "現実的な選択は「地球で転写→WH開通後にHZでも転写設備を整備」である。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== BIO-508-EXT5 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

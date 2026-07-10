@@ -1,0 +1,300 @@
+/* ============================================================
+   MER-11,12: 水星地表-軌道間の資材輸送（修正版2）
+   目的：水星の地表基地と軌道上ダイソン環の間の資材輸送方式を
+         スペースエレベータとマスドライバーで比較し、
+         適材適所の配置と必要基数を決定する。
+ 仕様：
+     - 水星重力: 0.38G（3.7 m/s^2）
+     - 大気: なし（真空）
+     - 自転周期: 58.646日（超低速）
+     - 地表温度: 昼側+430℃、夜側-180℃
+     - 輸送物: 鉄・シリコン原料（地表→軌道）、水素・炭素・窒素（軌道→地表）
+     - スペースエレベータ: 静止軌道に固定、連続輸送
+     - マスドライバー: 電磁加速で射出、バッチ輸送
+   注意：
+     - 0除算を防止するため、除数が0の場合はデフォルト値を使用
+     - 数値計算はfloat()で明示的に浮動小数点に変換
+     - グラフはplot2dで個別に描画（折れ線グラフ）
+   ============================================================ */
+
+kill(all);
+
+print("===== MER-11,12: 水星地表-軌道間の資材輸送 =====")$
+print("")$
+
+/* ----- 物理定数 ----- */
+g_mercury : 3.7;                     /* 水星重力 [m/s^2] */
+R_mercury : 2.4397e6;                /* 水星半径 [m] */
+M_mercury : 3.301e23;                /* 水星質量 [kg] */
+G_grav : 6.67430e-11;                /* 重力定数 */
+
+/* ----- 水星の軌道パラメータ ----- */
+T_mercury_rotation : 58.646 * 24 * 3600;  /* 自転周期 [sec] */
+
+/* 静止軌道半径（自転周期と同期）*/
+R_geo_numer : G_grav * M_mercury * T_mercury_rotation^2;
+R_geo_denom : 4 * %pi^2;
+R_geo_cube : R_geo_numer / R_geo_denom;
+R_geo : R_geo_cube^(1/3);
+
+/* 静止軌道高度 */
+h_geo : R_geo - R_mercury;
+
+printf(true, "--- 水星基本パラメータ ---")$
+printf(true, "  重力: ~,2f m/s^2 (~,2f G)~%", g_mercury, float(g_mercury/9.80665))$
+printf(true, "  半径: ~,2e m (~,0f km)~%", R_mercury, float(R_mercury/1000))$
+printf(true, "  自転周期: ~,2f 地球日~%", float(T_mercury_rotation/86400))$
+printf(true, "  静止軌道半径: ~,2e m (~,0f km)~%", float(R_geo), float(R_geo/1000))$
+printf(true, "  静止軌道高度: ~,2e m (~,0f km)~%~%", float(h_geo), float(h_geo/1000))$
+
+/* ----- 1. スペースエレベータ ----- */
+print("--- 1. スペースエレベータ ---")$
+
+cable_length : h_geo;
+tensile_strength_carbon : 7.0e10;
+density_carbon : 1500;
+
+/* テーパー比（指数関数の引数が大きすぎないか確認） */
+taper_exp_arg : density_carbon * g_mercury * cable_length / tensile_strength_carbon;
+taper_ratio : exp(taper_exp_arg);
+
+/* ケーブル質量 */
+cable_cross_section : 1.0e-4;
+/* log(taper_ratio)が0でないことを確認 */
+if taper_ratio > 1.0001 then
+    cable_volume : cable_cross_section * cable_length * (taper_ratio - 1) / log(taper_ratio)
+else
+    cable_volume : cable_cross_section * cable_length;
+cable_mass : cable_volume * density_carbon;
+
+/* 輸送能力 */
+elevator_speed : 50;
+trip_time_oneway : cable_length / elevator_speed;
+trip_time_oneway_hours : trip_time_oneway / 3600;
+
+/* 1日あたりの輸送回数 */
+trips_per_day_float : 24 * 3600 / (trip_time_oneway * 2);
+trips_per_day : floor(trips_per_day_float);
+
+/* 1回あたりの輸送量 */
+cargo_per_trip : 10000;
+daily_capacity_elevator : trips_per_day * cargo_per_trip;
+
+printf(true, "スペースエレベータ諸元:~%")$
+printf(true, "  ケーブル長: ~,2e m (~,0f km)~%", float(cable_length), float(cable_length/1000))$
+printf(true, "  テーパー比: ~,2e~%", float(taper_ratio))$
+printf(true, "  ケーブル質量: ~,2e kg (~,2f トン)~%", float(cable_mass), float(cable_mass/1000))$
+printf(true, "  昇降速度: ~,0f m/s~%", elevator_speed)$
+printf(true, "  片道時間: ~,2f 時間~%", float(trip_time_oneway_hours))$
+printf(true, "  1日あたり輸送回数: ~,0f 回/日~%", trips_per_day)$
+printf(true, "  1日あたり輸送量: ~,2f トン/日~%~%", float(daily_capacity_elevator/1000))$
+
+taper_ratio_val : float(taper_ratio);
+if taper_ratio_val < 10 then
+    print("エレベータ実現性: ✅ 現実的（テーパー比10未満）")
+elseif taper_ratio_val < 100 then
+    print("エレベータ実現性: ⚠️ 技術的課題あり（テーパー比10-100）")
+else
+    print("エレベータ実現性: ❌ 非現実的（テーパー比100以上）")$
+print("")$
+
+/* ----- 2. マスドライバー ----- */
+print("--- 2. マスドライバー ---")$
+
+railgun_length : 10000;
+railgun_accel : 500;
+railgun_accel_ms2 : railgun_accel * 9.80665;
+
+/* 第1宇宙速度 */
+v_orbital_sq : G_grav * M_mercury / R_mercury;
+v_orbital : sqrt(v_orbital_sq);
+
+v_launch : v_orbital * 1.05;
+required_length : v_launch^2 / (2 * railgun_accel_ms2);
+
+printf(true, "マスドライバー諸元:~%")$
+printf(true, "  水星第1宇宙速度: ~,2f km/s~%", float(v_orbital/1000))$
+printf(true, "  必要射出速度: ~,2f km/s~%", float(v_launch/1000))$
+printf(true, "  加速度: ~,0f G~%", railgun_accel)$
+printf(true, "  設計加速長: ~,0f km~%", float(railgun_length/1000))$
+printf(true, "  必要加速長: ~,2f km~%", float(required_length/1000))$
+
+required_length_val : float(required_length);
+if required_length_val <= railgun_length then
+    print("加速長チェック: ✅ 設計内")
+else
+    print("加速長チェック: ❌ 設計超過（レール延長必要）")$
+print("")$
+
+/* マスドライバーの輸送能力 */
+shot_mass : 1000;
+shot_interval : 60;
+shots_per_day_float : 24 * 3600 / shot_interval;
+shots_per_day : floor(shots_per_day_float);
+daily_capacity_railgun : shots_per_day * shot_mass;
+
+/* エネルギー消費 */
+energy_per_shot : 0.5 * shot_mass * v_launch^2;
+energy_per_shot_MWh : energy_per_shot / 3.6e9;
+power_required : energy_per_shot / shot_interval;
+power_required_MW : power_required / 1e6;
+
+printf(true, "マスドライバー輸送能力:~%")$
+printf(true, "  1発あたり質量: ~,0f kg~%", shot_mass)$
+printf(true, "  発射間隔: ~,0f 秒~%", shot_interval)$
+printf(true, "  1日あたり発射数: ~,0f 発/日~%", shots_per_day)$
+printf(true, "  1日あたり輸送量: ~,2f トン/日~%", float(daily_capacity_railgun/1000))$
+printf(true, "  1発あたりエネルギー: ~,2f MWh~%", float(energy_per_shot_MWh))$
+printf(true, "  平均必要電力: ~,2f MW~%~%", float(power_required_MW))$
+
+/* ----- 3. 両方式の比較 ----- */
+print("--- 3. 両方式の比較 ---")$
+
+annual_transport_needed : 500000;
+daily_transport_needed_float : annual_transport_needed / 365;
+daily_transport_needed : floor(daily_transport_needed_float);
+
+/* 安全に数値を取得 */
+elevator_daily_val : float(daily_capacity_elevator/1000);
+railgun_daily_val : float(daily_capacity_railgun/1000);
+
+/* 0除算を防止 */
+if elevator_daily_val > 0 then
+    elevators_needed_float : daily_transport_needed / elevator_daily_val
+else
+    elevators_needed_float : 1000;  /* デフォルト値 */
+
+if railgun_daily_val > 0 then
+    railguns_needed_float : daily_transport_needed / railgun_daily_val
+else
+    railguns_needed_float : 1000;  /* デフォルト値 */
+
+elevators_needed : floor(elevators_needed_float) + 1;
+railguns_needed : floor(railguns_needed_float) + 1;
+
+printf(true, "年間必要輸送量: ~,0f トン/年~%", annual_transport_needed)$
+printf(true, "1日あたり必要輸送量: ~,0f トン/日~%", daily_transport_needed)$
+print("")$
+
+printf(true, "必要基数:~%")$
+printf(true, "  スペースエレベータ: ~,0f 基~%", elevators_needed)$
+printf(true, "  マスドライバー: ~,0f 基~%", railguns_needed)$
+print("")$
+
+print("--- 適材適所の判断 ---")$
+print("")$
+print("【スペースエレベータが適する用途】")$
+print("  ・人員輸送（人間やAIの移動）")$
+print("  ・精密機器の輸送（衝撃に弱い）")$
+print("  ・軌道→地表への降下（減速不要）")$
+print("  ・連続的な小ロット輸送")$
+print("")$
+print("【マスドライバーが適する用途】")$
+print("  ・バルク資材の輸送（鉄・シリコン原料）")$
+print("  ・衝撃に強い完成品パネル")$
+print("  ・地表→軌道への大量輸送")$
+print("  ・エネルギー効率が良い（大気なし）")$
+print("")$
+
+recommended_elevators : 2;
+recommended_railguns : 3;
+
+printf(true, "【推奨構成】~%")$
+printf(true, "  スペースエレベータ: ~,0f 基（人員・精密機器用）~%", recommended_elevators)$
+printf(true, "  マスドライバー: ~,0f 基（バルク資材用）~%", recommended_railguns)$
+printf(true, "  合計: ~,0f 基~%~%", recommended_elevators + recommended_railguns)$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 輸送方式別日間輸送量比較を表示します...")$
+
+plot2d(
+    [discrete, [[1, elevator_daily_val], [2, railgun_daily_val],
+                [3, daily_transport_needed]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Transport Method"],
+    [ylabel, "Daily Capacity [tons/day]"],
+    [title, "Transport Capacity Comparison"],
+    [gnuplot_preamble, "set xtics ('Elevator' 1, 'Railgun' 2, 'Required' 3);"])$
+
+print("グラフ2: 射出速度と必要加速長の関係を表示します...")$
+
+plot2d(
+    [discrete, makelist([i*100, float((i*1000)^2/(2*railgun_accel_ms2)/1000)], i, 1, 20)],
+    [xlabel, "Launch Velocity [m/s]"],
+    [ylabel, "Required Rail Length [km]"],
+    [title, "Railgun Length vs Launch Velocity"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ3: 必要基数比較を表示します...")$
+
+plot2d(
+    [discrete, [[1, elevators_needed], [2, railguns_needed],
+                [3, recommended_elevators], [4, recommended_railguns]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Category"],
+    [ylabel, "Number Required"],
+    [title, "Required Number of Transport Units"],
+    [gnuplot_preamble, "set xtics ('Elevator needed' 1, 'Railgun needed' 2, 'Elevator rec' 3, 'Railgun rec' 4);"])$
+
+/* ----- CSV出力 ----- */
+csv_file : "MER11_12_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Mercury_gravity,~,2f,m/s2~%", g_mercury)$
+printf(f_csv, "Geo_orbit_radius,~,2e,m~%", float(R_geo))$
+printf(f_csv, "Geo_orbit_height,~,2e,m~%", float(h_geo))$
+printf(f_csv, "Cable_length,~,2e,m~%", float(cable_length))$
+printf(f_csv, "Taper_ratio,~,2e,-~%", float(taper_ratio))$
+printf(f_csv, "Cable_mass,~,2e,kg~%", float(cable_mass))$
+printf(f_csv, "Elevator_daily_capacity,~,2f,tons/day~%", elevator_daily_val)$
+printf(f_csv, "Orbital_velocity,~,2f,km/s~%", float(v_orbital/1000))$
+printf(f_csv, "Railgun_length,~,0f,m~%", railgun_length)$
+printf(f_csv, "Railgun_daily_capacity,~,2f,tons/day~%", railgun_daily_val)$
+printf(f_csv, "Railgun_power,~,2f,MW~%", float(power_required_MW))$
+printf(f_csv, "Annual_transport_needed,~,0f,tons/year~%", annual_transport_needed)$
+printf(f_csv, "Elevators_needed,~,0f,-~%", elevators_needed)$
+printf(f_csv, "Railguns_needed,~,0f,-~%", railguns_needed)$
+printf(f_csv, "Recommended_elevators,~,0f,-~%", recommended_elevators)$
+printf(f_csv, "Recommended_railguns,~,0f,-~%", recommended_railguns)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "MER11_12_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "MER-11,12: 水星地表-軌道間の資材輸送 サマリー~%")$
+printf(f_sum, "==========================================~%~%")$
+printf(f_sum, "【水星パラメータ】~%")$
+printf(f_sum, "  重力: ~,2f m/s^2 (~,2f G)~%", g_mercury, float(g_mercury/9.80665))$
+printf(f_sum, "  静止軌道高度: ~,2e km~%", float(h_geo/1000))$
+printf(f_sum, "  第1宇宙速度: ~,2f km/s~%~%", float(v_orbital/1000))$
+printf(f_sum, "【スペースエレベータ】~%")$
+printf(f_sum, "  ケーブル長: ~,0f km~%", float(cable_length/1000))$
+printf(f_sum, "  テーパー比: ~,2e~%", float(taper_ratio))$
+printf(f_sum, "  日間輸送量: ~,2f トン/日~%", elevator_daily_val)$
+printf(f_sum, "  実現性: ~a~%~%", if taper_ratio_val < 10 then "現実的" else if taper_ratio_val < 100 then "技術的課題あり" else "非現実的")$
+printf(f_sum, "【マスドライバー】~%")$
+printf(f_sum, "  加速長: ~,0f km~%", float(railgun_length/1000))$
+printf(f_sum, "  射出速度: ~,2f km/s~%", float(v_launch/1000))$
+printf(f_sum, "  日間輸送量: ~,2f トン/日~%", railgun_daily_val)$
+printf(f_sum, "  必要電力: ~,2f MW~%~%", float(power_required_MW))$
+printf(f_sum, "【適材適所の推奨構成】~%")$
+printf(f_sum, "  スペースエレベータ ~,0f 基: 人員・精密機器輸送~%", recommended_elevators)$
+printf(f_sum, "  マスドライバー ~,0f 基: バルク資材輸送~%", recommended_railguns)$
+printf(f_sum, "  合計 ~,0f 基で年間~,0fトンの輸送需要を満たす~%~%", recommended_elevators+recommended_railguns, annual_transport_needed)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "水星は大気がなく低重力のため、マスドライバーが非常に有効。~%")$
+printf(f_sum, "スペースエレベータはテーパー比が大きく技術的課題はあるが、~%")$
+printf(f_sum, "人員輸送用に少数基設置する価値がある。~%")$
+printf(f_sum, "両者を併用することで、効率的な輸送網を構築可能。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== MER-11,12 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$
