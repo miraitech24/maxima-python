@@ -1,0 +1,277 @@
+/* ============================================================
+   c201: 量子ビット集積化 - ナノダイヤモンドアレイの最適配置
+   目的：ナノダイヤモンド中のNVセンターを量子ビットとして利用し、
+         最適なアレイ配置を計算する。最大集積度とエラー率の
+         トレードオフを解析する。
+   仕様：
+     - ナノダイヤモンド粒径: 5nm〜100nm
+     - NVセンター: 1粒子あたり1個（単一NV）
+     - アレイ配置: 正方格子、六方格子、ランダム配置
+     - 結合距離: 近接しすぎるとデコヒーレンス、離れすぎると結合弱い
+     - 標的: 1cm^2あたりの量子ビット密度最大化
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（別window表示）
+     - .png出力は行わない
+   出力:
+     1. c201_results.csv: 計算結果
+     2. c201_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+print("===== c201: 量子ビット集積化 - ナノダイヤモンドアレイ最適配置 =====")$
+print("")$
+
+/* ----- 物理定数 ----- */
+pi_val : %pi;
+h_bar : 1.054571817e-34;             /* 換算プランク定数 [J*s] */
+k_B : 1.380649e-23;                  /* ボルツマン定数 [J/K] */
+mu_B : 9.2740100783e-24;             /* ボーア磁子 [J/T] */
+
+/* ----- ナノダイヤモンドパラメータ ----- */
+print("--- ナノダイヤモンドパラメータ ---")$
+
+/* 粒径範囲 */
+d_min : 5;                           /* 最小粒径 [nm] */
+d_max : 100;                         /* 最大粒径 [nm] */
+d_step : 5;                          /* 計算ステップ [nm] */
+
+/* NVセンター特性 */
+T2_NV : 1.0e-3;                      /* NVセンターのコヒーレンス時間 [sec]（1ms） */
+g_NV : 2.0028;                       /* NVセンターのg因子 */
+D_zero_field : 2.87e9;               /* ゼロ磁場分裂 [Hz] */
+
+/* 動作温度 */
+T_op : 4.0;                          /* 動作温度 [K]（液体ヘリウム） */
+T_op_room : 300;                     /* 室温 [K]（比較用） */
+
+printf(true, "ナノダイヤモンド粒径範囲: ~,0f nm 〜 ~,0f nm~%", d_min, d_max)$
+printf(true, "NVセンターコヒーレンス時間: ~,2e sec~%", T2_NV)$
+printf(true, "動作温度: ~,1f K (液体ヘリウム)~%~%", T_op)$
+
+/* ----- アレイ配置の定義 ----- */
+print("--- アレイ配置の定義 ---")$
+
+/* 配置タイプ */
+/* 1: 正方格子, 2: 六方格子, 3: ランダム */
+
+/* 最小結合距離（デコヒーレンス回避） */
+/* NVセンター間の双極子-双極子結合 */
+/* 結合エネルギーが熱エネルギーより小さくなる距離 */
+J_dd(r) := (mu_0 * g_NV^2 * mu_B^2) / (4 * pi_val * r^3);
+/* ただしmu_0は真空透磁率 */
+mu_0 : 1.25663706212e-6;             /* 真空透磁率 [H/m] */
+
+/* デコヒーレンスを起こさない最小距離 */
+/* J_dd < h_bar / T2_NV となる距離 */
+r_min_coherence : (mu_0 * g_NV^2 * mu_B^2 * T2_NV / (4 * pi_val * h_bar))^(1/3);
+
+printf(true, "最小結合距離（デコヒーレンス回避）: ~,2f nm~%~%", r_min_coherence*1e9)$
+
+/* ----- 各配置の密度計算 ----- */
+print("--- 各配置の密度計算 ---")$
+
+/* 粒径ごとの最大集積密度 */
+printf(true, "粒径[nm] | 正方格子[個/cm2] | 六方格子[個/cm2] | ランダム[個/cm2]~%")$
+printf(true, "--------+-------------------+-------------------+------------------~%")$
+
+for d: d_min thru d_max step d_step do block(
+    [d_m, r_particle, spacing_square, spacing_hex, spacing_random,
+     density_square, density_hex, density_random],
+    d_m : d * 1e-9,                  /* [m] */
+    r_particle : d_m / 2,
+
+    /* 粒子間隔 = 粒径 + 最小結合距離 */
+    spacing_square : d_m + r_min_coherence,
+    spacing_hex : d_m + r_min_coherence,
+    spacing_random : (d_m + r_min_coherence) * 1.2,  /* ランダムは余裕必要 */
+
+    /* 密度計算 */
+    density_square : 1 / (spacing_square^2),          /* 個/m^2 */
+    density_hex : 2 / (sqrt(3) * spacing_hex^2),      /* 六方格子の密度 */
+    density_random : 1 / (spacing_random^2) * 0.8,    /* ランダムは充填率低下 */
+
+    /* cm^2あたりに変換 */
+    density_square_cm2 : density_square / 1e4,        /* 個/cm^2 */
+    density_hex_cm2 : density_hex / 1e4,
+    density_random_cm2 : density_random / 1e4,
+
+    if mod(d, 10) = 0 then
+        printf(true, "~4,0f    | ~15,2e | ~15,2e | ~15,2e~%",
+               d, density_square_cm2, density_hex_cm2, density_random_cm2)
+)$
+print("")$
+
+/* ----- エラー率の計算 ----- */
+print("--- エラー率の計算 ---")$
+
+/* エラー要因: 熱励起、結合誤差、核スピン */
+/* 熱励起エラー率 */
+Gamma_th(T) := exp(-h_bar * D_zero_field / (k_B * T));
+
+Gamma_th_4K : Gamma_th(T_op);
+Gamma_th_300K : Gamma_th(T_op_room);
+
+printf(true, "熱励起エラー率:~%")$
+printf(true, "  4K: ~,2e~%", Gamma_th_4K)$
+printf(true, "  300K: ~,2e~%", Gamma_th_300K)$
+print("")$
+
+/* 結合誤差（近接によるデコヒーレンス） */
+/* 粒径が小さいほど近接しやすくエラー増加 */
+printf(true, "粒径[nm] | 正方格子エラー率 | 六方格子エラー率 | ランダムエラー率~%")$
+printf(true, "--------+------------------+------------------+------------------~%")$
+
+for d: d_min thru d_max step d_step do block(
+    [d_m, r_particle, spacing, J_coupling, error_rate_s, error_rate_h, error_rate_r],
+    d_m : d * 1e-9,
+    r_particle : d_m / 2,
+
+    /* 結合エネルギー */
+    spacing_s : d_m + r_min_coherence,
+    J_s : (mu_0 * g_NV^2 * mu_B^2) / (4 * pi_val * spacing_s^3),
+
+    /* エラー率 = 結合エネルギー / コヒーレンスエネルギー */
+    error_rate_s : min(1.0, J_s * T2_NV / h_bar),
+    error_rate_h : error_rate_s,  /* 六方も同様 */
+    error_rate_r : error_rate_s * 1.1,  /* ランダムはやや高い */
+
+    if mod(d, 10) = 0 then
+        printf(true, "~4,0f    | ~14,2e | ~14,2e | ~14,2e~%",
+               d, error_rate_s, error_rate_h, error_rate_r)
+)$
+print("")$
+
+/* ----- 最適粒径の探索 ----- */
+print("--- 最適粒径の探索 ---")$
+
+/* 性能指数 = 密度 * (1 - エラー率) */
+printf(true, "粒径[nm] | 正方格子性能指数 | 六方格子性能指数 | ランダム性能指数~%")$
+printf(true, "--------+-------------------+-------------------+------------------~%")$
+
+best_d : 0$
+best_fom : 0$
+best_type : ""$
+
+for d: d_min thru d_max step d_step do block(
+    [d_m, spacing, density_s, density_h, density_r,
+     J_s, error_s, error_h, error_r,
+     fom_s, fom_h, fom_r],
+    d_m : d * 1e-9,
+    spacing : d_m + r_min_coherence,
+
+    density_s : 1 / (spacing^2) / 1e4,
+    density_h : 2 / (sqrt(3) * spacing^2) / 1e4,
+    density_r : 1 / ((spacing*1.2)^2) * 0.8 / 1e4,
+
+    J_s : (mu_0 * g_NV^2 * mu_B^2) / (4 * pi_val * spacing^3),
+    error_s : min(1.0, J_s * T2_NV / h_bar),
+    error_h : error_s,
+    error_r : error_s * 1.1,
+
+    fom_s : density_s * (1 - error_s),
+    fom_h : density_h * (1 - error_h),
+    fom_r : density_r * (1 - error_r),
+
+    if mod(d, 10) = 0 then
+        printf(true, "~4,0f    | ~15,2e | ~15,2e | ~15,2e~%",
+               d, fom_s, fom_h, fom_r),
+
+    /* 最適解の更新 */
+    if fom_h > best_fom then (
+        best_fom : fom_h,
+        best_d : d,
+        best_type : "六方格子"
+    ),
+    if fom_s > best_fom then (
+        best_fom : fom_s,
+        best_d : d,
+        best_type : "正方格子"
+    )
+)$
+
+printf(true, "~%~%最適解:~%")$
+printf(true, "  最適粒径: ~,0f nm~%", best_d)$
+printf(true, "  最適配置: ~a~%", best_type)$
+printf(true, "  最大性能指数: ~,2e 個/cm^2~%~%", best_fom)$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 粒径 vs 集積密度 を表示します...")$
+
+plot2d(
+    [discrete, makelist([d, 1/(((d*1e-9)+r_min_coherence)^2)/1e4], d, d_min, d_max, d_step)],
+    [xlabel, "Particle Diameter [nm]"],
+    [ylabel, "Density [qubits/cm^2]"],
+    [title, "Qubit Density vs Diamond Particle Size (Square Lattice)"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ2: 粒径 vs エラー率 を表示します...")$
+
+plot2d(
+    [discrete, makelist([d, min(1.0, (mu_0 * g_NV^2 * mu_B^2) / (4 * pi_val * ((d*1e-9)+r_min_coherence)^3) * T2_NV / h_bar)], d, d_min, d_max, d_step)],
+    [xlabel, "Particle Diameter [nm]"],
+    [ylabel, "Error Rate"],
+    [title, "Error Rate vs Diamond Particle Size"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ3: 粒径 vs 性能指数 を表示します...")$
+
+plot2d(
+    [discrete, makelist([d, (1/(((d*1e-9)+r_min_coherence)^2)/1e4) * (1 - min(1.0, (mu_0 * g_NV^2 * mu_B^2) / (4 * pi_val * ((d*1e-9)+r_min_coherence)^3) * T2_NV / h_bar))], d, d_min, d_max, d_step)],
+    [xlabel, "Particle Diameter [nm]"],
+    [ylabel, "Figure of Merit"],
+    [title, "Figure of Merit vs Diamond Particle Size"],
+    [style, [lines, 2]],
+    [color, green])$
+
+/* ----- CSV出力 ----- */
+csv_file : "c201_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Min_diamond_size,~,0f,nm~%", d_min)$
+printf(f_csv, "Max_diamond_size,~,0f,nm~%", d_max)$
+printf(f_csv, "NV_coherence_time,~,2e,sec~%", T2_NV)$
+printf(f_csv, "Operating_temperature,~,1f,K~%", T_op)$
+printf(f_csv, "Min_coupling_distance,~,2f,nm~%", r_min_coherence*1e9)$
+printf(f_csv, "Thermal_error_4K,~,2e,-~%", Gamma_th_4K)$
+printf(f_csv, "Thermal_error_300K,~,2e,-~%", Gamma_th_300K)$
+printf(f_csv, "Optimal_diameter,~,0f,nm~%", best_d)$
+printf(f_csv, "Optimal_lattice,~a,-~%", best_type)$
+printf(f_csv, "Max_figure_of_merit,~,2e,qubits/cm2~%", best_fom)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "c201_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "c201: 量子ビット集積化 - ナノダイヤモンドアレイ最適配置 サマリー~%")$
+printf(f_sum, "========================================================~%~%")$
+printf(f_sum, "【パラメータ】~%")$
+printf(f_sum, "  ナノダイヤモンド粒径: ~,0f〜~,0f nm~%", d_min, d_max)$
+printf(f_sum, "  NVセンターコヒーレンス時間: ~,2e sec~%", T2_NV)$
+printf(f_sum, "  動作温度: ~,1f K~%~%", T_op)$
+printf(f_sum, "【計算結果】~%")$
+printf(f_sum, "  最小結合距離: ~,2f nm~%", r_min_coherence*1e9)$
+printf(f_sum, "  熱励起エラー率(4K): ~,2e~%", Gamma_th_4K)$
+printf(f_sum, "  熱励起エラー率(300K): ~,2e~%", Gamma_th_300K)$
+printf(f_sum, "  最適粒径: ~,0f nm~%", best_d)$
+printf(f_sum, "  最適配置: ~a~%", best_type)$
+printf(f_sum, "  最大性能指数: ~,2e 個/cm^2~%~%", best_fom)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "六方格子配置が最も高い集積密度を達成。~%")$
+printf(f_sum, "最適粒径は約~,0fnmで、密度とエラー率のバランスが最適。~%", best_d)$
+printf(f_sum, "液体ヘリウム温度(4K)では熱励起エラーは無視できるレベル。~%")$
+printf(f_sum, "室温では熱励起エラーが支配的になるため、極低温動作が必須。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== c201 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

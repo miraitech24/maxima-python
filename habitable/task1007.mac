@@ -1,0 +1,33 @@
+/* #1007 ペンローズ過程 解析セクション */
+load("stringproc")$
+assume(M > 0, a >= 0, a <= M)$
+
+/* 解析解の定義 */
+gain_expr : (sqrt(1 - sqrt(1 - (a/M)^2)) / sqrt(2)) * 100$
+
+/* Python形式への文字列置換（連成規則に基づく） */
+gain_str : string(gain_expr)$
+gain_str : ssubst("**", "^", gain_str)$
+gain_str : ssubst("math.sqrt", "sqrt", gain_str)$
+
+/* ファイル引き渡し（import用） */
+with_stdout("penrose_params.py",
+    print("import math"),
+    print("def get_max_gain(M, a):"),
+    printf(true, "    return ~a ~%", gain_str)
+)$
+
+/* グラフ出力設定（dimensionsの引数を[幅,高さ]で修正） */
+set_draw_defaults(terminal = png, dimensions = [800, 600])$
+draw2d(
+    title      = "Penrose Process: Analytic Energy Gain (#1007)",
+    xlabel     = "Dimensionless Spin (a/M)",
+    ylabel     = "Max Gain [%]",
+    grid       = true,
+    line_width = 2,
+    color      = "#304ffe",
+    explicit(subst([M=1], gain_expr), a, 0, 0.999),
+    file_name  = "maxima_penrose_analytic"
+)$
+
+

@@ -1,0 +1,240 @@
+
+/* ============================================================
+   MER-Dyson: 水星ダイソン環建設 全体チャート
+   目的：金星母船ヘスペラスと水星工場の分担、資材搬送方法、
+         ダイソン環完成までの流れを可視化する。
+   仕様：
+     - レールガン: 完成パネルの軌道への直接射出
+     - マスドライバー: 精錬済み材料の軌道への大量輸送
+     - スペースエレベータ: 人員・精密機器の輸送
+     - 工場分担: ヘスペラス（3Dプリント+材料精錬）
+                水星地表工場（パネル製造+採掘）
+                軌道工場（最終組立+設置）
+   出力: dyson_construction_chart.png
+   ============================================================ */
+
+kill(all);
+print("===== 水星ダイソン環建設 全体チャート =====")$
+print("")$
+/* ----- 建設フェーズ定義 ----- */
+print("--- 建設フェーズ ---")$
+phase_data : [
+    [0, "フェーズ0: 技術開発", 0, 5, "自己複製ロボット開発、AI制御システム"],
+    [1, "フェーズ1: 初期展開", 5, 7, "ヘスペラス金星到着、水星着陸、初期ロボット展開"],
+    [2, "フェーズ2: 工場建設", 7, 9, "ヘスペラス工場稼働、水星地表工場建設、マスドライバー建設"],
+    [3, "フェーズ3: 材料生産", 9, 11, "水星採掘開始、ヘスペラス材料精錬、レールガン建設"],
+    [4, "フェーズ4: パネル製造", 11, 13, "水星地表でパネル量産、軌道への定期射出開始"],
+    [5, "フェーズ5: 軌道組立", 13, 16, "軌道上でのダイソン環セグメント組立、環の拡張"],
+    [6, "フェーズ6: 完成・運用", 16, 18, "ダイソン環完成（1.2PW）、0.2c航行船の加速試験"],
+    [7, "フェーズ7: 出発", 18, 20, "ケンタ、0.2cでプロキシマbへ出発"]
+];
+printf(true, "フェーズ | 期間[年] | 内容~%")$
+printf(true, "--------+---------+------~%")$
+for i:1 thru length(phase_data) do
+    printf(true, "~a | ~,0f-~,0f   | ~a~%",
+           phase_data[i][2], phase_data[i][3], phase_data[i][4], phase_data[i][5])$
+print("")$
+/* ----- 資材の流れ ----- */
+print("--- 資材の流れ ---")$
+print("")$
+print("【金星ヘスペラス】")$
+print("  役割: 材料精錬、3Dプリント、精密機器製造")$
+print("  生産物: 精錬金属インゴット、電子部品、複合材料")$
+print("  搬送先: 水星地表工場（レールガン経由）")$
+print("")$
+print("【水星地表工場】")$
+print("  役割: パネル製造、構造材生産、採掘")$
+print("  生産物: ソーラーパネル、構造ビーム、配線ユニット")$
+print("  搬送先: 軌道上組立現場（マスドライバー/レールガン経由）")$
+print("")$
+print("【軌道上組立工場】")$
+print("  役割: ダイソン環セグメントの最終組立、設置")$
+print("  生産物: 完成したダイソン環")$
+print("  搬送元: 水星地表工場（マスドライバー/レールガン）")$
+print("")$
+/* ----- 搬送方式の使い分け ----- */
+print("--- 搬送方式の使い分け ---")$
+print("")$
+/* レールガン */
+railgun_speed : 6.0e3;               /* 射出速度 [m/s] */
+railgun_payload : 1000;              /* 1回あたりペイロード [kg] */
+railgun_cost_per_kg : 10;            /* コスト [USD/kg] */
+
+/* マスドライバー */
+massdriver_speed : 3.0e3;            /* 射出速度 [m/s] */
+massdriver_payload : 10000;          /* 1回あたりペイロード [kg] */
+massdriver_cost_per_kg : 2;          /* コスト [USD/kg] */
+
+/* スペースエレベータ */
+elevator_speed : 50;                 /* 上昇速度 [m/s] */
+elevator_payload : 5000;             /* 1回あたりペイロード [kg] */
+elevator_cost_per_kg : 50;           /* コスト [USD/kg] */
+
+printf(true, "搬送方式 | 速度[km/s] | 1回あたり[kg] | コスト[USD/kg] | 用途~%")$
+printf(true, "--------+-----------+-------------+---------------+------~%")$
+printf(true, "レールガン | ~4,1f     | ~7,0f       | ~4,0f          | 完成パネルの軌道直送、精密機器~%",
+       railgun_speed/1000, railgun_payload, railgun_cost_per_kg)$
+printf(true, "マスドライバー | ~4,1f     | ~7,0f       | ~4,0f          | バルク材料の大量輸送~%",
+       massdriver_speed/1000, massdriver_payload, massdriver_cost_per_kg)$
+printf(true, "エレベータ | ~5,3f   | ~7,0f       | ~4,0f          | 人員・精密機器・メンテナンス~%",
+       elevator_speed/1000, elevator_payload, elevator_cost_per_kg)$
+print("")$
+/* ----- 年間搬送量の試算 ----- */
+print("--- 年間搬送量の試算 ---")$
+/* ダイソン環完成に必要な総質量 */
+dyson_total_mass : 1.32e22;          /* ダイソン環総質量 [kg]（水星質量の4%） */
+construction_years : 13;             /* 建設期間 [年]（フェーズ2〜5） */
+annual_mass_needed : dyson_total_mass / construction_years;  /* 年間必要質量 [kg/年] */
+
+/* 各搬送方式の年間能力 */
+railgun_shots_per_day : 100;         /* レールガン1日あたり射出回数 */
+railgun_annual : railgun_payload * railgun_shots_per_day * 365;
+massdriver_shots_per_day : 50;       /* マスドライバー1日あたり射出回数 */
+massdriver_annual : massdriver_payload * massdriver_shots_per_day * 365;
+elevator_trips_per_day : 10;         /* エレベータ1日あたり運行回数 */
+elevator_annual : elevator_payload * elevator_trips_per_day * 365;
+total_annual_capacity : railgun_annual + massdriver_annual + elevator_annual;
+printf(true, "年間必要搬送質量: ~,2e kg/年~%", annual_mass_needed)$
+printf(true, "年間搬送能力:~%")$
+printf(true, "  レールガン: ~,2e kg/年 (~,1f%)~%", railgun_annual, railgun_annual/total_annual_capacity*100)$
+printf(true, "  マスドライバー: ~,2e kg/年 (~,1f%)~%", massdriver_annual, massdriver_annual/total_annual_capacity*100)$
+printf(true, "  スペースエレベータ: ~,2e kg/年 (~,1f%)~%", elevator_annual, elevator_annual/total_annual_capacity*100)$
+printf(true, "  合計: ~,2e kg/年~%", total_annual_capacity)$
+printf(true, "  必要量に対する比率: ~,2f%~%~%", total_annual_capacity/annual_mass_needed*100)$
+/* ----- グラフ描画（横棒グラフ） ----- */
+print("グラフ: 建設フェーズと資材の流れを表示します...")$
+/* フェーズタイムライン（横棒グラフ） */
+draw2d(
+    title = "Dyson Ring Construction Timeline",
+    xlabel = "Years",
+    ylabel = "Phase",
+    grid = true,
+    xrange = [0, 22],
+    yrange = [0, 8],
+
+    /* フェーズ0: 技術開発 */
+    fill_color = light_gray,
+    color = light_gray,
+    polygon([[0, 7.3], [5, 7.3], [5, 6.7], [0, 6.7]]),
+    color = black,
+    label(["Tech Dev", 2.5, 7.0]),
+
+    /* フェーズ1: 初期展開 */
+    fill_color = cyan,
+    color = cyan,
+    polygon([[5, 6.3], [7, 6.3], [7, 5.7], [5, 5.7]]),
+    color = black,
+    label(["Initial Deploy", 6, 6.0]),
+
+    /* フェーズ2: 工場建設 */
+    fill_color = blue,
+    color = blue,
+    polygon([[7, 5.3], [9, 5.3], [9, 4.7], [7, 4.7]]),
+    color = black,
+    label(["Factory Build", 8, 5.0]),
+
+    /* フェーズ3: 材料生産 */
+    fill_color = green,
+    color = green,
+    polygon([[9, 4.3], [11, 4.3], [11, 3.7], [9, 3.7]]),
+    color = black,
+    label(["Material Prod", 10, 4.0]),
+
+    /* フェーズ4: パネル製造 */
+    fill_color = orange,
+    color = orange,
+    polygon([[11, 3.3], [13, 3.3], [13, 2.7], [11, 2.7]]),
+    color = black,
+    label(["Panel Mfg", 12, 3.0]),
+
+    /* フェーズ5: 軌道組立 */
+    fill_color = red,
+    color = red,
+    polygon([[13, 2.3], [16, 2.3], [16, 1.7], [13, 1.7]]),
+    color = black,
+    label(["Orbit Assembly", 14.5, 2.0]),
+
+    /* フェーズ6: 完成 */
+    fill_color = magenta,
+    color = magenta,
+    polygon([[16, 1.3], [18, 1.3], [18, 0.7], [16, 0.7]]),
+    color = black,
+    label(["Complete", 17, 1.0]),
+
+    /* フェーズ7: 出発 */
+    fill_color = purple,
+    color = purple,
+    polygon([[18, 0.3], [20, 0.3], [20, -0.3], [18, -0.3]]),
+    color = black,
+    label(["Departure", 19, 0.0]),
+
+    /* 凡例 */
+    color = black,
+    label(["Phase 0: Tech Development", 21, 7.5]),
+    label(["Phase 1: Initial Deployment", 21, 6.5]),
+    label(["Phase 2: Factory Construction", 21, 5.5]),
+    label(["Phase 3: Material Production", 21, 4.5]),
+    label(["Phase 4: Panel Manufacturing", 21, 3.5]),
+    label(["Phase 5: Orbit Assembly", 21, 2.5]),
+    label(["Phase 6: Completion", 21, 1.5]),
+    label(["Phase 7: Departure", 21, 0.5]),
+
+    /* グラフ設定 */
+   
+    dimensions = [1200, 800]
+)$
+print("グラフ保存: dyson_construction_chart.png")$
+print("")$
+/* ----- 資材フロー図（テキスト） ----- */
+print("===== 資材フロー図 =====")$
+print("")$
+print("【地球】")$
+print("  │")$
+print("  │ (初期ロボット・精密機器・触媒)")$
+print("  ▼")$
+print("【金星ヘスペラス（高度50km）】")$
+print("  │")$
+print("  │ 役割: 3Dプリント、材料精錬、電子部品製造")$
+print("  │ 生産: 精錬金属、複合材料、電子基板")$
+print("  │")$
+print("  ├─── レールガン ───→ 【水星地表工場】")$
+print("  │            (精錬材料の高速輸送)")$
+print("  │")$
+print("  └─── レールガン ───→ 【軌道上組立工場】")$
+print("               (精密機器・電子部品)")$
+print("")$
+print("【水星地表工場】")$
+print("  │")$
+print("  │ 役割: 採掘、パネル製造、構造材生産")$
+print("  │ 生産: ソーラーパネル、構造ビーム")$
+print("  │")$
+print("  ├─── マスドライバー ──→ 【軌道上組立工場】")$
+print("  │            (バルク材料の大量輸送)")$
+print("  │")$
+print("  └─── レールガン ───→ 【軌道上組立工場】")$
+print("               (完成パネルの直送)")$
+print("")$
+print("【軌道上組立工場（水星同期軌道）】")$
+print("  │")$
+print("  │ 役割: ダイソン環セグメント組立、設置")$
+print("  │ 生産: 完成したダイソン環")$
+print("  │")$
+print("  └─── 自己展開 ───→ 【ダイソン環完成】")$
+print("               (1.2PW発電開始)")$
+print("")$
+print("【スペースエレベータ（水星地表↔軌道）】")$
+print("  役割: 人員輸送、メンテナンス、緊急時対応")$
+print("  速度: 50m/s、片道約2時間")$
+print("  ペイロード: 5トン/回")$
+print("")$
+/* ----- CSV出力 ----- */
+csv_file : "dyson_construction_chart.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Phase,Name,Start[year],End[year],Description~%")$
+for i:1 thru length(phase_data) do
+    printf(f_csv, "~a,~a,~,0f,~,0f,~a~%",
+           phase_data[i][1], phase_data[i][2], phase_data[i][3], phase_data[i][4], phase_data[i][5])$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+print("===== 完了 =====")$
+

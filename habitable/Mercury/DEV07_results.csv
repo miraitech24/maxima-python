@@ -1,0 +1,15 @@
+Item,Value,Unit
+Distance_min,0.30,AU
+Distance_avg,0.75,AU
+Delta_V_venus_to_mercury,5.57,km/s
+Delta_V_mercury_to_earth,9.32,km/s
+Railgun_length_venus,1.58,km
+Railgun_length_mercury,4.43,km
+Railgun_energy_venus,143.69,MWh
+Railgun_energy_mercury,401.93,MWh
+Chemical_fuel_ratio,2.82,-
+Ion_fuel_ratio,0.24,-
+Railgun_build_cost,158245486.06,USD
+Railgun_annual_op,86214.34,USD
+Chemical_annual_cost,2356002578.74,USD
+Ion_annual_cost,1667704649.20,USD
