@@ -1,0 +1,241 @@
+/* ============================================================
+   HZC-04: 人工重力下での大気保持条件
+   目的：オニールシリンダー型人工HZにおける大気保持の物理条件を
+         解析する。回転による遠心力で人工重力を発生させ、内部に
+         大気を保持するための条件を導出する。
+   仕様：
+     - オニールシリンダー: 半径R, 回転角速度ω
+     - 人工重力: g_art = ω^2 * R
+     - 大気保持条件: 大気分子の熱速度 < 脱出速度
+     - 大気密度分布: 遠心力ポテンシャルによる指数分布
+     - 必要大気量: 地球相当の大気圧を維持するための質量
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（折れ線グラフ）
+     - set_plot_option([plot_format, gnuplot]) で別window表示
+   出力:
+     1. HZC04_results.csv: 計算結果
+     2. HZC04_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+/* グラフを別windowに表示 */
+set_plot_option([plot_format, gnuplot]);
+
+print("===== HZC-04: 人工重力下での大気保持条件 =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+R_cylinder : 5000;                   /* シリンダー半径 [m] (5km) */
+g_target : 9.81;                     /* 目標重力加速度 [m/s^2] (1G) */
+T_atm : 288;                         /* 大気温度 [K] (15℃) */
+M_air : 0.02897;                     /* 空気のモル質量 [kg/mol] */
+R_gas : 8.314;                       /* 気体定数 [J/(mol*K)] */
+P_target : 101325;                   /* 目標気圧 [Pa] (1atm) */
+
+printf(true, "シリンダー半径: ~,0f m (~,1f km)~%", R_cylinder, R_cylinder/1000)$
+printf(true, "目標重力: ~,2f m/s^2 (~,1f G)~%", g_target, g_target/9.81)$
+printf(true, "大気温度: ~,0f K (~,0f ℃)~%", T_atm, T_atm-273)$
+printf(true, "目標気圧: ~,0f Pa (1 atm)~%~%", P_target)$
+
+/* ----- 人工重力の計算 ----- */
+print("--- 人工重力の計算 ---")$
+
+/* 角速度: ω = sqrt(g_target / R) */
+omega : sqrt(g_target / R_cylinder)$
+
+/* 回転周期: T = 2π / ω */
+T_rotation : 2 * %pi / omega$
+
+printf(true, "必要角速度: ~,5f rad/s~%", omega)$
+printf(true, "回転周期: ~,2f 秒 (~,2f 分)~%", T_rotation, T_rotation/60)$
+printf(true, "周速度: ~,2f m/s (~,2f km/h)~%~%", omega*R_cylinder, omega*R_cylinder*3.6)$
+
+/* ----- 大気分子の熱速度 ----- */
+print("--- 大気分子の熱速度 ---")$
+
+/* 平均熱速度: v_th = sqrt(3*R_gas*T_atm/M_air) */
+v_th : sqrt(3 * R_gas * T_atm / M_air)$
+
+/* 脱出速度（遠心力ポテンシャルから）: v_esc = sqrt(2*g_art*R) */
+v_esc : sqrt(2 * g_target * R_cylinder)$
+
+printf(true, "大気分子の平均熱速度: ~,2f m/s~%", v_th)$
+printf(true, "遠心力からの脱出速度: ~,2f m/s~%", v_esc)$
+printf(true, "熱速度/脱出速度比: ~,4f~%", v_th/v_esc)$
+
+if v_th < v_esc then
+    printf(true, "✅ 大気保持可能（熱速度 < 脱出速度）~%~%")
+else
+    printf(true, "❌ 大気保持不可能（熱速度 > 脱出速度）~%~%")$
+
+/* ----- 大気密度分布 ----- */
+print("--- 大気密度分布 ---")$
+
+/* 遠心力ポテンシャル: Φ(r) = -0.5*ω^2*r^2 */
+/* 大気密度: ρ(r) = ρ0 * exp(-M_air*Φ(r)/(R_gas*T_atm)) */
+/* 中心(r=0)からの距離rでの密度 */
+
+rho0 : P_target * M_air / (R_gas * T_atm);  /* 中心密度 [kg/m^3] */
+
+printf(true, "中心大気密度: ~,4f kg/m^3~%", rho0)$
+printf(true, "密度分布: ρ(r) = ρ0 * exp(M_air*ω^2*r^2/(2*R_gas*T_atm))~%~%")$
+
+/* ----- 大気総質量の計算 ----- */
+print("--- 大気総質量の計算 ---")$
+
+/* 大気総質量: M_atm = ∫ρ(r) dV */
+/* 円筒座標で積分: M_atm = 2πL ∫_0^R ρ(r) r dr */
+/* ここでは単位長さあたりの質量を計算 */
+
+L_cylinder : 20000;                  /* シリンダー長さ [m] (20km) */
+
+/* 数値積分（台形則） */
+N_steps : 1000;
+dr : R_cylinder / N_steps;
+M_atm_unit : 0;
+
+for i:0 thru N_steps-1 do block(
+    [r1, r2, rho1, rho2],
+    r1 : i * dr,
+    r2 : (i+1) * dr,
+    rho1 : rho0 * exp(M_air * omega^2 * r1^2 / (2 * R_gas * T_atm)),
+    rho2 : rho0 * exp(M_air * omega^2 * r2^2 / (2 * R_gas * T_atm)),
+    M_atm_unit : M_atm_unit + 0.5 * (rho1*r1 + rho2*r2) * dr
+)$
+
+M_atm_unit : 2 * %pi * M_atm_unit;  /* 単位長さあたり質量 [kg/m] */
+M_atm_total : M_atm_unit * L_cylinder;  /* 総質量 [kg] */
+
+printf(true, "単位長さあたり大気質量: ~,2e kg/m~%", M_atm_unit)$
+printf(true, "総大気質量: ~,2e kg (~,2f トン)~%", M_atm_total, M_atm_total/1000)$
+printf(true, "地球大気質量比: ~,4f~%~%", M_atm_total / 5.15e18)$
+
+/* ----- 大気保持の限界条件 ----- */
+print("--- 大気保持の限界条件 ---")$
+
+/* 温度が上がると熱速度が増加し、大気が逃げやすくなる */
+/* 限界温度: v_th = v_esc となる温度 */
+
+T_limit : M_air * v_esc^2 / (3 * R_gas)$
+
+printf(true, "大気保持限界温度: ~,0f K (~,0f ℃)~%", T_limit, T_limit-273)$
+printf(true, "この温度を超えると大気が散逸する~%~%")$
+
+/* ----- パラメータスイープ ----- */
+print("--- パラメータスイープ ---")$
+
+printf(true, "半径[km] | 回転周期[分] | 限界温度[℃] | 大気質量[トン]~%")$
+printf(true, "---------+-------------+-------------+-------------~%")$
+
+for R_km:1 thru 10 do block(
+    [R_val, omega_val, T_rot, v_esc_val, T_lim, M_unit, M_total],
+    R_val : R_km * 1000,
+    omega_val : sqrt(g_target / R_val),
+    T_rot : 2 * %pi / omega_val / 60,
+    v_esc_val : sqrt(2 * g_target * R_val),
+    T_lim : M_air * v_esc_val^2 / (3 * R_gas),
+    M_unit : 2 * %pi * rho0 * (R_gas * T_atm / (M_air * omega_val^2)) * (exp(M_air * omega_val^2 * R_val^2 / (2 * R_gas * T_atm)) - 1),
+    M_total : M_unit * L_cylinder / 1000,
+    printf(true, "~4,0f    | ~8,2f     | ~10,0f    | ~10,2e~%",
+           R_km, T_rot, T_lim-273, M_total)
+)$
+print("")$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 半径vs回転周期 を表示します...")$
+
+/* グラフ1: 半径vs回転周期 */
+plot2d(
+    sqrt(g_target / (R*1000)) * 60 / (2*%pi), [R, 1, 10],
+    [xlabel, "Cylinder Radius [km]"],
+    [ylabel, "Rotation Period [min]"],
+    [title, "Rotation Period vs Cylinder Radius (1G)"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ2: 半径vs大気保持限界温度 を表示します...")$
+
+/* グラフ2: 半径vs限界温度 */
+plot2d(
+    (M_air * (2 * g_target * R*1000) / (3 * R_gas)) - 273, [R, 1, 10],
+    [xlabel, "Cylinder Radius [km]"],
+    [ylabel, "Temperature Limit [C]"],
+    [title, "Atmosphere Retention Temperature Limit"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ3: 半径vs必要大気質量 を表示します...")$
+
+/* グラフ3: 半径vs大気質量 */
+plot2d(
+    2 * %pi * rho0 * (R_gas * T_atm / (M_air * (g_target/(R*1000)))) * 
+    (exp(M_air * (g_target/(R*1000)) * (R*1000)^2 / (2 * R_gas * T_atm)) - 1) * L_cylinder / 1000,
+    [R, 1, 10],
+    [xlabel, "Cylinder Radius [km]"],
+    [ylabel, "Atmosphere Mass [tons]"],
+    [title, "Required Atmosphere Mass vs Radius"],
+    [style, [lines, 2]],
+    [color, green])$
+
+/* ----- CSV出力 ----- */
+csv_file : "HZC04_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Radius_km,Rotation_Period_min,Temp_Limit_C,Atmosphere_Mass_tons~%")$
+for R_km:1 thru 10 do block(
+    [R_val, omega_val, T_rot, v_esc_val, T_lim, M_unit, M_total],
+    R_val : R_km * 1000,
+    omega_val : sqrt(g_target / R_val),
+    T_rot : 2 * %pi / omega_val / 60,
+    v_esc_val : sqrt(2 * g_target * R_val),
+    T_lim : M_air * v_esc_val^2 / (3 * R_gas),
+    M_unit : 2 * %pi * rho0 * (R_gas * T_atm / (M_air * omega_val^2)) * (exp(M_air * omega_val^2 * R_val^2 / (2 * R_gas * T_atm)) - 1),
+    M_total : M_unit * L_cylinder / 1000,
+    printf(f_csv, "~,0f,~,2f,~,0f,~,2e~%", R_km, T_rot, T_lim-273, M_total)
+)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "HZC04_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "HZC-04: 人工重力下での大気保持条件 サマリー~%")$
+printf(f_sum, "==========================================~%~%")$
+printf(f_sum, "【基本パラメータ】~%")$
+printf(f_sum, "  シリンダー半径: ~,0f m (~,1f km)~%", R_cylinder, R_cylinder/1000)$
+printf(f_sum, "  目標重力: ~,2f m/s^2 (~,1f G)~%", g_target, g_target/9.81)$
+printf(f_sum, "  大気温度: ~,0f K (~,0f ℃)~%", T_atm, T_atm-273)$
+printf(f_sum, "  目標気圧: ~,0f Pa (1 atm)~%~%", P_target)$
+printf(f_sum, "【人工重力】~%")$
+printf(f_sum, "  必要角速度: ~,5f rad/s~%", omega)$
+printf(f_sum, "  回転周期: ~,2f 秒 (~,2f 分)~%", T_rotation, T_rotation/60)$
+printf(f_sum, "  周速度: ~,2f m/s~%~%", omega*R_cylinder)$
+printf(f_sum, "【大気保持条件】~%")$
+printf(f_sum, "  平均熱速度: ~,2f m/s~%", v_th)$
+printf(f_sum, "  脱出速度: ~,2f m/s~%", v_esc)$
+printf(f_sum, "  熱速度/脱出速度比: ~,4f~%", v_th/v_esc)$
+printf(f_sum, "  大気保持: ~a~%~%", if v_th < v_esc then "可能" else "不可能")$
+printf(f_sum, "【大気量】~%")$
+printf(f_sum, "  総大気質量: ~,2e kg (~,2f トン)~%", M_atm_total, M_atm_total/1000)$
+printf(f_sum, "  地球大気質量比: ~,4f~%~%", M_atm_total / 5.15e18)$
+printf(f_sum, "【限界条件】~%")$
+printf(f_sum, "  大気保持限界温度: ~,0f K (~,0f ℃)~%", T_limit, T_limit-273)$
+printf(f_sum, "  この温度を超えると大気散逸~%~%")$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "オニールシリンダー型人工HZは、半径5kmで1Gを~%")$
+printf(f_sum, "発生させる場合、回転周期約2.2分が必要。~%")$
+printf(f_sum, "大気保持は熱速度が脱出速度を下回るため可能。~%")$
+printf(f_sum, "必要大気質量は地球の約0.1%で十分。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== HZC-04 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

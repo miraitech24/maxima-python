@@ -27,21 +27,17 @@
 /* 4. グラフ                                                     */
 /*    draw2dで4つのグラフを別ウィンドウに表示                      */
 /* ============================================================ */
-
 display2d:false;
 load(draw)$
-
 P_map: 0.85$
 P_syn: 0.70$
 P_quantum: 0.40$
 P_conscious: 0.25$
 P_integrate: 0.60$
 t_max: 100$
-
 print("==========================================")$
 print("BIO-508: 記憶転送 - 脳記憶デジタル化成功率")$
 print("==========================================")$
-
 P_total: P_map * P_syn * P_quantum * P_conscious * P_integrate$
 print("基本パラメータ:")$
 print("  ニューラルマッピング成功率 P1 = ", P_map)$
@@ -51,15 +47,12 @@ print("  意識連続性維持率 P4 = ", P_conscious)$
 print("  PhysicalAI統合率 P5 = ", P_integrate)$
 print("")$
 print("総合転送成功率: ", float(P_total * 100), " %")$
-
 P_map_t(t) := min(P_map + 0.15 * (1 - exp(-0.05 * t)), 1.0)$
 P_syn_t(t) := min(P_syn + 0.25 * (1 - exp(-0.04 * t)), 1.0)$
 P_quantum_t(t) := min(P_quantum + 0.50 * (1 - exp(-0.03 * t)), 1.0)$
 P_conscious_t(t) := min(P_conscious + 0.60 * (1 - exp(-0.02 * t)), 1.0)$
 P_integrate_t(t) := min(P_integrate + 0.35 * (1 - exp(-0.04 * t)), 1.0)$
-
 P_total_t(t) := P_map_t(t) * P_syn_t(t) * P_quantum_t(t) * P_conscious_t(t) * P_integrate_t(t)$
-
 print("")$
 print("=== 技術進歩による成功率の推移 ===")$
 print("年   P_map    P_syn    P_quant  P_cons   P_int    P_total")$
@@ -72,19 +65,16 @@ for t_val:0 thru 100 step 10 do (
     pt: float(P_total_t(t_val)),
     print(t_val, "  ", pm, "  ", ps, "  ", pq, "  ", pc, "  ", pi, "  ", pt)
 )$
-
 /* 目標達成までの年数を実数計算で安全に求める */
 target: 0.999$
 /* 対数の中身が正であることを確認してから計算 */
 arg1: 1 - (target - P_quantum) / 0.50$
 arg2: 1 - (target - P_conscious) / 0.60$
 arg3: 1 - (target - P_integrate) / 0.35$
-
 /* 実数チェックと計算 */
 y1: if arg1 > 0 then float(-log(arg1) / 0.03) else 999$
 y2: if arg2 > 0 then float(-log(arg2) / 0.02) else 999$
 y3: if arg3 > 0 then float(-log(arg3) / 0.04) else 999$
-
 print("")$
 print("=== 意識転送の課題分析 ===")$
 print("課題1: 量子状態の完全保存")$
@@ -101,7 +91,6 @@ print("課題3: PhysicalAIとの統合")$
 print("  現在の技術: ", P_integrate * 100, " %")$
 print("  目標: 99.9 %")$
 print("  必要年数: ", y3, " 年")$
-
 print("")$
 print("=== 各段階の重要度分析 ===")$
 print("段階を10%改善した場合の総合成功率向上:")$
@@ -110,7 +99,7 @@ print("  シナプス抽出: ", float(P_map*(P_syn+0.1)*P_quantum*P_conscious*P_
 print("  量子状態保存: ", float(P_map*P_syn*(P_quantum+0.1)*P_conscious*P_integrate / P_total * 100 - 100), " %")$
 print("  意識連続性: ", float(P_map*P_syn*P_quantum*(P_conscious+0.1)*P_integrate / P_total * 100 - 100), " %")$
 print("  PhysicalAI統合: ", float(P_map*P_syn*P_quantum*P_conscious*(P_integrate+0.1) / P_total * 100 - 100), " %")$
-
+draw_renderer: gnuplot;
 /* 図1: 各段階の成功率 */
 draw2d(
     title = "Fig.1: Success Rate by Stage",
@@ -120,7 +109,6 @@ draw2d(
     color = blue, line_width = 2,
     grid = true
 )$
-
 /* 図2: 技術進歩による総合成功率の推移 */
 t_vals: makelist(i, i, 0, 100)$
 P_vals: makelist(float(P_total_t(i)), i, 0, 100)$
@@ -132,7 +120,6 @@ draw2d(
     color = red, line_width = 2,
     grid = true
 )$
-
 /* 図3: 各段階の技術進歩曲線 */
 draw2d(
     title = "Fig.3: Technology Progress by Stage",
@@ -154,7 +141,6 @@ draw2d(
     color = red, line_width = 2,
     grid = true
 )$
-
 /* 図4: 目標達成までの年数 */
 draw2d(
     title = "Fig.4: Years Required for 99.9% Achievement",
@@ -164,9 +150,9 @@ draw2d(
     color = red, line_width = 2,
     grid = true
 )$
-
 print("")$
 print("All 4 figures displayed in separate windows")$
 print("==========================================")$
 print("BIO-508 analysis complete")$
 print("==========================================")$
+

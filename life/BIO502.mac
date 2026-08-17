@@ -37,29 +37,23 @@ d_opt_func(m) := find_root(P_safe(m,d) - threshold, d, 0, 2)$
 /* 4. m の範囲 0.1 ～ 1.0 で最適投与量を計算 */
 m_vals: makelist(0.1 + i*0.05, i, 0, 18)$
 d_opt_vals: map(d_opt_func, m_vals)$
-
+set_plot_option([plot_format, gnuplot]);
 /* 5. グラフ出力 */
 /* 5.1 データとフィットの比較（例として m=0.3 近辺） */
 plot2d([ [discrete, d_data, resp_data], 
-         P_safe(0.3,d) ],
-       [gnuplot_term, png],
-       [gnuplot_out_file, "BIO502_fit_m03.png"],
+       P_safe(0.3,d) ],
        [xlabel, "d"], [ylabel, "P"],
        [style, [points,1,2], [lines,2]],
        [legend, "data", "fitted"])$
 
 /* 5.2 最適投与量曲線 */
 plot2d([discrete, m_vals, d_opt_vals],
-       [gnuplot_term, png],
-       [gnuplot_out_file, "BIO502_opt_dose.png"],
        [xlabel, "m"], [ylabel, "d_opt"],
        [style, [lines,2]], [legend, "optimal dose"])$
 
 /* 5.3 安全域表示 (m=0.5 の場合) */
 plot2d(P_safe(0.5,d), [d,0,1.5],
-       [gnuplot_term, png],
-       [gnuplot_out_file, "BIO502_safe_m05.png"],
-       [xlabel, "d"], [ylabel, "P"],
+      [xlabel, "d"], [ylabel, "P"],
        [style, [lines,2]],
        [legend, "P(m=0.5)"])$
 
@@ -78,9 +72,5 @@ with_stdout("BIO502_summary.txt",
   print("BIO-502 Corrected Summary"),
   print("Source file: BIOCore.csv"),
   print("Fitted model: P = 1/(1+exp(", a_opt, "*(m - ", b_opt, "*d)))"),
-  print("Threshold:", threshold),
-  print("Output files: BIO502_fit_m03.png, BIO502_opt_dose.png, BIO502_safe_m05.png"),
-  print("            : BIO502_fitted_params.csv, BIO502_optimal_dose.csv"))$
-
-quit()$
+  print("BIO502_fitted_params.csv, BIO502_optimal_dose.csv"))$
 

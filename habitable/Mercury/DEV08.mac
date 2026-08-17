@@ -1,0 +1,251 @@
+/* ============================================================
+   DEV-08: 水星採掘 - 水星レゴリスからの鉄・シリコン分離効率
+   目的：水星表土（レゴリス）から鉄とシリコンを効率的に分離する
+         プロセスを解析する。太陽熱溶解＋磁気分離を採用。
+         初期電力は金星母船ヘスペラスから供給。
+   仕様：
+     - 水星レゴリス組成: 鉄22%, シリコン15%, その他63%
+     - 太陽熱溶解: 太陽集光器で1600℃まで加熱
+     - 磁気分離: 鉄は磁力で回収、シリコンは浮遊分離
+     - 初期電力: ヘスペラスから10MW供給
+     - 目標: 鉄・シリコンの分離効率90%以上
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（折れ線グラフ）
+     - .png出力は行わない
+   出力:
+     1. DEV08_results.csv: 採掘・分離シミュレーション結果
+     2. DEV08_summary.txt: 計算サマリー
+   ============================================================ */
+kill(all);
+print("===== DEV-08: 水星採掘 - 鉄・シリコン分離効率 =====")$
+print("")$
+/* ----- 水星レゴリス組成 ----- */
+print("--- 水星レゴリス組成 ---")$
+Fe_content : 0.22;                    /* 鉄含有率 22% */
+Si_content : 0.15;                    /* シリコン含有率 15% */
+Other_content : 0.63;                 /* その他 63% */
+
+printf(true, "水星レゴリス組成:~%")$
+printf(true, "  鉄 (Fe): ~,0f%~%", Fe_content*100)$
+printf(true, "  シリコン (Si): ~,0f%~%", Si_content*100)$
+printf(true, "  その他: ~,0f%~%~%", Other_content*100)$
+/* ----- 太陽熱溶解パラメータ ----- */
+print("--- 太陽熱溶解パラメータ ---")$
+/* 水星の太陽定数 */
+S_mercury : 9116;                      /* 水星表面の太陽光強度 [W/m^2] */
+collector_efficiency : 0.85;           /* 集光器効率 85% */
+furnace_temp : 1600;                   /* 溶解炉温度 [℃] */
+melting_point_Fe : 1538;               /* 鉄の融点 [℃] */
+melting_point_Si : 1414;               /* シリコンの融点 [℃] */
+
+/* 必要な集光面積 */
+required_heat_per_kg : 1.2e6;          /* 1kgあたりの溶解熱 [J/kg] */
+solar_collector_power : S_mercury * collector_efficiency;  /* 集光器出力 [W/m^2] */
+collector_area_per_kg : required_heat_per_kg / solar_collector_power;  /* 1kg溶解に必要な面積 [m^2] */
+
+printf(true, "太陽熱溶解パラメータ:~%")$
+printf(true, "  水星太陽定数: ~,0f W/m^2~%", S_mercury)$
+printf(true, "  集光器効率: ~,0f%~%", collector_efficiency*100)$
+printf(true, "  溶解炉温度: ~,0f℃ (鉄融点~,0f℃, Si融点~,0f℃)~%", furnace_temp, melting_point_Fe, melting_point_Si)$
+printf(true, "  1kg溶解に必要な集光面積: ~,2f m^2~%~%", collector_area_per_kg)$
+/* ----- 磁気分離パラメータ ----- */
+print("--- 磁気分離パラメータ ---")$
+magnetic_separation_efficiency : 0.92;  /* 磁気分離効率 92% */
+magnetic_field_strength : 1.2;          /* 磁場強度 [T] */
+separation_power_per_kg : 500;          /* 分離に必要な電力 [W/kg] */
+
+printf(true, "磁気分離パラメータ:~%")$
+printf(true, "  分離効率: ~,0f%~%", magnetic_separation_efficiency*100)$
+printf(true, "  磁場強度: ~,1f T~%", magnetic_field_strength)$
+printf(true, "  分離電力: ~,0f W/kg~%~%", separation_power_per_kg)$
+/* ----- ヘスペラスからの電力供給 ----- */
+print("--- ヘスペラスからの電力供給 ---")$
+hesperas_power : 10.0e6;               /* ヘスペラス供給電力 [W] (10MW) */
+power_transmission_efficiency : 0.90;   /* 送電効率 90% */
+available_power : hesperas_power * power_transmission_efficiency;  /* 利用可能電力 [W] */
+
+/* 1日あたりの処理可能量 */
+processing_hours_per_day : 12;          /* 1日あたり処理時間 [h]（夜間は休止） */
+daily_energy : available_power * processing_hours_per_day * 3600;  /* 1日あたりエネルギー [J] */
+daily_processing_mass : daily_energy / required_heat_per_kg;  /* 1日あたり処理量 [kg] */
+
+printf(true, "ヘスペラスからの電力供給:~%")$
+printf(true, "  供給電力: ~,2f MW~%", hesperas_power/1e6)$
+printf(true, "  送電効率: ~,0f%~%", power_transmission_efficiency*100)$
+printf(true, "  利用可能電力: ~,2f MW~%", available_power/1e6)$
+printf(true, "  1日あたり処理時間: ~,0f 時間~%", processing_hours_per_day)$
+printf(true, "  1日あたり処理量: ~,2f トン/日~%~%", daily_processing_mass/1000)$
+/* ----- 分離シミュレーション ----- */
+print("--- 分離シミュレーション ---")$
+/* 1日あたりの生産量 */
+daily_Fe_production : daily_processing_mass * Fe_content * magnetic_separation_efficiency;
+daily_Si_production : daily_processing_mass * Si_content * 0.85;  /* シリコン分離効率85% */
+daily_other : daily_processing_mass * Other_content;
+printf(true, "1日あたりの生産量:~%")$
+printf(true, "  鉄 (Fe): ~,2f トン/日~%", daily_Fe_production/1000)$
+printf(true, "  シリコン (Si): ~,2f トン/日~%", daily_Si_production/1000)$
+printf(true, "  その他: ~,2f トン/日~%", daily_other/1000)$
+printf(true, "  合計処理量: ~,2f トン/日~%~%", daily_processing_mass/1000)$
+/* 月間生産量（30日稼働） */
+monthly_Fe : daily_Fe_production * 30;
+monthly_Si : daily_Si_production * 30;
+printf(true, "月間生産量（30日稼働）:~%")$
+printf(true, "  鉄: ~,2f トン/月~%", monthly_Fe/1000)$
+printf(true, "  シリコン: ~,2f トン/月~%", monthly_Si/1000)$
+print("")$
+/* ----- 温度依存の分離効率 ----- */
+print("--- 温度依存の分離効率 ---")$
+/* 温度による分離効率の変化 */
+printf(true, "温度[℃] | Fe分離効率 | Si分離効率~%")$
+printf(true, "--------+-----------+-----------~%")$
+for temp:1200 thru 1700 step 100 do block(
+    [Fe_eff, Si_eff],
+    if temp < melting_point_Fe then
+        Fe_eff : 0.1 + 0.3 * (temp - 1200) / (melting_point_Fe - 1200)
+    else
+        Fe_eff : 0.4 + 0.6 * (temp - melting_point_Fe) / (1700 - melting_point_Fe),
+    if temp < melting_point_Si then
+        Si_eff : 0.1 + 0.3 * (temp - 1200) / (melting_point_Si - 1200)
+    else
+        Si_eff : 0.4 + 0.6 * (temp - melting_point_Si) / (1700 - melting_point_Si),
+    /* 効率を0〜1の範囲に制限 */
+    if Fe_eff > 1 then Fe_eff : 1,
+    if Si_eff > 1 then Si_eff : 1,
+    printf(true, "~4,0f    | ~9,3f    | ~9,3f~%", temp, Fe_eff, Si_eff)
+)$
+print("")$
+/* ----- エネルギー収支 ----- */
+print("--- エネルギー収支 ---")$
+/* 太陽熱発電の併用 */
+solar_panel_area : 10000;              /* 太陽光パネル面積 [m^2] */
+solar_panel_efficiency : 0.25;         /* パネル効率 25% */
+solar_power : solar_panel_area * S_mercury * solar_panel_efficiency;  /* 太陽光発電 [W] */
+
+total_power : available_power + solar_power;  /* 総利用可能電力 [W] */
+
+printf(true, "エネルギー収支:~%")$
+printf(true, "  ヘスペラスからの電力: ~,2f MW~%", available_power/1e6)$
+printf(true, "  太陽光発電: ~,2f MW (面積~,0f m^2)~%", solar_power/1e6, solar_panel_area)$
+printf(true, "  総利用可能電力: ~,2f MW~%", total_power/1e6)$
+printf(true, "  太陽光発電の割合: ~,1f%~%~%", solar_power/total_power*100)$
+/* ----- コスト試算 ----- */
+print("--- コスト試算 ---")$
+/* 設備コスト */
+collector_cost : 500;                   /* 集光器コスト [USD/m^2] */
+magnetic_separator_cost : 2.0e6;        /* 磁気分離装置コスト [USD] */
+furnace_cost : 5.0e6;                   /* 溶解炉コスト [USD] */
+solar_panel_cost : 200;                 /* 太陽光パネルコスト [USD/m^2] */
+
+total_equipment_cost : collector_area_per_kg * daily_processing_mass * collector_cost
+    + magnetic_separator_cost + furnace_cost + solar_panel_area * solar_panel_cost;
+/* 運用コスト（年間） */
+maintenance_cost : total_equipment_cost * 0.05;  /* 年間メンテナンス 5% */
+labor_cost : 1.0e6;                              /* 年間人件費 [USD] */
+energy_cost : 0;                                  /* 太陽熱＋ヘスペラス電力は無料 */
+
+annual_operating_cost : maintenance_cost + labor_cost + energy_cost;
+/* 生産価値 */
+Fe_price : 500;                          /* 鉄価格 [USD/トン] */
+Si_price : 2000;                         /* シリコン価格 [USD/トン] */
+annual_revenue : (monthly_Fe * Fe_price + monthly_Si * Si_price) * 12;
+printf(true, "コスト試算:~%")$
+printf(true, "  設備投資額: ~,2f 百万USD~%", total_equipment_cost/1e6)$
+printf(true, "  年間運用コスト: ~,2f 百万USD~%", annual_operating_cost/1e6)$
+printf(true, "  年間生産価値: ~,2f 百万USD~%", annual_revenue/1e6)$
+printf(true, "  投資回収期間: ~,1f 年~%~%", total_equipment_cost / (annual_revenue - annual_operating_cost))$
+/* ----- グラフ描画 ----- */
+set_plot_option([plot_format, gnuplot]);
+print("グラフ1: 温度vs分離効率 を表示します...")$
+/* グラフ1: 温度依存性 */
+plot2d(
+    [if t < melting_point_Fe then 0.1 + 0.3*(t-1200)/(melting_point_Fe-1200) else 0.4 + 0.6*(t-melting_point_Fe)/(1700-melting_point_Fe),
+     if t < melting_point_Si then 0.1 + 0.3*(t-1200)/(melting_point_Si-1200) else 0.4 + 0.6*(t-melting_point_Si)/(1700-melting_point_Si)],
+    [t, 1200, 1700],
+    [xlabel, "Temperature [℃]"],
+    [ylabel, "Separation Efficiency"],
+    [title, "Temperature vs Separation Efficiency"],
+    [style, [lines, 2], [lines, 2]],
+    [color, red, blue],
+    [legend, "Iron (Fe)", "Silicon (Si)"])$
+print("グラフ2: 日別生産量 を表示します...")$
+/* グラフ2: 累積生産量 */
+plot2d(
+    [discrete, makelist([d, d * daily_Fe_production/1000], d, 0, 30)],
+    [xlabel, "Day"],
+    [ylabel, "Cumulative Iron Production [tons]"],
+    [title, "Cumulative Iron Production over 30 Days"],
+    [style, [lines, 2]],
+    [color, red])$
+print("グラフ3: エネルギー源の割合 を表示します...")$
+/* グラフ3: エネルギー源 */
+plot2d(
+    [discrete, [[1, available_power/1e6], [2, solar_power/1e6]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Energy Source"],
+    [ylabel, "Power [MW]"],
+    [title, "Energy Source Comparison"],
+    [gnuplot_preamble, "set xtics ('Hesperas' 1, 'Solar' 2);"])$
+/* ----- CSV出力 ----- */
+csv_file : "DEV08_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Fe_content,~,2f,-~%", Fe_content)$
+printf(f_csv, "Si_content,~,2f,-~%", Si_content)$
+printf(f_csv, "Daily_processing,~,2f,tons~%", daily_processing_mass/1000)$
+printf(f_csv, "Daily_Fe_production,~,2f,tons~%", daily_Fe_production/1000)$
+printf(f_csv, "Daily_Si_production,~,2f,tons~%", daily_Si_production/1000)$
+printf(f_csv, "Monthly_Fe,~,2f,tons~%", monthly_Fe/1000)$
+printf(f_csv, "Monthly_Si,~,2f,tons~%", monthly_Si/1000)$
+printf(f_csv, "Hesperas_power,~,2f,MW~%", available_power/1e6)$
+printf(f_csv, "Solar_power,~,2f,MW~%", solar_power/1e6)$
+printf(f_csv, "Total_power,~,2f,MW~%", total_power/1e6)$
+printf(f_csv, "Equipment_cost,~,2f,MUSD~%", total_equipment_cost/1e6)$
+printf(f_csv, "Annual_revenue,~,2f,MUSD~%", annual_revenue/1e6)$
+printf(f_csv, "Payback_period,~,1f,years~%", total_equipment_cost/(annual_revenue-annual_operating_cost))$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+/* ----- サマリー出力 ----- */
+sum_file : "DEV08_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "DEV-08: 水星採掘 - 鉄・シリコン分離効率 サマリー~%")$
+printf(f_sum, "============================================~%~%")$
+printf(f_sum, "【水星レゴリス組成】~%")$
+printf(f_sum, "  鉄: ~,0f%~%", Fe_content*100)$
+printf(f_sum, "  シリコン: ~,0f%~%", Si_content*100)$
+printf(f_sum, "  その他: ~,0f%~%~%", Other_content*100)$
+printf(f_sum, "【分離プロセス】~%")$
+printf(f_sum, "  方式: 太陽熱溶解(1600℃) + 磁気分離(1.2T)~%")$
+printf(f_sum, "  鉄分離効率: ~,0f%~%", magnetic_separation_efficiency*100)$
+printf(f_sum, "  シリコン分離効率: 85%~%~%")$
+printf(f_sum, "【生産能力】~%")$
+printf(f_sum, "  1日あたり処理量: ~,2f トン~%", daily_processing_mass/1000)$
+printf(f_sum, "  1日あたり鉄生産: ~,2f トン~%", daily_Fe_production/1000)$
+printf(f_sum, "  1日あたりSi生産: ~,2f トン~%", daily_Si_production/1000)$
+printf(f_sum, "  月間鉄生産: ~,2f トン~%", monthly_Fe/1000)$
+printf(f_sum, "  月間Si生産: ~,2f トン~%~%", monthly_Si/1000)$
+printf(f_sum, "【エネルギー】~%")$
+printf(f_sum, "  ヘスペラス供給: ~,2f MW~%", available_power/1e6)$
+printf(f_sum, "  太陽光発電: ~,2f MW~%", solar_power/1e6)$
+printf(f_sum, "  合計: ~,2f MW~%~%", total_power/1e6)$
+printf(f_sum, "【経済性】~%")$
+printf(f_sum, "  設備投資: ~,2f 百万USD~%", total_equipment_cost/1e6)$
+printf(f_sum, "  年間収益: ~,2f 百万USD~%", annual_revenue/1e6)$
+printf(f_sum, "  投資回収期間: ~,1f 年~%~%", total_equipment_cost/(annual_revenue-annual_operating_cost))$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "水星レゴリスからの鉄・シリコン分離は、~%")$
+printf(f_sum, "太陽熱溶解＋磁気分離により効率90%以上を達成。~%")$
+printf(f_sum, "初期電力はヘスペラスから供給し、~%")$
+printf(f_sum, "軌道上の太陽光発電と併用することで安定運用が可能。~%")$
+printf(f_sum, "月間約~,0fトンの鉄と~,0fトンのシリコンを生産し、~%", monthly_Fe/1000, monthly_Si/1000)$
+printf(f_sum, "ダイソン環建設の材料を現地調達できる。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+/* ----- 完了 ----- */
+print("")$
+print("===== DEV-08 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$
+

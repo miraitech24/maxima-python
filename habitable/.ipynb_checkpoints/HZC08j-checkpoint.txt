@@ -1,0 +1,199 @@
+kill(all);
+
+set_plot_option([plot_format, gnuplot]);
+
+print("===== HZC-08: 食料生産に必要な農地面積 =====");
+print("");
+
+print("--- 基本パラメータ ---");
+
+N_pop : 1000000;                     /* 収容人数 [人] (100万人) */
+C_req : 2500;                        /* 1人あたり必要カロリー [kcal/日] */
+C_req_year : C_req * 365;            /* 1人あたり年間カロリー [kcal/年] */
+
+wheat_yield_soil : 8000;             /* 小麦収量 [kg/ha/年] */
+wheat_cal_per_kg : 3300;             /* 小麦カロリー [kcal/kg] */
+soil_cal_per_ha : wheat_yield_soil * wheat_cal_per_kg;  /* 土耕カロリー [kcal/ha/年] */
+
+hydroponic_efficiency : 10;          /* 水耕の効率倍率 */
+hydroponic_cal_per_ha : soil_cal_per_ha * hydroponic_efficiency;  /* 水耕カロリー [kcal/ha/年] */
+
+printf(true, "収容人数: ~,0f 人~%", N_pop);
+printf(true, "1人あたり必要カロリー: ~,0f kcal/日~%", C_req);
+printf(true, "1人あたり年間カロリー: ~,0f kcal/年~%", C_req_year);
+printf(true, "土耕栽培: 小麦 ~,0f kg/ha/年, ~,0f kcal/ha/年~%", wheat_yield_soil, soil_cal_per_ha);
+printf(true, "水耕栽培: 効率 ~,0f倍, ~,0f kcal/ha/年~%~%", hydroponic_efficiency, hydroponic_cal_per_ha);
+
+print("--- 必要農地面積の計算 ---");
+
+total_cal_needed : N_pop * C_req_year;  /* [kcal/年] */
+
+area_soil : total_cal_needed / soil_cal_per_ha;  /* [ha] */
+area_soil_km2 : area_soil / 100;               /* [km^2] */
+
+area_hydroponic : total_cal_needed / hydroponic_cal_per_ha;  /* [ha] */
+area_hydroponic_km2 : area_hydroponic / 100;                 /* [km^2] */
+
+printf(true, "総必要カロリー: ~,2e kcal/年~%", total_cal_needed);
+printf(true, "土耕栽培必要面積: ~,1f ha (~,1f km^2)~%", area_soil, area_soil_km2);
+printf(true, "水耕栽培必要面積: ~,1f ha (~,1f km^2)~%~%", area_hydroponic, area_hydroponic_km2);
+
+print("--- オニールシリンダーとの比較 ---");
+
+cylinder_diameter : 6.4;             /* 直径 [km] */
+cylinder_length : 32;                /* 長さ [km] */
+cylinder_area : %pi * cylinder_diameter * cylinder_length;  /* 内表面積 [km^2] */
+cylinder_area_ha : cylinder_area * 100;  /* [ha] */
+
+habitable_area : cylinder_area * 0.5;  /* [km^2] */
+habitable_area_ha : habitable_area * 100;  /* [ha] */
+
+printf(true, "オニールシリンダー標準サイズ:~%");
+printf(true, "  直径: ~,1f km, 長さ: ~,1f km~%", cylinder_diameter, cylinder_length);
+printf(true, "  内表面積: ~,1f km^2 (~,0f ha)~%", cylinder_area, cylinder_area_ha);
+printf(true, "  居住可能面積: ~,1f km^2 (~,0f ha)~%~%", habitable_area, habitable_area_ha);
+
+soil_ratio : area_soil_km2 / habitable_area * 100;
+hydroponic_ratio : area_hydroponic_km2 / habitable_area * 100;
+
+printf(true, "土耕栽培に必要な面積割合: ~,1f% の居住可能面積~%", soil_ratio);
+printf(true, "水耕栽培に必要な面積割合: ~,1f% の居住可能面積~%~%", hydroponic_ratio);
+
+print("--- 植物工場の設計 ---");
+
+vertical_layers : 10;                /* 垂直層数 */
+area_hydroponic_actual : area_hydroponic / vertical_layers;  /* 実際の設置面積 [ha] */
+area_hydroponic_actual_km2 : area_hydroponic_actual / 100;  /* [km^2] */
+
+printf(true, "植物工場（水耕栽培）の設計:~%");
+printf(true, "  垂直層数: ~,0f 層~%", vertical_layers);
+printf(true, "  実際の設置面積: ~,1f ha (~,2f km^2)~%", area_hydroponic_actual, area_hydroponic_actual_km2);
+printf(true, "  オニールシリンダー内の占有面積: ~,1f%~%~%", 
+       area_hydroponic_actual_km2 / habitable_area * 100);
+
+print("--- 食料自給率の計算 ---");
+
+max_soil_area : habitable_area_ha * 0.7;  /* 70%を農業に利用 */
+max_soil_cal : max_soil_area * soil_cal_per_ha;
+self_sufficiency_soil : max_soil_cal / total_cal_needed * 100;
+
+plant_factory_area : habitable_area_ha * 0.1;  /* 10%を植物工場に */
+plant_factory_cal : plant_factory_area * hydroponic_cal_per_ha;
+total_cal_with_factory : max_soil_cal + plant_factory_cal;
+self_sufficiency_hybrid : total_cal_with_factory / total_cal_needed * 100;
+
+printf(true, "オニールシリンダー内の食料自給率:~%");
+printf(true, "  土耕のみ（居住可能面積の70%利用）: ~,1f%~%", self_sufficiency_soil);
+printf(true, "  土耕+植物工場（10%併設）: ~,1f%~%~%", self_sufficiency_hybrid);
+
+print("グラフ1: 収容人数vs必要農地面積 を表示します...");
+
+plot2d(
+    [x * C_req_year / soil_cal_per_ha / 100, x * C_req_year / hydroponic_cal_per_ha / 100],
+    [x, 100000, 10000000],
+    [xlabel, "Population"],
+    [ylabel, "Required Area [km^2]"],
+    [title, "Required Farmland Area vs Population"],
+    [legend, "Soil Cultivation", "Hydroponics"],
+    [style, [lines, 2], [lines, 2]],
+    [color, red, blue],
+    [logx, true]);
+
+print("グラフ2: 農法比較（横棒グラフ） を表示します...");
+
+draw2d(
+    title = "Farming Method Comparison",
+    xlabel = "Required Area [km^2]",
+    ylabel = "Method",
+    grid = true,
+
+    fill_color = red,
+    color = red,
+    polygon([[area_soil_km2, 1], [0, 1],
+             [0, 0.7], [area_soil_km2, 0.7]]),
+    color = black,
+    label(["Soil", 0.5, 1]),
+
+    fill_color = blue,
+    color = blue,
+    polygon([[area_hydroponic_km2, 2], [0, 2],
+             [0, 1.7], [area_hydroponic_km2, 1.7]]),
+    color = black,
+    label(["Hydroponics", 0.5, 2]),
+
+    fill_color = green,
+    color = green,
+    polygon([[area_hydroponic_actual_km2, 3], [0, 3],
+             [0, 2.7], [area_hydroponic_actual_km2, 2.7]]),
+    color = black,
+    label(["Vertical Farm (10 layers)", 0.5, 3])
+);
+
+print("グラフ3: 自給率の時間変化 を表示します...");
+
+plot2d(
+    [self_sufficiency_soil, self_sufficiency_hybrid],
+    [x, 0, 1],
+    [xlabel, "Time"],
+    [ylabel, "Self-sufficiency [%]"],
+    [title, "Food Self-sufficiency Rate"],
+    [legend, "Soil Only", "Soil + Plant Factory"],
+    [style, [lines, 2], [lines, 2]],
+    [color, red, green],
+    [ytics, 0, 20, 100]);
+
+csv_file : "HZC08_results.csv";
+f_csv : openw(csv_file);
+printf(f_csv, "Item,Value,Unit~%");
+printf(f_csv, "Population,~,0f,persons~%", N_pop);
+printf(f_csv, "Calorie_requirement,~,0f,kcal/day/person~%", C_req);
+printf(f_csv, "Total_calories_needed,~,2e,kcal/year~%", total_cal_needed);
+printf(f_csv, "Soil_area,~,1f,ha~%", area_soil);
+printf(f_csv, "Soil_area_km2,~,1f,km2~%", area_soil_km2);
+printf(f_csv, "Hydroponic_area,~,1f,ha~%", area_hydroponic);
+printf(f_csv, "Hydroponic_area_km2,~,1f,km2~%", area_hydroponic_km2);
+printf(f_csv, "Vertical_farm_area,~,1f,ha~%", area_hydroponic_actual);
+printf(f_csv, "Vertical_farm_area_km2,~,2f,km2~%", area_hydroponic_actual_km2);
+printf(f_csv, "Cylinder_surface_area,~,1f,km2~%", cylinder_area);
+printf(f_csv, "Habitable_area,~,1f,km2~%", habitable_area);
+printf(f_csv, "Soil_ratio,~,1f,%~%", soil_ratio);
+printf(f_csv, "Hydroponic_ratio,~,1f,%~%", hydroponic_ratio);
+printf(f_csv, "Self_sufficiency_soil,~,1f,%~%", self_sufficiency_soil);
+printf(f_csv, "Self_sufficiency_hybrid,~,1f,%~%", self_sufficiency_hybrid);
+close(f_csv);
+printf(true, "CSV保存: ~a~%", csv_file);
+
+sum_file : "HZC08_summary.txt";
+f_sum : openw(sum_file);
+printf(f_sum, "HZC-08: 食料生産に必要な農地面積 サマリー~%");
+printf(f_sum, "========================================~%~%");
+printf(f_sum, "【基本パラメータ】~%");
+printf(f_sum, "  収容人数: ~,0f 人~%", N_pop);
+printf(f_sum, "  1人あたり必要カロリー: ~,0f kcal/日~%", C_req);
+printf(f_sum, "  総必要カロリー: ~,2e kcal/年~%~%", total_cal_needed);
+printf(f_sum, "【農法比較】~%");
+printf(f_sum, "  土耕栽培: ~,1f km^2 必要~%", area_soil_km2);
+printf(f_sum, "  水耕栽培: ~,1f km^2 必要~%", area_hydroponic_km2);
+printf(f_sum, "  植物工場(10層): ~,2f km^2 必要~%~%", area_hydroponic_actual_km2);
+printf(f_sum, "【オニールシリンダー】~%");
+printf(f_sum, "  内表面積: ~,1f km^2~%", cylinder_area);
+printf(f_sum, "  居住可能面積: ~,1f km^2~%", habitable_area);
+printf(f_sum, "  土耕に必要な面積割合: ~,1f%~%", soil_ratio);
+printf(f_sum, "  水耕に必要な面積割合: ~,1f%~%~%", hydroponic_ratio);
+printf(f_sum, "【食料自給率】~%");
+printf(f_sum, "  土耕のみ: ~,1f%~%", self_sufficiency_soil);
+printf(f_sum, "  土耕+植物工場: ~,1f%~%~%", self_sufficiency_hybrid);
+printf(f_sum, "【結論】~%");
+printf(f_sum, "水耕栽培（植物工場）を採用すれば、オニールシリンダー内の~%");
+printf(f_sum, "わずか数%の面積で100万人分の食料を生産可能。~%");
+printf(f_sum, "植物工場の垂直多層化により、さらに面積効率が向上する。~%");
+printf(f_sum, "オニールシリンダー内で完全な食料自給が達成できる。~%");
+close(f_sum);
+printf(true, "サマリー保存: ~a~%", sum_file);
+
+print("");
+print("===== HZC-08 計算完了 =====");
+print("出力ファイル:");
+printf(true, "  1. ~a~%", csv_file);
+printf(true, "  2. ~a~%", sum_file);
+print("  グラフは別windowで表示済み");

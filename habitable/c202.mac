@@ -1,0 +1,231 @@
+/* ============================================================
+   c202: 量子ビット集積化 - 光子損失確率の見積もり
+   目的：ナノダイヤモンド中のNVセンターから検出器までの
+         光子伝搬損失を計算し、量子ビット集積化の実現可能性を評価する。
+   仕様：
+     - ナノダイヤモンド中のNVセンターが発する光子を解析
+     - 光子伝搬経路: NVセンター → ナノダイヤモンド → 導波路 → 検出器
+     - 各段階での損失を計算
+     - 全損失確率と最終的な検出効率を算出
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（折れ線グラフ）
+     - set_plot_option([plot_format, gnuplot]) で別window表示
+     - .png出力は行わない
+   出力:
+     1. c202_results.csv: 計算結果
+     2. c202_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+/* グラフを別windowに表示 */
+set_plot_option([plot_format, gnuplot]);
+
+print("===== c202: 量子ビット集積化 - 光子損失確率 =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+/* NVセンターの発光特性 */
+lambda_NV : 637e-9;                 /* NVセンター発光波長 [m] (637nm) */
+T_NV : 13e-9;                       /* 発光寿命 [s] (13ns) */
+quantum_yield : 0.8;                /* 量子収率 80% */
+
+/* ナノダイヤモンド */
+n_diamond : 2.4;                    /* ダイヤモンド屈折率 */
+d_nano : 100e-9;                    /* ナノダイヤモンド直径 [m] (100nm) */
+absorption_coeff : 0.1;             /* 吸収係数 [cm^-1] */
+
+/* 導波路 */
+n_waveguide : 1.5;                  /* 導波路屈折率 */
+L_waveguide : 1e-3;                 /* 導波路長 [m] (1mm) */
+waveguide_loss : 3.0;               /* 導波路損失 [dB/cm] */
+
+/* 検出器 */
+detector_efficiency : 0.9;          /* 検出器量子効率 90% */
+collection_na : 0.5;                /* 集光NA */
+
+printf(true, "NVセンター発光波長: ~,0f nm~%", lambda_NV*1e9)$
+printf(true, "発光寿命: ~,0f ns~%", T_NV*1e9)$
+printf(true, "量子収率: ~,1f%~%", quantum_yield*100)$
+printf(true, "ナノダイヤモンド直径: ~,0f nm~%", d_nano*1e9)$
+printf(true, "ダイヤモンド屈折率: ~,2f~%", n_diamond)$
+printf(true, "導波路長: ~,0f mm~%", L_waveguide*1e3)$
+printf(true, "導波路損失: ~,1f dB/cm~%", waveguide_loss)$
+printf(true, "検出器量子効率: ~,1f%~%", detector_efficiency*100)$
+printf(true, "集光NA: ~,2f~%~%", collection_na)$
+
+/* ----- 光子損失計算 ----- */
+print("--- 光子損失計算 ---")$
+
+/* 1. ナノダイヤモンド内部での損失 */
+/* 吸収損失: 吸収係数 × 光路長 */
+L_abs : absorption_coeff * d_nano * 100;  /* [cm^-1] × [cm] */
+T_abs : exp(-L_abs);                      /* 透過率 */
+
+/* 2. ナノダイヤモンド表面での反射損失（フレネル反射） */
+R_fresnel : ((n_diamond - 1)/(n_diamond + 1))^2;
+T_surface : 1 - R_fresnel;
+
+/* 3. 放射パターンによる集光効率 */
+/* NA=0.5 の場合の立体角 */
+theta_max : asin(collection_na);
+solid_angle : 2 * %pi * (1 - cos(theta_max));
+T_collection : solid_angle / (4 * %pi);
+
+/* 4. 導波路結合効率 */
+/* モードフィールドミスマッチによる損失 */
+mode_mismatch : 0.7;                     /* 結合効率 70% */
+T_coupling : mode_mismatch;
+
+/* 5. 導波路伝搬損失 */
+L_wg_dB : waveguide_loss * L_waveguide * 100;  /* [dB] */
+T_waveguide : 10^(-L_wg_dB/10);
+
+/* 6. 検出器効率 */
+T_detector : detector_efficiency;
+
+/* 全透過率 */
+T_total : T_abs * T_surface * T_collection * T_coupling * T_waveguide * T_detector;
+P_loss : 1 - T_total;
+
+printf(true, "損失要因の内訳:~%")$
+printf(true, "  1. ナノダイヤモンド吸収: ~,4f (~,2f%)~%", T_abs, (1-T_abs)*100)$
+printf(true, "  2. 表面フレネル反射: ~,4f (~,2f%)~%", T_surface, (1-T_surface)*100)$
+printf(true, "  3. 放射パターン集光: ~,4f (~,2f%)~%", T_collection, (1-T_collection)*100)$
+printf(true, "  4. 導波路結合: ~,4f (~,2f%)~%", T_coupling, (1-T_coupling)*100)$
+printf(true, "  5. 導波路伝搬: ~,4f (~,2f%)~%", T_waveguide, (1-T_waveguide)*100)$
+printf(true, "  6. 検出器効率: ~,4f (~,2f%)~%", T_detector, (1-T_detector)*100)$
+print("")$
+printf(true, "全透過率: ~,4f (~,2f%)~%", T_total, T_total*100)$
+printf(true, "全損失確率: ~,4f (~,2f%)~%~%", P_loss, P_loss*100)$
+
+/* ----- パラメータスイープ ----- */
+print("--- パラメータスイープ ---")$
+
+/* ナノダイヤモンドサイズ依存性 */
+printf(true, "ナノダイヤモンド直径 [nm] | 全透過率 | 損失確率~%")$
+printf(true, "------------------------+---------+---------~%")$
+
+for size:50 thru 300 step 50 do block(
+    [d, L_abs_s, T_abs_s, T_total_s],
+    d : size * 1e-9,
+    L_abs_s : absorption_coeff * d * 100,
+    T_abs_s : exp(-L_abs_s),
+    T_total_s : T_abs_s * T_surface * T_collection * T_coupling * T_waveguide * T_detector,
+    printf(true, "~10,0f          | ~7,4f  | ~7,4f~%", size, T_total_s, 1-T_total_s)
+)$
+print("")$
+
+/* 導波路長依存性 */
+printf(true, "導波路長 [mm] | 全透過率 | 損失確率~%")$
+printf(true, "-------------+---------+---------~%")$
+
+for wg_len:0.1 thru 5 step 0.5 do block(
+    [L_wg_dB_s, T_wg_s, T_total_s],
+    L_wg_dB_s : waveguide_loss * wg_len * 0.1,
+    T_wg_s : 10^(-L_wg_dB_s/10),
+    T_total_s : T_abs * T_surface * T_collection * T_coupling * T_wg_s * T_detector,
+    printf(true, "~8,1f       | ~7,4f  | ~7,4f~%", wg_len, T_total_s, 1-T_total_s)
+)$
+print("")$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: ナノダイヤモンドサイズvs損失確率 を表示します...")$
+
+/* グラフ1: サイズ依存性 */
+plot2d(
+    [discrete, makelist([size, 
+        1 - exp(-absorption_coeff * size*1e-9 * 100) * T_surface * T_collection * T_coupling * T_waveguide * T_detector],
+        size, 50, 300, 10)],
+    [xlabel, "Nanodiamond Diameter [nm]"],
+    [ylabel, "Total Loss Probability"],
+    [title, "Photon Loss vs Nanodiamond Size"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ2: 導波路長vs損失確率 を表示します...")$
+
+/* グラフ2: 導波路長依存性 */
+plot2d(
+    [discrete, makelist([wg_len,
+        1 - T_abs * T_surface * T_collection * T_coupling * 10^(-(waveguide_loss * wg_len * 0.1)/10) * T_detector],
+        wg_len, 0.1, 5, 0.1)],
+    [xlabel, "Waveguide Length [mm]"],
+    [ylabel, "Total Loss Probability"],
+    [title, "Photon Loss vs Waveguide Length"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ3: 検出器効率vs全透過率 を表示します...")$
+
+/* グラフ3: 検出器効率依存性 */
+plot2d(
+    [discrete, makelist([eta,
+        T_abs * T_surface * T_collection * T_coupling * T_waveguide * eta],
+        eta, 0.5, 1.0, 0.05)],
+    [xlabel, "Detector Efficiency"],
+    [ylabel, "Total Transmission"],
+    [title, "Total Transmission vs Detector Efficiency"],
+    [style, [lines, 2]],
+    [color, green])$
+
+/* ----- CSV出力 ----- */
+csv_file : "c202_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Parameter,Value,Unit~%")$
+printf(f_csv, "NV_wavelength,~,0f,nm~%", lambda_NV*1e9)$
+printf(f_csv, "NV_lifetime,~,0f,ns~%", T_NV*1e9)$
+printf(f_csv, "Quantum_yield,~,2f,-~%", quantum_yield)$
+printf(f_csv, "Nanodiamond_diameter,~,0f,nm~%", d_nano*1e9)$
+printf(f_csv, "Waveguide_length,~,2f,mm~%", L_waveguide*1e3)$
+printf(f_csv, "Waveguide_loss,~,1f,dB/cm~%", waveguide_loss)$
+printf(f_csv, "Detector_efficiency,~,2f,-~%", detector_efficiency)$
+printf(f_csv, "Absorption_transmission,~,4f,-~%", T_abs)$
+printf(f_csv, "Surface_transmission,~,4f,-~%", T_surface)$
+printf(f_csv, "Collection_transmission,~,4f,-~%", T_collection)$
+printf(f_csv, "Coupling_transmission,~,4f,-~%", T_coupling)$
+printf(f_csv, "Waveguide_transmission,~,4f,-~%", T_waveguide)$
+printf(f_csv, "Detector_transmission,~,4f,-~%", T_detector)$
+printf(f_csv, "Total_transmission,~,4f,-~%", T_total)$
+printf(f_csv, "Total_loss_probability,~,4f,-~%", P_loss)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "c202_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "c202: 量子ビット集積化 - 光子損失確率 サマリー~%")$
+printf(f_sum, "============================================~%~%")$
+printf(f_sum, "【基本パラメータ】~%")$
+printf(f_sum, "  NVセンター発光波長: ~,0f nm~%", lambda_NV*1e9)$
+printf(f_sum, "  ナノダイヤモンド直径: ~,0f nm~%", d_nano*1e9)$
+printf(f_sum, "  導波路長: ~,2f mm~%", L_waveguide*1e3)$
+printf(f_sum, "  検出器量子効率: ~,1f%~%~%", detector_efficiency*100)$
+printf(f_sum, "【損失内訳】~%")$
+printf(f_sum, "  吸収損失: ~,2f%~%", (1-T_abs)*100)$
+printf(f_sum, "  表面反射損失: ~,2f%~%", (1-T_surface)*100)$
+printf(f_sum, "  集光損失: ~,2f%~%", (1-T_collection)*100)$
+printf(f_sum, "  結合損失: ~,2f%~%", (1-T_coupling)*100)$
+printf(f_sum, "  伝搬損失: ~,2f%~%", (1-T_waveguide)*100)$
+printf(f_sum, "  検出器損失: ~,2f%~%~%", (1-T_detector)*100)$
+printf(f_sum, "【結果】~%")$
+printf(f_sum, "  全透過率: ~,2f%~%", T_total*100)$
+printf(f_sum, "  全損失確率: ~,2f%~%~%", P_loss*100)$
+printf(f_sum, "【考察】~%")$
+printf(f_sum, "  ナノダイヤモンドサイズは100nm以下が最適~%")$
+printf(f_sum, "  導波路長は1mm以下に抑えるべき~%")$
+printf(f_sum, "  検出器効率90%でも全損失は~,1f%~%", P_loss*100)$
+printf(f_sum, "  量子ビット集積化には損失低減が必須~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== c202 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

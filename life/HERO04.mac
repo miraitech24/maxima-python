@@ -1,0 +1,114 @@
+/* ============================================================ */
+/* HERO-04: Cyborg-Human Integration Rate                         */
+/* サイボーグ-ヒト統合率                                          */
+/*                                                              */
+/* 【仕様】                                                      */
+/* 1. 統合モデル                                                 */
+/*    サイボーグとヒトの統合プロセス                              */
+/*    5段階の統合:                                                */
+/*    I1: 神経接続統合率                                         */
+/*    I2: 運動制御統合率                                         */
+/*    I3: 感覚フィードバック統合率                                */
+/*    I4: 認知処理統合率                                         */
+/*    I5: アイデンティティ統合率                                  */
+/*                                                              */
+/* 2. パラメータ                                                 */
+/*    I_neural: 神経接続 = 0.80                                  */
+/*    I_motor: 運動制御 = 0.75                                   */
+/*    I_sensory: 感覚FB = 0.70                                   */
+/*    I_cognitive: 認知処理 = 0.65                               */
+/*    I_identity: アイデンティティ = 0.50                        */
+/*    t_max: 計算期間 = 50 years                                 */
+/*                                                              */
+/* 3. グラフ                                                     */
+/*    set_plot_option([plot_format, gnuplot]) で別ウィンドウ表示  */
+/* ============================================================ */
+
+display2d:false;
+set_plot_option([plot_format, gnuplot])$
+
+I_neural: 0.80$
+I_motor: 0.75$
+I_sensory: 0.70$
+I_cognitive: 0.65$
+I_identity: 0.50$
+t_max: 50$
+
+print("==========================================")$
+print("HERO-04: サイボーグ-ヒト統合率")$
+print("==========================================")$
+
+I_total: I_neural * I_motor * I_sensory * I_cognitive * I_identity$
+print("基本パラメータ:")$
+print("  神経接続統合 I1 = ", I_neural)$
+print("  運動制御統合 I2 = ", I_motor)$
+print("  感覚FB統合 I3 = ", I_sensory)$
+print("  認知処理統合 I4 = ", I_cognitive)$
+print("  アイデンティティ統合 I5 = ", I_identity)$
+print("")$
+print("総合統合率: ", float(I_total * 100), " %")$
+
+/* 技術進歩モデル */
+I_neural_t(t) := min(I_neural + 0.15*(1-exp(-0.08*t)), 1.0)$
+I_motor_t(t) := min(I_motor + 0.20*(1-exp(-0.06*t)), 1.0)$
+I_sensory_t(t) := min(I_sensory + 0.25*(1-exp(-0.05*t)), 1.0)$
+I_cognitive_t(t) := min(I_cognitive + 0.30*(1-exp(-0.04*t)), 1.0)$
+I_identity_t(t) := min(I_identity + 0.45*(1-exp(-0.03*t)), 1.0)$
+
+I_total_t(t) := I_neural_t(t)*I_motor_t(t)*I_sensory_t(t)*I_cognitive_t(t)*I_identity_t(t)$
+
+print("")$
+print("=== 技術進歩による統合率の推移 ===")$
+print("年   I_neural I_motor I_sens  I_cogn  I_ident I_total")$
+for t_val:0 thru 50 step 5 do (
+    in: float(I_neural_t(t_val)),
+    im: float(I_motor_t(t_val)),
+    is: float(I_sensory_t(t_val)),
+    ic: float(I_cognitive_t(t_val)),
+    ii: float(I_identity_t(t_val)),
+    it: float(I_total_t(t_val)),
+    print(t_val, "  ", in, "  ", im, "  ", is, "  ", ic, "  ", ii, "  ", it)
+)$
+
+/* 図1: 各段階の統合率 */
+plot2d([discrete, [1,2,3,4,5], [I_neural, I_motor, I_sensory, I_cognitive, I_identity]],
+    [style, [points, 2, 1, 6]],
+    [legend, "Current Integration"],
+    [xlabel, "Stage"], [ylabel, "Integration Rate"],
+    [title, "Fig.1: Integration Rate by Stage"])$
+
+/* 図2: 技術進歩による総合統合率 */
+t_vals: makelist(i, i, 0, 50)$
+I_vals: makelist(float(I_total_t(i)), i, 0, 50)$
+plot2d([discrete, t_vals, I_vals],
+    [style, [lines, 2]],
+    [legend, "I_total(t)"],
+    [xlabel, "Years"], [ylabel, "Total Integration Rate"],
+    [title, "Fig.2: Total Integration Rate over Time"])$
+
+/* 図3: 各段階の技術進歩曲線 */
+plot2d([I_neural_t(t), I_motor_t(t), I_sensory_t(t), I_cognitive_t(t), I_identity_t(t)],
+    [t, 0, 50],
+    [style, [lines, 2], [lines, 2], [lines, 2], [lines, 2], [lines, 2]],
+    [legend, "Neural", "Motor", "Sensory", "Cognitive", "Identity"],
+    [xlabel, "Years"], [ylabel, "Integration Rate"],
+    [title, "Fig.3: Technology Progress by Stage"])$
+
+/* 図4: 感度分析 */
+plot2d([discrete, [1,2,3,4,5], [
+    float((I_neural+0.1)*I_motor*I_sensory*I_cognitive*I_identity/I_total*100-100),
+    float(I_neural*(I_motor+0.1)*I_sensory*I_cognitive*I_identity/I_total*100-100),
+    float(I_neural*I_motor*(I_sensory+0.1)*I_cognitive*I_identity/I_total*100-100),
+    float(I_neural*I_motor*I_sensory*(I_cognitive+0.1)*I_identity/I_total*100-100),
+    float(I_neural*I_motor*I_sensory*I_cognitive*(I_identity+0.1)/I_total*100-100)
+]],
+    [style, [points, 2, 1, 6]],
+    [legend, "Improvement (%)"],
+    [xlabel, "Stage Improved by 10%"], [ylabel, "Total Integration Improvement (%)"],
+    [title, "Fig.4: Sensitivity Analysis"])$
+
+print("")$
+print("全4図を別ウィンドウに表示しました")$
+print("==========================================")$
+print("HERO-04 解析完了")$
+print("==========================================")$

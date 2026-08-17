@@ -1,0 +1,111 @@
+/* ============================================================ */
+/* HERO-02: Genetic Mutation Success Rate                        */
+/* 遺伝子突然変異成功率                                           */
+/*                                                              */
+/* 【仕様】                                                      */
+/* 1. 遺伝子突然変異モデル                                       */
+/*    有益な遺伝子突然変異の確率を計算                            */
+/*    突然変異には以下の種類がある:                                */
+/*    - 有益な突然変異（HEROes化に寄与）                         */
+/*    - 有害な突然変異                                           */
+/*    - 中立な突然変異                                           */
+/*                                                              */
+/* 2. パラメータ                                                 */
+/*    P_mutation: 突然変異発生率 = 1e-8 /塩基/世代               */
+/*    genome_size: ヒトゲノムサイズ = 3e9 塩基                   */
+/*    P_beneficial: 有益な突然変異の割合 = 0.001                 */
+/*    P_harmful: 有害な突然変異の割合 = 0.30                     */
+/*    P_neutral: 中立な突然変異の割合 = 0.699                    */
+/*    population: 対象集団サイズ = 1e6                           */
+/*    generations: 世代数 = 100                                  */
+/*                                                              */
+/* 3. グラフ                                                     */
+/*    set_plot_option([plot_format, gnuplot]) で別ウィンドウ表示  */
+/* ============================================================ */
+display2d:false;
+load(draw)$
+draw_renderer: gnuplot;
+P_mutation: 1e-8$
+genome_size: 3e9$
+P_beneficial: 0.001$
+P_harmful: 0.30$
+P_neutral: 0.699$
+population: 1e6$
+generations: 100$
+print("==========================================")$
+print("HERO-02: 遺伝子突然変異成功率")$
+print("==========================================")$
+/* 1人あたりの突然変異数 */
+mutations_per_person: P_mutation * genome_size$
+print("1人あたりの突然変異数: ", float(mutations_per_person))$
+/* 有益な突然変異の期待数 */
+beneficial_per_person: mutations_per_person * P_beneficial$
+print("1人あたりの有益な突然変異数: ", float(beneficial_per_person))$
+/* 集団全体での有益な突然変異数 */
+total_beneficial: beneficial_per_person * population$
+print("集団全体の有益な突然変異数: ", float(total_beneficial))$
+/* 少なくとも1つの有益な突然変異が発生する確率 */
+P_at_least_one: 1 - exp(-total_beneficial)$
+print("少なくとも1つの有益な突然変異が発生する確率: ", float(P_at_least_one * 100), " %")$
+/* 世代を重ねた場合の累積確率 */
+P_cumulative(g) := 1 - exp(-total_beneficial * g)$
+print("")$
+print("=== 世代数と累積確率 ===")$
+print("世代  累積確率")$
+for g:1 thru 100 step 10 do (
+    print(g, "  ", float(P_cumulative(g) * 100), " %")
+)$
+/* 突然変異の種類別割合 */
+print("")$
+print("=== 突然変異の種類別割合 ===")$
+print("有益: ", P_beneficial * 100, " %")$
+print("有害: ", P_harmful * 100, " %")$
+print("中立: ", P_neutral * 100, " %")$
+/* 図1: 突然変異の種類別割合 */
+draw2d(
+    title = "Fig.1: Mutation Type Distribution",
+    xlabel = "Mutation Type", ylabel = "Proportion",
+    key = "Distribution",
+    points([1,2,3], [P_beneficial, P_harmful, P_neutral]),
+    color = blue, line_width = 2,
+    grid = true
+)$
+/* 図2: 世代数と累積確率 */
+g_vals: makelist(i, i, 1, 100)$
+P_vals: makelist(float(P_cumulative(i)), i, 1, 100)$
+draw2d(
+    title = "Fig.2: Cumulative Probability over Generations",
+    xlabel = "Generations", ylabel = "Cumulative Probability",
+    key = "P_cumulative",
+    points(g_vals, P_vals),
+    color = red, line_width = 2,
+    grid = true
+)$
+/* 図3: 集団サイズの影響 */
+pop_vals: [1e3, 1e4, 1e5, 1e6, 1e7, 1e8]$
+P_pop: makelist(1 - exp(-beneficial_per_person * p), p, pop_vals)$
+draw2d(
+    title = "Fig.3: Effect of Population Size",
+    xlabel = "Population Size", ylabel = "Probability",
+    key = "P_at_least_one",
+    points(pop_vals, P_pop),
+    color = green, line_width = 2,
+    grid = true
+)$
+/* 図4: 有益な突然変異の割合の影響 */
+beneficial_vals: [0.0001, 0.0005, 0.001, 0.005, 0.01]$
+P_ben: makelist(1 - exp(-mutations_per_person * b * population), b, beneficial_vals)$
+draw2d(
+    title = "Fig.4: Effect of Beneficial Mutation Rate",
+    xlabel = "Beneficial Mutation Rate", ylabel = "Probability",
+    key = "P_at_least_one",
+    points(beneficial_vals, P_ben),
+    color = purple, line_width = 2,
+    grid = true
+)$
+print("")$
+print("全4図を別ウィンドウに表示しました")$
+print("==========================================")$
+print("HERO-02 解析完了")$
+print("==========================================")$
+

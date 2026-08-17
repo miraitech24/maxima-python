@@ -1,0 +1,137 @@
+/* ============================================================ */
+/* HERO-01: Cyborg Enhancement Probability                        */
+/* サイボーグ強化成功率                                           */
+/*                                                              */
+/* 【仕様】                                                      */
+/* 1. サイボーグ強化モデル                                       */
+/*    5段階の強化プロセス:                                        */
+/*    P1: 神経インターフェース接続成功率                          */
+/*    P2: 生体適合性成功率                                       */
+/*    P3: 免疫拒絶回避率                                         */
+/*    P4: 機能統合率                                             */
+/*    P5: 心理的受容率                                           */
+/*                                                              */
+/* 2. パラメータ                                                 */
+/*    P_neural: 神経接続 = 0.85                                  */
+/*    P_bio: 生体適合性 = 0.75                                   */
+/*    P_immune: 免疫拒絶回避 = 0.70                              */
+/*    P_integrate: 機能統合 = 0.80                               */
+/*    P_psych: 心理的受容 = 0.65                                 */
+/*    t_max: 計算期間 = 50 years                                 */
+/*                                                              */
+/* 3. グラフ                                                     */
+/*    draw_renderer: gnuplot で別ウィンドウ表示                   */
+/* ============================================================ */
+
+display2d:false;
+load(draw)$
+draw_renderer: gnuplot$
+
+P_neural: 0.85$
+P_bio: 0.75$
+P_immune: 0.70$
+P_integrate: 0.80$
+P_psych: 0.65$
+t_max: 50$
+
+print("==========================================")$
+print("HERO-01: サイボーグ強化成功率")$
+print("==========================================")$
+
+P_total: P_neural * P_bio * P_immune * P_integrate * P_psych$
+print("基本パラメータ:")$
+print("  神経インターフェース接続 P1 = ", P_neural)$
+print("  生体適合性 P2 = ", P_bio)$
+print("  免疫拒絶回避 P3 = ", P_immune)$
+print("  機能統合 P4 = ", P_integrate)$
+print("  心理的受容 P5 = ", P_psych)$
+print("")$
+print("総合強化成功率: ", float(P_total * 100), " %")$
+
+/* 技術進歩モデル */
+P_neural_t(t) := min(P_neural + 0.12*(1-exp(-0.08*t)), 1.0)$
+P_bio_t(t) := min(P_bio + 0.20*(1-exp(-0.06*t)), 1.0)$
+P_immune_t(t) := min(P_immune + 0.25*(1-exp(-0.05*t)), 1.0)$
+P_integrate_t(t) := min(P_integrate + 0.15*(1-exp(-0.07*t)), 1.0)$
+P_psych_t(t) := min(P_psych + 0.30*(1-exp(-0.04*t)), 1.0)$
+
+P_total_t(t) := P_neural_t(t)*P_bio_t(t)*P_immune_t(t)*P_integrate_t(t)*P_psych_t(t)$
+
+print("")$
+print("=== 技術進歩による成功率の推移 ===")$
+print("年   P_neural P_bio   P_immun P_integ P_psych P_total")$
+for t_val:0 thru 50 step 5 do (
+    pn: float(P_neural_t(t_val)),
+    pb: float(P_bio_t(t_val)),
+    pi: float(P_immune_t(t_val)),
+    pin: float(P_integrate_t(t_val)),
+    pp: float(P_psych_t(t_val)),
+    pt: float(P_total_t(t_val)),
+    print(t_val, "  ", pn, "  ", pb, "  ", pi, "  ", pin, "  ", pp, "  ", pt)
+)$
+
+/* 図1: 各段階の成功率 */
+draw2d(
+    title = "Fig.1: Success Rate by Stage",
+    xlabel = "Stage", ylabel = "Success Rate",
+    key = "Current Technology",
+    points([1,2,3,4,5], [P_neural, P_bio, P_immune, P_integrate, P_psych]),
+    color = blue, line_width = 2,
+    grid = true
+)$
+
+/* 図2: 技術進歩による総合成功率 */
+t_vals: makelist(i, i, 0, 50)$
+P_vals: makelist(float(P_total_t(i)), i, 0, 50)$
+draw2d(
+    title = "Fig.2: Total Success Rate over Time",
+    xlabel = "Years", ylabel = "Total Success Rate",
+    key = "P_total(t)",
+    points(t_vals, P_vals),
+    color = red, line_width = 2,
+    grid = true
+)$
+
+/* 図3: 各段階の技術進歩曲線 */
+draw2d(
+    title = "Fig.3: Technology Progress by Stage",
+    xlabel = "Years", ylabel = "Success Rate",
+    key = "Neural Interface",
+    explicit(P_neural_t(t), t, 0, 50),
+    color = blue, line_width = 2,
+    key = "Biocompatibility",
+    explicit(P_bio_t(t), t, 0, 50),
+    color = green, line_width = 2,
+    key = "Immune Rejection",
+    explicit(P_immune_t(t), t, 0, 50),
+    color = orange, line_width = 2,
+    key = "Functional Integration",
+    explicit(P_integrate_t(t), t, 0, 50),
+    color = purple, line_width = 2,
+    key = "Psychological Acceptance",
+    explicit(P_psych_t(t), t, 0, 50),
+    color = red, line_width = 2,
+    grid = true
+)$
+
+/* 図4: 感度分析 - 各段階の重要度 */
+draw2d(
+    title = "Fig.4: Sensitivity Analysis",
+    xlabel = "Stage Improved by 10%", ylabel = "Total Success Rate Improvement (%)",
+    key = "Improvement",
+    points([1,2,3,4,5], [
+        float((P_neural+0.1)*P_bio*P_immune*P_integrate*P_psych/P_total*100-100),
+        float(P_neural*(P_bio+0.1)*P_immune*P_integrate*P_psych/P_total*100-100),
+        float(P_neural*P_bio*(P_immune+0.1)*P_integrate*P_psych/P_total*100-100),
+        float(P_neural*P_bio*P_immune*(P_integrate+0.1)*P_psych/P_total*100-100),
+        float(P_neural*P_bio*P_immune*P_integrate*(P_psych+0.1)/P_total*100-100)
+    ]),
+    color = green, line_width = 2,
+    grid = true
+)$
+
+print("")$
+print("全4図を別ウィンドウに表示しました")$
+print("==========================================")$
+print("HERO-01 解析完了")$
+print("==========================================")$

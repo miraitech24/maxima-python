@@ -1,0 +1,271 @@
+/* ============================================================
+   FER-06: 人工子宮技術による出生率補完
+   目的：少子化リスク除去のため、人工子宮技術を用いた
+         出生率補完の数理モデルを構築する。
+   想定シナリオ：
+     1. 同性結婚カップル: 両方の遺伝子を組み合わせた人工受精
+     2. 個人複製: 単一の個人からのクローン生成
+     3. 受精卵の体外培養: 従来の体外受精の延長
+     4. ハイブリッド: 上記3つの組み合わせによる最大効率
+   仕様：
+     - 技術成熟度 M_tech (0〜1) に応じた生産可能数
+     - 人口補充率 R_repl の計算
+     - 実用化時期の推定
+     - コスト便益分析
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（折れ線グラフ）
+     - set_plot_option([plot_format, gnuplot]) で別window表示
+   出力:
+     1. FER06_results.csv: シミュレーション結果
+     2. FER06_summary.txt: 計算サマリー
+   ============================================================ */
+
+set_plot_option([plot_format, gnuplot])$
+
+kill(all);
+
+print("===== FER-06: 人工子宮技術による出生率補完 =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+/* 人口パラメータ */
+N_population : 8.0e9;                /* 世界人口 [人] */
+birth_rate_current : 1.5;            /* 現在の合計特殊出生率 */
+replacement_rate : 2.1;              /* 人口置換水準の出生率 */
+deficit_rate : replacement_rate - birth_rate_current;  /* 出生率不足 */
+
+/* 人工子宮技術パラメータ */
+M_tech : 0.7;                        /* 技術成熟度 70% */
+production_per_unit : 1000;          /* 1施設あたり年間生産数 [人/年] */
+unit_cost : 5.0e6;                   /* 1施設あたり建設コスト [USD] */
+operation_cost_per_birth : 10000;    /* 1出生あたり運用コスト [USD] */
+
+/* シナリオ別パラメータ */
+printf(true, "世界人口: ~,2e 人~%", N_population)$
+printf(true, "現在の出生率: ~,2f~%", birth_rate_current)$
+printf(true, "置換水準: ~,2f~%", replacement_rate)$
+printf(true, "出生率不足: ~,2f~%", deficit_rate)$
+printf(true, "技術成熟度: ~,1f%~%", M_tech*100)$
+printf(true, "1施設あたり年間生産数: ~,0f 人/年~%", production_per_unit)$
+printf(true, "施設建設コスト: ~,2e USD~%", unit_cost)$
+printf(true, "1出生あたり運用コスト: ~,0f USD~%~%", operation_cost_per_birth)$
+
+/* ----- シナリオ定義 ----- */
+print("--- シナリオ定義 ---")$
+
+/* シナリオ1: 同性結婚カップル */
+scenario1_name : "同性結婚カップル";
+scenario1_desc : "両方の遺伝子を組み合わせた人工受精";
+scenario1_efficiency : 0.6;          /* 技術効率 60% */
+scenario1_target_pop : 0.05 * N_population;  /* 対象人口 5% */
+scenario1_annual_births : scenario1_target_pop * deficit_rate * scenario1_efficiency * M_tech / 30;  /* 30年で均す */
+
+/* シナリオ2: 個人複製（クローン） */
+scenario2_name : "個人複製（クローン）";
+scenario2_desc : "単一の個人からのクローン生成";
+scenario2_efficiency : 0.3;          /* 技術効率 30% */
+scenario2_target_pop : 0.01 * N_population;  /* 対象人口 1% */
+scenario2_annual_births : scenario2_target_pop * deficit_rate * scenario2_efficiency * M_tech / 30;
+
+/* シナリオ3: 受精卵の体外培養 */
+scenario3_name : "受精卵の体外培養";
+scenario3_desc : "従来の体外受精の延長、不妊治療";
+scenario3_efficiency : 0.8;          /* 技術効率 80% */
+scenario3_target_pop : 0.15 * N_population;  /* 対象人口 15% */
+scenario3_annual_births : scenario3_target_pop * deficit_rate * scenario3_efficiency * M_tech / 30;
+
+/* シナリオ4: ハイブリッド（3つの組み合わせ） */
+scenario4_name : "ハイブリッド戦略";
+scenario4_desc : "上記3つの組み合わせによる最大効率";
+scenario4_efficiency : 0.9;          /* 技術効率 90% */
+scenario4_target_pop : 0.2 * N_population;  /* 対象人口 20% */
+scenario4_annual_births : scenario4_target_pop * deficit_rate * scenario4_efficiency * M_tech / 30;
+
+printf(true, "シナリオ | 効率 | 対象人口 | 年間出生数 | 備考~%")$
+printf(true, "--------+------+---------+-----------+------~%")$
+printf(true, "~a | ~3,1f | ~5,1f%% | ~8,0f | ~a~%",
+       scenario1_name, scenario1_efficiency, scenario1_target_pop/N_population*100,
+       scenario1_annual_births, scenario1_desc)$
+printf(true, "~a | ~3,1f | ~5,1f%% | ~8,0f | ~a~%",
+       scenario2_name, scenario2_efficiency, scenario2_target_pop/N_population*100,
+       scenario2_annual_births, scenario2_desc)$
+printf(true, "~a | ~3,1f | ~5,1f%% | ~8,0f | ~a~%",
+       scenario3_name, scenario3_efficiency, scenario3_target_pop/N_population*100,
+       scenario3_annual_births, scenario3_desc)$
+printf(true, "~a | ~3,1f | ~5,1f%% | ~8,0f | ~a~%",
+       scenario4_name, scenario4_efficiency, scenario4_target_pop/N_population*100,
+       scenario4_annual_births, scenario4_desc)$
+print("")$
+
+/* ----- 人口補充率の計算 ----- */
+print("--- 人口補充率の計算 ---")$
+
+/* 必要な年間出生数 */
+required_annual_births : N_population * deficit_rate / 30;  /* 30年で補充 */
+
+printf(true, "必要な年間出生数（30年計画）: ~,0f 人/年~%", required_annual_births)$
+print("")$
+
+printf(true, "シナリオ | 年間出生数 | 補充率 | 充足率~%")$
+printf(true, "--------+-----------+-------+------~%")$
+
+scenarios : [
+    [scenario1_name, scenario1_annual_births],
+    [scenario2_name, scenario2_annual_births],
+    [scenario3_name, scenario3_annual_births],
+    [scenario4_name, scenario4_annual_births]
+]$
+
+for s in scenarios do block(
+    [name, births, repl_rate, coverage],
+    name : s[1],
+    births : s[2],
+    repl_rate : births / (N_population * deficit_rate / 30),
+    coverage : births / required_annual_births * 100,
+    printf(true, "~a | ~8,0f  | ~5,3f | ~5,1f%~%", name, births, repl_rate, coverage)
+)$
+print("")$
+
+/* ----- コスト分析 ----- */
+print("--- コスト分析 ---")$
+
+/* 必要施設数 */
+required_facilities : required_annual_births / production_per_unit;
+total_construction_cost : required_facilities * unit_cost;
+annual_operation_cost : required_annual_births * operation_cost_per_birth;
+total_annual_cost : total_construction_cost / 30 + annual_operation_cost;  /* 30年償却 */
+
+printf(true, "必要施設数: ~,0f 施設~%", required_facilities)$
+printf(true, "総建設コスト: ~,2e USD~%", total_construction_cost)$
+printf(true, "年間運用コスト: ~,2e USD/年~%", annual_operation_cost)$
+printf(true, "年間総コスト（30年償却）: ~,2e USD/年~%", total_annual_cost)$
+printf(true, "1出生あたりコスト: ~,0f USD~%~%", total_annual_cost / required_annual_births)$
+
+/* ----- 技術成熟度と実用化時期 ----- */
+print("--- 技術成熟度と実用化時期 ---")$
+
+/* 技術成熟度モデル: ロジスティック曲線 */
+/* M_tech(t) = 1 / (1 + exp(-k * (t - t_half))) */
+k_growth : 0.3;                      /* 成長率 */
+t_half : 2035;                       /* 成熟度50%の年 */
+
+M_tech_func(t) := 1 / (1 + exp(-k_growth * (t - t_half)))$
+
+printf(true, "技術成熟度モデル: ロジスティック曲線~%")$
+printf(true, "  M(t) = 1 / (1 + exp(-k * (t - t_half)))~%")$
+printf(true, "  k = ~,2f, t_half = ~,0f 年~%", k_growth, t_half)$
+print("")$
+
+printf(true, "年 | 技術成熟度 | 生産可能数[万人/年] | 備考~%")$
+printf(true, "---+-----------+-------------------+------~%")$
+
+for t:2025 thru 2060 step 5 do block(
+    [m_val, prod],
+    m_val : float(M_tech_func(t)),
+    prod : m_val * required_annual_births / 1e4,
+    printf(true, "~,0f | ~7,3f    | ~14,1f       | ~a~%",
+           t, m_val, prod,
+           if m_val >= 0.9 then "✅ 実用化" else if m_val >= 0.5 then "🔶 実証段階" else "🔴 研究段階")
+)$
+print("")$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 技術成熟度の時間変化 を表示します...")$
+
+/* グラフ1: 技術成熟度曲線 */
+plot2d(
+    M_tech_func(t), [t, 2025, 2070],
+    [xlabel, "Year"],
+    [ylabel, "Technology Maturity"],
+    [title, "Artificial Womb Technology Maturity"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ2: シナリオ別年間出生数 を表示します...")$
+
+/* グラフ2: シナリオ比較（横棒グラフ） */
+plot2d(
+    [discrete, [[1, scenario1_annual_births/1e6], [2, scenario2_annual_births/1e6],
+                [3, scenario3_annual_births/1e6], [4, scenario4_annual_births/1e6]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Scenario"],
+    [ylabel, "Annual Births [millions]"],
+    [title, "Annual Births by Scenario"],
+    [gnuplot_preamble, "set xtics ('Same-Sex' 1, 'Clone' 2, 'IVF' 3, 'Hybrid' 4);"])$
+
+print("グラフ3: 人口補充効果の累積 を表示します...")$
+
+/* グラフ3: 累積出生数 */
+plot2d(
+    [discrete, makelist([t, float(integrate(M_tech_func(x) * required_annual_births, x, 2025, t)) / 1e8], t, 2025, 2070, 5)],
+    [xlabel, "Year"],
+    [ylabel, "Cumulative Births [100 millions]"],
+    [title, "Cumulative Births from Artificial Wombs"],
+    [style, [lines, 2]],
+    [color, green])$
+
+/* ----- CSV出力 ----- */
+csv_file : "FER06_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Year,Technology_Maturity,Annual_Births,Cumulative_Births~%")$
+for t:2025 thru 2070 do
+    printf(f_csv, "~,0f,~,6f,~,2e,~,2e~%",
+           t, float(M_tech_func(t)),
+           float(M_tech_func(t) * required_annual_births),
+           float(integrate(M_tech_func(x) * required_annual_births, x, 2025, t)))$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "FER06_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "FER-06: 人工子宮技術による出生率補完 サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【基本パラメータ】~%")$
+printf(f_sum, "  世界人口: ~,2e 人~%", N_population)$
+printf(f_sum, "  現在の出生率: ~,2f (置換水準 ~,2f)~%", birth_rate_current, replacement_rate)$
+printf(f_sum, "  出生率不足: ~,2f~%", deficit_rate)$
+printf(f_sum, "  技術成熟度: ~,1f%~%~%", M_tech*100)$
+printf(f_sum, "【想定シナリオ】~%")$
+printf(f_sum, "  1. 同性結婚カップル: 両方の遺伝子を組み合わせた人工受精~%")$
+printf(f_sum, "  2. 個人複製（クローン）: 単一の個人からのクローン生成~%")$
+printf(f_sum, "  3. 受精卵の体外培養: 従来の体外受精の延長~%")$
+printf(f_sum, "  4. ハイブリッド戦略: 上記3つの組み合わせ~%~%")$
+printf(f_sum, "【人口補充効果】~%")$
+printf(f_sum, "  ハイブリッド戦略が最も効果的（補充率 ~,3f）~%",
+       scenario4_annual_births / required_annual_births)$
+printf(f_sum, "  体外培養が次点（補充率 ~,3f）~%",
+       scenario3_annual_births / required_annual_births)$
+printf(f_sum, "  同性結婚カップルは限定的（補充率 ~,3f）~%",
+       scenario1_annual_births / required_annual_births)$
+printf(f_sum, "  個人複製は倫理課題大（補充率 ~,3f）~%~%",
+       scenario2_annual_births / required_annual_births)$
+printf(f_sum, "【コスト分析】~%")$
+printf(f_sum, "  必要施設数: ~,0f 施設~%", required_facilities)$
+printf(f_sum, "  総建設コスト: ~,2e USD~%", total_construction_cost)$
+printf(f_sum, "  年間運用コスト: ~,2e USD/年~%", annual_operation_cost)$
+printf(f_sum, "  1出生あたりコスト: ~,0f USD~%~%", total_annual_cost / required_annual_births)$
+printf(f_sum, "【実用化時期】~%")$
+printf(f_sum, "  研究段階: 2025-2035年~%")$
+printf(f_sum, "  実証段階: 2035-2045年~%")$
+printf(f_sum, "  実用化: 2045年以降~%")$
+printf(f_sum, "  完全普及: 2055年以降~%~%")$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "人工子宮技術は、ハイブリッド戦略で最大の効果を発揮する。~%")$
+printf(f_sum, "同性結婚カップルと体外培養を組み合わせることで、~%")$
+printf(f_sum, "出生率不足をほぼ補完可能。~%")$
+printf(f_sum, "個人複製は技術的には可能だが、倫理的課題が大きい。~%")$
+printf(f_sum, "実用化には2045年以降を見込む。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== FER-06 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

@@ -1,0 +1,230 @@
+/* ============================================================
+   c217: 量子ニューラルネットワークの計算量
+   目的：時超えケンタの意思決定に必要な量子演算回数を見積もる。
+         物理AIが自律判断する際の量子ニューラルネットワークの
+         計算複雑性を解析する。
+   仕様：
+     - 量子ニューラルネットワーク: 量子ビット数n, 層数L
+     - 意思決定に必要な量子演算: ゲート演算回数
+     - 古典NNとの比較: 同じ問題を解くのに必要な演算回数
+     - 時超えケンタの判断速度: 光年単位の通信遅延を考慮
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（折れ線グラフ）
+     - .png出力は行わない
+   出力:
+     1. c217_results.csv: 計算量見積もり結果
+     2. c217_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+print("===== c217: 量子ニューラルネットワークの計算量 =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+/* 量子ニューラルネットワークの規模 */
+n_qubits : 100;                      /* 量子ビット数（時超えケンタのコア規模） */
+L_layers : 20;                       /* 量子回路の層数 */
+n_params : n_qubits * L_layers;      /* パラメータ数 */
+
+/* 量子ゲートの種類 */
+gate_types : 4;                      /* 使用するゲート種類数（RX, RY, RZ, CNOT） */
+
+/* 意思決定の複雑さ */
+decision_categories : 10;            /* 意思決定のカテゴリ数 */
+scenarios_per_decision : 100;        /* 1つの意思決定あたりのシナリオ数 */
+
+printf(true, "量子ニューラルネットワークの規模:~%")$
+printf(true, "  量子ビット数: ~,0f qubits~%", n_qubits)$
+printf(true, "  回路層数: ~,0f layers~%", L_layers)$
+printf(true, "  パラメータ数: ~,0f params~%", n_params)$
+printf(true, "  使用ゲート種類: ~,0f types~%", gate_types)$
+printf(true, "  意思決定カテゴリ: ~,0f categories~%", decision_categories)$
+printf(true, "  シナリオ数/決定: ~,0f scenarios~%~%", scenarios_per_decision)$
+
+/* ----- 量子演算回数の見積もり ----- */
+print("--- 量子演算回数の見積もり ---")$
+
+/* 1回の順伝播（forward pass）に必要な量子ゲート演算数 */
+gates_per_layer : n_qubits * gate_types;  /* 1層あたりのゲート数 */
+total_gates_forward : gates_per_layer * L_layers;  /* 順伝播の総ゲート数 */
+
+/* 勾配計算（backpropagation）に必要な演算数 */
+/* 量子勾配はパラメータシフト則を使用: 各パラメータにつき2回の順伝播 */
+gates_per_gradient : 2 * total_gates_forward * n_params;  /* 勾配計算の総ゲート数 */
+
+/* 1回の学習イテレーションに必要な演算数 */
+gates_per_iteration : total_gates_forward + gates_per_gradient;
+
+/* 収束に必要なイテレーション数 */
+iterations_to_converge : 1000;       /* 収束までのイテレーション数 */
+total_gates_training : gates_per_iteration * iterations_to_converge;
+
+/* 1回の意思決定に必要な演算数（推論時） */
+gates_per_inference : total_gates_forward * decision_categories * scenarios_per_decision;
+
+printf(true, "1回の順伝播に必要な量子ゲート演算数: ~,0f gates~%", total_gates_forward)$
+printf(true, "1回の勾配計算に必要な量子ゲート演算数: ~,0f gates~%", gates_per_gradient)$
+printf(true, "1回の学習イテレーションに必要な演算数: ~,0f gates~%", gates_per_iteration)$
+printf(true, "収束までの総学習演算数: ~,2e gates~%", total_gates_training)$
+printf(true, "1回の意思決定（推論）に必要な演算数: ~,2e gates~%~%", gates_per_inference)$
+
+/* ----- 古典NNとの比較 ----- */
+print("--- 古典NNとの比較 ---")$
+
+/* 古典NNのパラメータ（同等の性能を持つNN） */
+classical_neurons : 1000;            /* ニューロン数 */
+classical_layers : 10;               /* 層数 */
+classical_params : classical_neurons^2 * classical_layers;  /* 古典NNのパラメータ数 */
+
+/* 古典NNの演算回数 */
+classical_gates_forward : classical_neurons^2 * classical_layers;  /* 順伝播 */
+classical_gates_training : classical_gates_forward * iterations_to_converge * 3;  /* 学習（×3は勾配計算の係数） */
+classical_gates_inference : classical_gates_forward * decision_categories * scenarios_per_decision;
+
+/* 量子優位性（Quantum Advantage） */
+quantum_advantage_training : classical_gates_training / total_gates_training;
+quantum_advantage_inference : classical_gates_inference / gates_per_inference;
+
+printf(true, "古典NNのパラメータ数: ~,2e params~%", classical_params)$
+printf(true, "古典NNの学習演算数: ~,2e ops~%", classical_gates_training)$
+printf(true, "古典NNの推論演算数: ~,2e ops~%", classical_gates_inference)$
+printf(true, "量子優位性（学習）: ~,2f 倍~%", quantum_advantage_training)$
+printf(true, "量子優位性（推論）: ~,2f 倍~%~%", quantum_advantage_inference)$
+
+/* ----- 時超えケンタの判断速度 ----- */
+print("--- 時超えケンタの判断速度 ---")$
+
+/* 量子ゲートの実行時間 */
+gate_time : 1e-9;                    /* 1量子ゲートあたりの実行時間 [s]（1ナノ秒） */
+
+/* 1回の意思決定にかかる時間 */
+inference_time : gates_per_inference * gate_time;  /* [s] */
+inference_time_ms : inference_time * 1000;  /* [ms] */
+
+/* プロキシマbとの通信遅延（4.2光年） */
+light_speed : 3.0e8;                /* 光速 [m/s] */
+distance_proxima : 4.2 * 365.25 * 24 * 3600 * light_speed;  /* 4.2光年 [m] */
+communication_delay : distance_proxima / light_speed;  /* 片道 [s] */
+communication_delay_years : communication_delay / (365.25 * 24 * 3600);  /* [年] */
+
+/* 自律判断の必要性 */
+autonomy_ratio : communication_delay / inference_time;  /* 通信遅延と判断時間の比 */
+
+printf(true, "1量子ゲートの実行時間: ~,0f ns~%", gate_time*1e9)$
+printf(true, "1回の意思決定時間: ~,2f ms~%", inference_time_ms)$
+printf(true, "プロキシマbとの通信遅延（片道）: ~,1f 年~%", communication_delay_years)$
+printf(true, "通信遅延と判断時間の比: ~,2e 倍~%", autonomy_ratio)$
+printf(true, "→ 時超えケンタは自律判断が必須（通信待ち不可）~%~%")$
+
+/* ----- 量子ビット数と計算量のスケーリング ----- */
+print("--- 量子ビット数と計算量のスケーリング ---")$
+
+printf(true, "量子ビット数 | 順伝播ゲート数 | 学習総ゲート数 | 推論ゲート数~%")$
+printf(true, "------------+---------------+---------------+-------------~%")$
+
+for n:10 thru 100 step 10 do block(
+    [g_f, g_t, g_i],
+    g_f : n * gate_types * L_layers,
+    g_t : (g_f + 2 * g_f * n * L_layers) * iterations_to_converge,
+    g_i : g_f * decision_categories * scenarios_per_decision,
+    printf(true, "~5,0f       | ~13,2e | ~13,2e | ~11,2e~%", n, g_f, g_t, g_i)
+)$
+print("")$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 量子ビット数vs計算量 を表示します...")$
+
+/* グラフ1: 量子ビット数vs計算量 */
+plot2d(
+    [discrete, makelist([n, n * gate_types * L_layers * decision_categories * scenarios_per_decision], n, 10, 100, 10)],
+    [xlabel, "Number of Qubits"],
+    [ylabel, "Inference Gates"],
+    [title, "Quantum Gates vs Qubits (Inference)"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ2: 古典vs量子の計算量比較 を表示します...")$
+
+/* グラフ2: 古典vs量子 */
+plot2d(
+    [discrete, makelist([n, n^2 * classical_layers * decision_categories * scenarios_per_decision], n, 10, 100, 10)],
+    [xlabel, "System Size"],
+    [ylabel, "Classical Ops"],
+    [title, "Classical NN Operations vs Size"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ3: 判断時間vs通信遅延 を表示します...")$
+
+/* グラフ3: 判断時間vs通信遅延 */
+plot2d(
+    [discrete, [[1, inference_time_ms], [2, communication_delay*1000]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Metric"],
+    [ylabel, "Time [ms]"],
+    [title, "Decision Time vs Communication Delay"],
+    [gnuplot_preamble, "set xtics ('Decision' 1, 'Comm Delay' 2); set yrange [0:];"])$
+
+/* ----- CSV出力 ----- */
+csv_file : "c217_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Qubits,~,0f,-~%", n_qubits)$
+printf(f_csv, "Layers,~,0f,-~%", L_layers)$
+printf(f_csv, "Parameters,~,0f,-~%", n_params)$
+printf(f_csv, "Forward_gates,~,0f,-~%", total_gates_forward)$
+printf(f_csv, "Training_gates,~,2e,-~%", total_gates_training)$
+printf(f_csv, "Inference_gates,~,2e,-~%", gates_per_inference)$
+printf(f_csv, "Classical_params,~,2e,-~%", classical_params)$
+printf(f_csv, "Classical_training_ops,~,2e,-~%", classical_gates_training)$
+printf(f_csv, "Classical_inference_ops,~,2e,-~%", classical_gates_inference)$
+printf(f_csv, "Quantum_advantage_training,~,2f,-~%", quantum_advantage_training)$
+printf(f_csv, "Quantum_advantage_inference,~,2f,-~%", quantum_advantage_inference)$
+printf(f_csv, "Gate_time,~,0f,ns~%", gate_time*1e9)$
+printf(f_csv, "Inference_time,~,2f,ms~%", inference_time_ms)$
+printf(f_csv, "Communication_delay,~,1f,years~%", communication_delay_years)$
+printf(f_csv, "Autonomy_ratio,~,2e,-~%", autonomy_ratio)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "c217_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "c217: 量子ニューラルネットワークの計算量 サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【量子NNの規模】~%")$
+printf(f_sum, "  量子ビット数: ~,0f qubits~%", n_qubits)$
+printf(f_sum, "  回路層数: ~,0f layers~%", L_layers)$
+printf(f_sum, "  パラメータ数: ~,0f params~%~%", n_params)$
+printf(f_sum, "【計算量見積もり】~%")$
+printf(f_sum, "  順伝播: ~,0f gates~%", total_gates_forward)$
+printf(f_sum, "  学習（収束まで）: ~,2e gates~%", total_gates_training)$
+printf(f_sum, "  推論（1回の意思決定）: ~,2e gates~%~%", gates_per_inference)$
+printf(f_sum, "【古典NNとの比較】~%")$
+printf(f_sum, "  量子優位性（学習）: ~,2f 倍~%", quantum_advantage_training)$
+printf(f_sum, "  量子優位性（推論）: ~,2f 倍~%~%", quantum_advantage_inference)$
+printf(f_sum, "【時超えケンタの判断速度】~%")$
+printf(f_sum, "  1回の意思決定時間: ~,2f ms~%", inference_time_ms)$
+printf(f_sum, "  プロキシマbとの通信遅延: ~,1f 年~%", communication_delay_years)$
+printf(f_sum, "  自律判断の必要性: 必須（通信待ち不可）~%~%")$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "時超えケンタの量子NNは100qubit, 20層で構成され、~%")$
+printf(f_sum, "1回の意思決定に約~,2e回の量子ゲート演算が必要。~%", gates_per_inference)$
+printf(f_sum, "これは古典NNの約~,0f倍の効率であり、~%", quantum_advantage_inference)$
+printf(f_sum, "4.2光年先からの自律判断を可能にする。~%")$
+printf(f_sum, "通信遅延が判断時間の~,2e倍であるため、~%", autonomy_ratio)$
+printf(f_sum, "時超えケンタは人間の指示を待たずに自律行動する。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== c217 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

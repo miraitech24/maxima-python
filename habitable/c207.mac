@@ -1,0 +1,197 @@
+/* ============================================================
+   c207: 光子検出効率 - SNSPDの検出効率の波長依存性
+   目的：ナノダイヤモンドの発光波長に対する超伝導ナノワイヤ
+         単一光子検出器(SNSPD)の検出効率を計算する。
+   仕様：
+     - SNSPDはNbTiN超伝導薄膜を使用
+     - ナノダイヤモンドのNVセンター発光波長: 637nm（ゼロフォノン線）
+     - フォノンサイドバンド: 637-800nm
+     - 検出効率は波長依存性を持つ
+     - 臨界温度 Tc = 8.5K (NbTiN)
+     - 動作温度 T = 2.5K
+   注意：
+     - set_plot_option([plot_format, gnuplot]) で各グラフを別window表示
+     - drawのsubplotは使用しない
+     - .png出力は行わない
+   出力:
+     1. c207_results.csv: 波長vs検出効率データ
+     2. c207_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+/* グラフ表示設定 */
+set_plot_option([plot_format, gnuplot])$
+
+print("===== c207: SNSPD検出効率の波長依存性 =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+/* SNSPD材料パラメータ (NbTiN) */
+Tc : 8.5;                            /* 臨界温度 [K] */
+T_op : 2.5;                          /* 動作温度 [K] */
+gap_energy : 1.76 * 1.380649e-23 * Tc;  /* 超伝導ギャップエネルギー [J] */
+
+/* ナノダイヤモンドNVセンター発光 */
+lambda_ZPL : 637;                    /* ゼロフォノン線波長 [nm] */
+lambda_min : 600;                    /* 計算範囲最小波長 [nm] */
+lambda_max : 900;                    /* 計算範囲最大波長 [nm] */
+
+/* 検出効率モデルパラメータ */
+eta_max : 0.85;                      /* 最大検出効率 85% */
+lambda_peak : 650;                   /* ピーク効率波長 [nm] */
+sigma : 80;                          /* 効率の広がり [nm] */
+
+printf(true, "SNSPD材料: NbTiN~%")$
+printf(true, "  臨界温度 Tc: ~,1f K~%", Tc)$
+printf(true, "  動作温度 T: ~,1f K~%", T_op)$
+printf(true, "  超伝導ギャップ: ~,2e J~%", gap_energy)$
+print("")$
+printf(true, "ナノダイヤモンドNVセンター~%")$
+printf(true, "  ゼロフォノン線: ~,0f nm~%", lambda_ZPL)$
+printf(true, "  フォノンサイドバンド: ~,0f-~,0f nm~%", lambda_ZPL, lambda_max)$
+printf(true, "  計算範囲: ~,0f-~,0f nm~%~%", lambda_min, lambda_max)$
+
+/* ----- 検出効率モデル ----- */
+print("--- 検出効率モデル ---")$
+
+/* 検出効率 η(λ) はガウス分布に従うと仮定 */
+/* η(λ) = η_max * exp(-(λ - λ_peak)^2 / (2σ^2)) */
+eta_detector(lambda) := eta_max * exp(-(lambda - lambda_peak)^2 / (2 * sigma^2))$
+
+/* 波長から光子エネルギーを計算 */
+photon_energy(lambda) := 1.98644586e-25 / (lambda * 1e-9)$  /* E = hc/λ [J] */
+
+printf(true, "検出効率モデル:~%")$
+printf(true, "  η(λ) = η_max * exp(-(λ - λ_peak)^2 / (2σ^2))~%")$
+printf(true, "  η_max = ~,2f, λ_peak = ~,0f nm, σ = ~,0f nm~%~%", eta_max, lambda_peak, sigma)$
+
+/* ----- 波長別検出効率計算 ----- */
+print("--- 波長別検出効率 ---")$
+
+printf(true, "波長[nm] | 光子エネルギー[eV] | 検出効率[%] | 備考~%")$
+printf(true, "---------+-------------------+------------+------~%")$
+
+/* 主要波長での効率 */
+for lambda_val in [600, 637, 650, 700, 750, 800, 850, 900] do block(
+    [eta_val, E_eV],
+    eta_val : float(eta_detector(lambda_val)),
+    E_eV : float(photon_energy(lambda_val) / 1.602176634e-19),
+    printf(true, "~4,0f     | ~14,3f       | ~8,1f     | ~a~%",
+           lambda_val, E_eV, eta_val*100,
+           if lambda_val = lambda_ZPL then "✅ NV中心" else "")
+)$
+print("")$
+
+/* ----- 最適波長の探索 ----- */
+print("--- 最適波長の探索 ---")$
+
+optimal_lambda : lambda_peak;
+optimal_eta : eta_max;
+
+printf(true, "最適検出波長: ~,0f nm~%", optimal_lambda)$
+printf(true, "最大検出効率: ~,1f%~%", optimal_eta*100)$
+
+/* NVセンター波長での効率 */
+eta_NV : float(eta_detector(lambda_ZPL))$
+printf(true, "NVセンター波長(~,0f nm)での効率: ~,1f%~%", lambda_ZPL, eta_NV*100)$
+printf(true, "ピーク効率との差: ~,1f%~%~%", (eta_max - eta_NV)*100)$
+
+/* ----- 温度依存性 ----- */
+print("--- 温度依存性 ---")$
+
+/* 検出効率の温度依存性（簡易モデル） */
+/* η(T) = η_max * (1 - (T/Tc)^2) */
+eta_temp(T) := eta_max * (1 - (T/Tc)^2)$
+
+printf(true, "動作温度 | 補正後効率[%]~%")$
+printf(true, "--------+-------------~%")$
+for T_val in [1.5, 2.0, 2.5, 3.0, 4.0, 5.0] do
+    printf(true, "~4,1f    | ~10,1f~%", T_val, float(eta_temp(T_val)*100))$
+print("")$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 検出効率の波長依存性 を表示します...")$
+
+/* グラフ1: 波長vs検出効率 */
+plot2d(
+    eta_detector(lambda), [lambda, lambda_min, lambda_max],
+    [xlabel, "Wavelength [nm]"],
+    [ylabel, "Detection Efficiency"],
+    [title, "SNSPD Detection Efficiency vs Wavelength"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ2: 光子エネルギーと検出効率 を表示します...")$
+
+/* グラフ2: 光子エネルギーvs効率 */
+plot2d(
+    [eta_detector(lambda), photon_energy(lambda)/1.602176634e-19],
+    [lambda, lambda_min, lambda_max],
+    [xlabel, "Wavelength [nm]"],
+    [ylabel, "Efficiency / Photon Energy [eV]"],
+    [title, "Detection Efficiency and Photon Energy"],
+    [style, [lines, 2, 2]],
+    [color, red, green],
+    [legend, "Efficiency", "Photon Energy"])$
+
+print("グラフ3: 温度依存性 を表示します...")$
+
+/* グラフ3: 温度vs効率 */
+plot2d(
+    eta_temp(T), [T, 1.0, 8.0],
+    [xlabel, "Temperature [K]"],
+    [ylabel, "Detection Efficiency"],
+    [title, "SNSPD Efficiency vs Temperature"],
+    [style, [lines, 2]],
+    [color, magenta])$
+
+/* ----- CSV出力 ----- */
+csv_file : "c207_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Wavelength_nm,Photon_Energy_eV,Detection_Efficiency~%")$
+for lambda_val:lambda_min step 5 thru lambda_max do
+    printf(f_csv, "~,0f,~,4f,~,6f~%",
+           lambda_val,
+           float(photon_energy(lambda_val)/1.602176634e-19),
+           float(eta_detector(lambda_val)))$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "c207_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "c207: SNSPD検出効率の波長依存性 サマリー~%")$
+printf(f_sum, "====================================~%~%")$
+printf(f_sum, "【SNSPDパラメータ】~%")$
+printf(f_sum, "  材料: NbTiN~%")$
+printf(f_sum, "  臨界温度: ~,1f K~%", Tc)$
+printf(f_sum, "  動作温度: ~,1f K~%", T_op)$
+printf(f_sum, "  超伝導ギャップ: ~,2e J~%~%", gap_energy)$
+printf(f_sum, "【ナノダイヤモンドNVセンター】~%")$
+printf(f_sum, "  ゼロフォノン線: ~,0f nm~%", lambda_ZPL)$
+printf(f_sum, "  フォノンサイドバンド: ~,0f-~,0f nm~%~%", lambda_ZPL, lambda_max)$
+printf(f_sum, "【検出効率】~%")$
+printf(f_sum, "  最大効率: ~,1f% (~,0f nm)~%", eta_max*100, lambda_peak)$
+printf(f_sum, "  NVセンターでの効率: ~,1f%~%", eta_NV*100)$
+printf(f_sum, "  効率低下: ~,1f%~%~%", (eta_max - eta_NV)*100)$
+printf(f_sum, "【温度依存性】~%")$
+printf(f_sum, "  2.5Kでの効率: ~,1f%~%", float(eta_temp(2.5)*100))$
+printf(f_sum, "  4.0Kでの効率: ~,1f%~%", float(eta_temp(4.0)*100))$
+printf(f_sum, "  5.0Kでの効率: ~,1f%~%~%", float(eta_temp(5.0)*100))$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "NVセンター発光(637nm)はSNSPDの高効率領域に位置する。~%")$
+printf(f_sum, "検出効率は約~,1f%で、ピークから~,1f%の低下のみ。~%", eta_NV*100, (eta_max-eta_NV)*100)$
+printf(f_sum, "動作温度2.5Kで最大効率の~,1f%を維持可能。~%", float(eta_temp(2.5)/eta_max*100))$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== c207 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

@@ -1,0 +1,59 @@
+/* ============================================================ */
+/* HEROes分析: サイボーグか突然変異か、誰でもなれるのか          */
+/*                                                              */
+/* 【仕様】                                                      */
+/* 1. HEROesの分類                                                */
+/*    A: サイボーグ型（技術による強化）                           */
+/*    B: 突然変異型（遺伝子改変・自然変異）                       */
+/*    C: 訓練型（技術・遺伝子なしで到達）                         */
+/*                                                              */
+/* 2. 誰でもなれるかの判定                                       */
+/*    各型の到達可能性を確率計算                                  */
+/*                                                              */
+/* 3. 計算課題一覧のCSV出力                                      */
+/* ============================================================ */
+
+display2d:false$
+load(draw)$
+
+print("==========================================")$
+print("HEROes分析")$
+print("==========================================")$
+
+/* 各型の到達確率 */
+P_cyborg: 0.70$
+P_mutation: 0.05$
+P_training: 0.25$
+
+print("=== HEROesの分類 ===")$
+print("A: サイボーグ型（技術による強化）: ", P_cyborg*100, "%")$
+print("B: 突然変異型（遺伝子改変）: ", P_mutation*100, "%")$
+print("C: 訓練型（技術・遺伝子なし）: ", P_training*100, "%")$
+print("")$
+print("=== 誰でもなれるか？ ===")$
+print("サイボーグ型: 技術があれば誰でも可能")$
+print("突然変異型: 遺伝子改変が必要（倫理的問題）")$
+print("訓練型: 誰でも可能だが限界がある")$
+print("")$
+print("結論: 技術と訓練があれば誰でもHEROesになれる可能性がある")$
+print("ただし突然変異型は遺伝子改変の倫理的問題がある")$
+
+/* CSV出力 */
+with_stdout("HEROes_calc_tasks.csv",
+    print("Task ID,Category,Core Task,Calculation Content,Necessity of Coupling,Urgency,Expected Resolution Year"),
+    print("HERO-01,Cyborgization,Cyborg Enhancement Probability,Probability of successful cybernetic enhancement,Essential,High,2040"),
+    print("HERO-02,Mutation,Genetic Mutation Success Rate,Probability of beneficial genetic mutation,Analysis,Medium,2050"),
+    print("HERO-03,Training,Peak Human Performance Probability,Probability of achieving peak human performance through training,Essential,High,2030"),
+    print("HERO-04,Integration,Cyborg-Human Integration Rate,Probability of seamless integration between human and machine,Essential,High,2045"),
+    print("HERO-05,Ethics,HEROes Ethical Threshold,Quantification of acceptable enhancement limits,Analysis,High,2040"),
+    print("HERO-06,Cost,Economic Feasibility of HEROes,Resources required for HEROes creation,Essential,Medium,2050"),
+    print("HERO-07,Society,Social Acceptance Rate,Probability of society accepting HEROes,Analysis,High,2045"),
+    print("HERO-08,Regulation,Legal Framework Probability,Probability of establishing legal framework for HEROes,Essential,High,2040")
+)$
+
+print("")$
+print("CSV出力: HEROes_calc_tasks.csv")$
+print("==========================================")$
+print("HEROes分析完了")$
+print("==========================================")$
+

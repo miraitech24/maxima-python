@@ -1,0 +1,279 @@
+/* ============================================================
+   HZC-03: 閉鎖生態系の最小大気量と組成
+   目的：人工ハビタブルゾーン（HZ）内の閉鎖生態系において、
+         人間と植物の間で酸素・二酸化炭素の循環を成立させるための
+         最小大気量と最適組成を計算する。
+   仕様：
+     - 収容人数 N_people: 100万人（1基のHZあたり）
+     - 酸素消費率: 0.55 kg/人/日（安静時平均）
+     - 二酸化炭素排出率: 0.75 kg/人/日（呼吸商0.85）
+     - 植物による光合成: CO2吸収 + O2生成
+     - 大気圧: 1気圧（101.3 kPa）
+     - 安全マージン: 20%
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（折れ線グラフ）
+     - .png出力は行わない
+   出力:
+     1. HZC03_results.csv: 大気量・組成計算結果
+     2. HZC03_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+print("===== HZC-03: 閉鎖生態系の最小大気量と組成 =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+N_people : 1000000;                  /* 収容人数 [人] */
+O2_rate : 0.55;                      /* 酸素消費率 [kg/人/日] */
+CO2_rate : 0.75;                     /* 二酸化炭素排出率 [kg/人/日] */
+safety_margin : 1.2;                 /* 安全マージン 20% */
+atm_pressure : 101325;               /* 大気圧 [Pa]（1気圧） */
+temp : 293;                          /* 温度 [K]（20℃） */
+R_gas : 287;                         /* 気体定数 [J/(kg·K)]（乾燥空気） */
+
+/* 植物パラメータ */
+plant_CO2_uptake : 0.15;             /* 植物1m^2あたりのCO2吸収率 [kg/m^2/日] */
+plant_O2_production : 0.11;          /* 植物1m^2あたりのO2生成率 [kg/m^2/日] */
+plant_area_per_person : 10;          /* 1人あたり必要植物面積 [m^2] */
+
+printf(true, "収容人数: ~,0f 人~%", N_people)$
+printf(true, "酸素消費率: ~,2f kg/人/日~%", O2_rate)$
+printf(true, "二酸化炭素排出率: ~,2f kg/人/日~%", CO2_rate)$
+printf(true, "安全マージン: ~,0f%~%", (safety_margin-1)*100)$
+printf(true, "大気圧: ~,0f Pa (1気圧)~%", atm_pressure)$
+printf(true, "温度: ~,0f K (~,0f℃)~%~%", temp, temp-273)$
+
+/* ----- 1日あたりの物質収支 ----- */
+print("--- 1日あたりの物質収支 ---")$
+
+total_O2_consumption : N_people * O2_rate;       /* 総酸素消費量 [kg/日] */
+total_CO2_production : N_people * CO2_rate;      /* 総CO2排出量 [kg/日] */
+
+printf(true, "総酸素消費量: ~,2f kg/日~%", total_O2_consumption)$
+printf(true, "総二酸化炭素排出量: ~,2f kg/日~%", total_CO2_production)$
+print("")$
+
+/* ----- 植物による光合成循環 ----- */
+print("--- 植物による光合成循環 ---")$
+
+/* 必要植物面積 */
+required_plant_area_CO2 : total_CO2_production / plant_CO2_uptake;  /* CO2吸収に必要な面積 [m^2] */
+required_plant_area_O2 : total_O2_consumption / plant_O2_production;  /* O2生成に必要な面積 [m^2] */
+required_plant_area : max(required_plant_area_CO2, required_plant_area_O2);  /* 必要な植物面積 [m^2] */
+
+/* 植物面積の充足率 */
+plant_area_available : N_people * plant_area_per_person;
+
+printf(true, "CO2吸収に必要な植物面積: ~,2f m^2~%", required_plant_area_CO2)$
+printf(true, "O2生成に必要な植物面積: ~,2f m^2~%", required_plant_area_O2)$
+printf(true, "必要な植物面積（最大値）: ~,2f m^2~%", required_plant_area)$
+printf(true, "1人あたり割り当て植物面積: ~,0f m^2/人~%", plant_area_per_person)$
+printf(true, "利用可能な植物面積: ~,2f m^2~%", plant_area_available)$
+printf(true, "面積充足率: ~,2f%~%", plant_area_available/required_plant_area*100)$
+print("")$
+
+/* ----- 最小大気量の計算 ----- */
+print("--- 最小大気量の計算 ---")$
+
+/* 人間の生存に必要な最小酸素量 */
+/* 大気中の酸素濃度が19.5%を下回ると危険（通常21%） */
+min_O2_concentration : 0.195;        /* 最小酸素濃度 */
+normal_O2_concentration : 0.21;      /* 通常酸素濃度 */
+max_CO2_concentration : 0.005;       /* 最大CO2濃度（5000ppm） */
+
+/* 1人あたりの1日あたり呼吸量 */
+breathing_volume_per_person : 12;    /* 1人あたり1日あたり呼吸量 [m^3/日]（安静時） */
+air_density : 1.225;                 /* 空気密度 [kg/m^3]（1気圧、15℃） */
+
+/* 最小大気量（酸素枯渇基準） */
+/* 酸素消費量から、酸素濃度が下限に達するまでの大気量を計算 */
+O2_mass_in_air : total_O2_consumption / (normal_O2_concentration - min_O2_concentration);  /* 必要な空気中の酸素質量 [kg] */
+min_air_mass_O2 : O2_mass_in_air / normal_O2_concentration;  /* 必要な空気質量 [kg] */
+min_air_volume_O2 : min_air_mass_O2 / air_density;  /* 必要な空気体積 [m^3] */
+
+/* 最小大気量（CO2蓄積基準） */
+/* CO2排出量から、CO2濃度が上限に達するまでの大気量を計算 */
+CO2_mass_in_air : total_CO2_production / max_CO2_concentration;  /* 必要な空気中のCO2質量 [kg] */
+min_air_mass_CO2 : CO2_mass_in_air / (CO2_rate / (O2_rate + CO2_rate));  /* 必要な空気質量 [kg]（概算） */
+min_air_volume_CO2 : min_air_mass_CO2 / air_density;  /* 必要な空気体積 [m^3] */
+
+/* 安全マージン込み */
+min_air_volume : max(min_air_volume_O2, min_air_volume_CO2) * safety_margin;
+
+printf(true, "酸素枯渇基準の最小大気量: ~,2f m^3~%", min_air_volume_O2)$
+printf(true, "CO2蓄積基準の最小大気量: ~,2f m^3~%", min_air_volume_CO2)$
+printf(true, "安全マージン込みの最小大気量: ~,2f m^3~%", min_air_volume)$
+printf(true, "1人あたりの最小大気量: ~,2f m^3/人~%", min_air_volume/N_people)$
+print("")$
+
+/* ----- 大気組成の設計 ----- */
+print("--- 大気組成の設計 ---")$
+
+/* 理想的な大気組成 */
+N2_ratio : 0.78;                     /* 窒素比率 */
+O2_ratio : 0.21;                     /* 酸素比率 */
+Ar_ratio : 0.0093;                   /* アルゴン比率 */
+CO2_ratio : 0.0004;                  /* 二酸化炭素比率（400ppm） */
+other_ratio : 0.0003;                /* その他 */
+
+/* 各成分の質量 */
+air_mass_total : min_air_volume * air_density;
+N2_mass : air_mass_total * N2_ratio;
+O2_mass : air_mass_total * O2_ratio;
+Ar_mass : air_mass_total * Ar_ratio;
+CO2_mass : air_mass_total * CO2_ratio;
+other_mass : air_mass_total * other_ratio;
+
+printf(true, "大気組成（体積比）:~%")$
+printf(true, "  窒素 (N2): ~,1f%~%", N2_ratio*100)$
+printf(true, "  酸素 (O2): ~,1f%~%", O2_ratio*100)$
+printf(true, "  アルゴン (Ar): ~,2f%~%", Ar_ratio*100)$
+printf(true, "  二酸化炭素 (CO2): ~,3f%~%", CO2_ratio*100)$
+printf(true, "  その他: ~,3f%~%", other_ratio*100)$
+print("")$
+
+printf(true, "各成分の質量（総大気質量 ~,2f kg）:~%", air_mass_total)$
+printf(true, "  窒素: ~,2f kg~%", N2_mass)$
+printf(true, "  酸素: ~,2f kg~%", O2_mass)$
+printf(true, "  アルゴン: ~,2f kg~%", Ar_mass)$
+printf(true, "  二酸化炭素: ~,2f kg~%", CO2_mass)$
+printf(true, "  その他: ~,2f kg~%", other_mass)$
+print("")$
+
+/* ----- 循環に必要な植物量 ----- */
+print("--- 循環に必要な植物量 ---")$
+
+/* 植物の総バイオマス */
+plant_biomass_per_area : 5;          /* 単位面積あたりの植物バイオマス [kg/m^2] */
+total_plant_biomass : required_plant_area * plant_biomass_per_area;
+
+/* 植物による水消費 */
+plant_water_consumption : 2;         /* 植物1m^2あたりの水消費 [L/m^2/日] */
+total_water_for_plants : required_plant_area * plant_water_consumption;  /* [L/日] */
+
+printf(true, "必要な植物面積: ~,2f m^2~%", required_plant_area)$
+printf(true, "総植物バイオマス: ~,2f kg~%", total_plant_biomass)$
+printf(true, "植物の水消費量: ~,2f L/日~%", total_water_for_plants)$
+printf(true, "1人あたりの植物バイオマス: ~,2f kg/人~%", total_plant_biomass/N_people)$
+print("")$
+
+/* ----- パラメータスイープ ----- */
+print("--- パラメータスイープ（収容人数vs必要大気量） ---")$
+
+printf(true, "収容人数[人] | 必要大気量[m^3] | 必要植物面積[m^2] | 植物バイオマス[kg]~%")$
+printf(true, "------------+----------------+------------------+------------------~%")$
+
+for i:1 thru 10 do block(
+    [n, air_v, plant_a, plant_b],
+    n : i * 100000,
+    air_v : max(n*O2_rate/(0.21-0.195)/0.21/air_density, n*CO2_rate/0.005/(CO2_rate/(O2_rate+CO2_rate))/air_density) * safety_margin,
+    plant_a : max(n*CO2_rate/plant_CO2_uptake, n*O2_rate/plant_O2_production),
+    plant_b : plant_a * plant_biomass_per_area,
+    printf(true, "~8,0f   | ~13,2f   | ~15,2f    | ~15,2f~%", n, air_v, plant_a, plant_b)
+)$
+print("")$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 収容人数 vs 必要大気量 を表示します...")$
+
+/* グラフ1: 収容人数vs必要大気量 */
+plot2d(
+    [discrete, makelist([i*100000, max(i*100000*O2_rate/(0.21-0.195)/0.21/air_density, i*100000*CO2_rate/0.005/(CO2_rate/(O2_rate+CO2_rate))/air_density) * safety_margin], i, 1, 10)],
+    [xlabel, "Population [people]"],
+    [ylabel, "Required Air Volume [m^3]"],
+    [title, "Required Air Volume vs Population"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ2: 収容人数 vs 必要植物面積 を表示します...")$
+
+/* グラフ2: 収容人数vs必要植物面積 */
+plot2d(
+    [discrete, makelist([i*100000, max(i*100000*CO2_rate/plant_CO2_uptake, i*100000*O2_rate/plant_O2_production)], i, 1, 10)],
+    [xlabel, "Population [people]"],
+    [ylabel, "Required Plant Area [m^2]"],
+    [title, "Required Plant Area vs Population"],
+    [style, [lines, 2]],
+    [color, green])$
+
+print("グラフ3: 大気組成（円グラフ代わり） を表示します...")$
+
+/* グラフ3: 大気組成 */
+plot2d(
+    [discrete, [[1, N2_ratio*100], [2, O2_ratio*100], [3, Ar_ratio*100], [4, CO2_ratio*100], [5, other_ratio*100]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Gas Component"],
+    [ylabel, "Volume Ratio [%]"],
+    [title, "Atmospheric Composition"],
+    [gnuplot_preamble, "set xtics ('N2' 1, 'O2' 2, 'Ar' 3, 'CO2' 4, 'Other' 5); set yrange [0:100];"])$
+
+/* ----- CSV出力 ----- */
+csv_file : "HZC03_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Population,~,0f,people~%", N_people)$
+printf(f_csv, "O2_consumption_rate,~,2f,kg/person/day~%", O2_rate)$
+printf(f_csv, "CO2_production_rate,~,2f,kg/person/day~%", CO2_rate)$
+printf(f_csv, "Total_O2_consumption,~,2f,kg/day~%", total_O2_consumption)$
+printf(f_csv, "Total_CO2_production,~,2f,kg/day~%", total_CO2_production)$
+printf(f_csv, "Required_plant_area_CO2,~,2f,m2~%", required_plant_area_CO2)$
+printf(f_csv, "Required_plant_area_O2,~,2f,m2~%", required_plant_area_O2)$
+printf(f_csv, "Required_plant_area,~,2f,m2~%", required_plant_area)$
+printf(f_csv, "Min_air_volume_O2,~,2f,m3~%", min_air_volume_O2)$
+printf(f_csv, "Min_air_volume_CO2,~,2f,m3~%", min_air_volume_CO2)$
+printf(f_csv, "Min_air_volume_safe,~,2f,m3~%", min_air_volume)$
+printf(f_csv, "Air_mass_total,~,2f,kg~%", air_mass_total)$
+printf(f_csv, "N2_mass,~,2f,kg~%", N2_mass)$
+printf(f_csv, "O2_mass,~,2f,kg~%", O2_mass)$
+printf(f_csv, "Ar_mass,~,2f,kg~%", Ar_mass)$
+printf(f_csv, "CO2_mass,~,2f,kg~%", CO2_mass)$
+printf(f_csv, "Total_plant_biomass,~,2f,kg~%", total_plant_biomass)$
+printf(f_csv, "Plant_water_consumption,~,2f,L/day~%", total_water_for_plants)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "HZC03_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "HZC-03: 閉鎖生態系の最小大気量と組成 サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【基本パラメータ】~%")$
+printf(f_sum, "  収容人数: ~,0f 人~%", N_people)$
+printf(f_sum, "  酸素消費率: ~,2f kg/人/日~%", O2_rate)$
+printf(f_sum, "  CO2排出率: ~,2f kg/人/日~%", CO2_rate)$
+printf(f_sum, "  安全マージン: ~,0f%~%~%", (safety_margin-1)*100)$
+printf(f_sum, "【物質収支（1日あたり）】~%")$
+printf(f_sum, "  総酸素消費量: ~,2f kg/日~%", total_O2_consumption)$
+printf(f_sum, "  総CO2排出量: ~,2f kg/日~%", total_CO2_production)$
+printf(f_sum, "  必要植物面積: ~,2f m^2~%", required_plant_area)$
+printf(f_sum, "  総植物バイオマス: ~,2f kg~%~%", total_plant_biomass)$
+printf(f_sum, "【最小大気量】~%")$
+printf(f_sum, "  酸素枯渇基準: ~,2f m^3~%", min_air_volume_O2)$
+printf(f_sum, "  CO2蓄積基準: ~,2f m^3~%", min_air_volume_CO2)$
+printf(f_sum, "  安全マージン込み: ~,2f m^3~%", min_air_volume)$
+printf(f_sum, "  1人あたり: ~,2f m^3/人~%~%", min_air_volume/N_people)$
+printf(f_sum, "【大気組成】~%")$
+printf(f_sum, "  窒素 (N2): ~,1f%~%", N2_ratio*100)$
+printf(f_sum, "  酸素 (O2): ~,1f%~%", O2_ratio*100)$
+printf(f_sum, "  アルゴン (Ar): ~,2f%~%", Ar_ratio*100)$
+printf(f_sum, "  CO2: ~,3f%~%", CO2_ratio*100)$
+printf(f_sum, "  総大気質量: ~,2f kg~%~%", air_mass_total)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "100万人収容の閉鎖生態系には、約~,2f m^3の大気が必要。~%", min_air_volume)$
+printf(f_sum, "これは一辺約~,0f mの立方体に相当。~%", floor(min_air_volume^(1/3)))$
+printf(f_sum, "植物面積は約~,2f m^2必要で、1人あたり~,0f m^2の緑地で循環が成立。~%", required_plant_area, plant_area_per_person)$
+printf(f_sum, "大気組成は地球と同等の窒素78%、酸素21%が最適。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== HZC-03 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

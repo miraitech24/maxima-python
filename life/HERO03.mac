@@ -1,0 +1,100 @@
+/* ============================================================ */
+/* HERO-03: Peak Human Performance Probability                    */
+/* 訓練による人間のピークパフォーマンス到達確率                   */
+/*                                                              */
+/* 【仕様】                                                      */
+/* 1. 訓練モデル                                                 */
+/*    ピークパフォーマンス到達までの5段階:                        */
+/*    P1: 基礎体力向上率                                         */
+/*    P2: 技術習得率                                             */
+/*    P3: 精神的集中力向上率                                     */
+/*    P4: 戦術理解率                                             */
+/*    P5: 実戦適応率                                             */
+/*                                                              */
+/* 2. パラメータ                                                 */
+/*    P_base: 基礎体力 = 0.90                                    */
+/*    P_skill: 技術習得 = 0.85                                   */
+/*    P_mental: 精神的集中 = 0.75                                */
+/*    P_tactical: 戦術理解 = 0.80                                */
+/*    P_adapt: 実戦適応 = 0.70                                   */
+/*    t_max: 訓練期間 = 20 years                                 */
+/*                                                              */
+/* 3. グラフ                                                     */
+/*    plot2d + set_plot_option([plot_format, gnuplot])           */
+/* ============================================================ */
+display2d:false;
+load(draw)$
+set_plot_option([plot_format, gnuplot])$
+P_base: 0.90$
+P_skill: 0.85$
+P_mental: 0.75$
+P_tactical: 0.80$
+P_adapt: 0.70$
+t_max: 20$
+print("==========================================")$
+print("HERO-03: ピークパフォーマンス到達確率")$
+print("==========================================")$
+P_total: P_base * P_skill * P_mental * P_tactical * P_adapt$
+print("基本パラメータ:")$
+print("  基礎体力向上 P1 = ", P_base)$
+print("  技術習得 P2 = ", P_skill)$
+print("  精神的集中 P3 = ", P_mental)$
+print("  戦術理解 P4 = ", P_tactical)$
+print("  実戦適応 P5 = ", P_adapt)$
+print("")$
+print("総合到達確率: ", float(P_total * 100), " %")$
+/* 訓練年数による改善モデル */
+P_base_t(t) := min(P_base + 0.08*(1-exp(-0.15*t)), 1.0)$
+P_skill_t(t) := min(P_skill + 0.12*(1-exp(-0.12*t)), 1.0)$
+P_mental_t(t) := min(P_mental + 0.20*(1-exp(-0.10*t)), 1.0)$
+P_tactical_t(t) := min(P_tactical + 0.15*(1-exp(-0.11*t)), 1.0)$
+P_adapt_t(t) := min(P_adapt + 0.25*(1-exp(-0.09*t)), 1.0)$
+P_total_t(t) := P_base_t(t)*P_skill_t(t)*P_mental_t(t)*P_tactical_t(t)*P_adapt_t(t)$
+print("")$
+print("=== 訓練年数による到達確率の推移 ===")$
+print("年   P_base  P_skill P_ment  P_tact  P_adapt P_total")$
+for t_val:0 thru 20 step 2 do (
+    pb: float(P_base_t(t_val)),
+    ps: float(P_skill_t(t_val)),
+    pm: float(P_mental_t(t_val)),
+    pt: float(P_tactical_t(t_val)),
+    pa: float(P_adapt_t(t_val)),
+    ptot: float(P_total_t(t_val)),
+    print(t_val, "  ", pb, "  ", ps, "  ", pm, "  ", pt, "  ", pa, "  ", ptot)
+)$
+/* 図1: 各段階の到達率 */
+plot2d([discrete, [1,2,3,4,5], [P_base, P_skill, P_mental, P_tactical, P_adapt]],
+    [style, [points, 2, 1, 6]],
+    [legend, "Current Level"],
+    [xlabel, "Stage"], [ylabel, "Success Rate"],
+    [title, "Fig.1: Success Rate by Stage"])$
+/* 図2: 訓練年数による総合到達率 */
+plot2d(P_total_t(t), [t, 0, 20],
+    [style, [lines, 2]],
+    [legend, "P_total(t)"],
+    [xlabel, "Training Years"], [ylabel, "Total Success Rate"],
+    [title, "Fig.2: Total Success Rate over Training Years"])$
+/* 図3: 各段階の訓練曲線 */
+plot2d([P_base_t(t), P_skill_t(t), P_mental_t(t), P_tactical_t(t), P_adapt_t(t)], [t, 0, 20],
+    [style, [lines, 2], [lines, 2], [lines, 2], [lines, 2], [lines, 2]],
+    [legend, "Base", "Skill", "Mental", "Tactical", "Adapt"],
+    [xlabel, "Training Years"], [ylabel, "Success Rate"],
+    [title, "Fig.3: Training Progress by Stage"])$
+/* 図4: 感度分析 */
+plot2d([discrete, [1,2,3,4,5], [
+    float((P_base+0.1)*P_skill*P_mental*P_tactical*P_adapt/P_total*100-100),
+    float(P_base*(P_skill+0.1)*P_mental*P_tactical*P_adapt/P_total*100-100),
+    float(P_base*P_skill*(P_mental+0.1)*P_tactical*P_adapt/P_total*100-100),
+    float(P_base*P_skill*P_mental*(P_tactical+0.1)*P_adapt/P_total*100-100),
+    float(P_base*P_skill*P_mental*P_tactical*(P_adapt+0.1)/P_total*100-100)
+]],
+    [style, [points, 2, 1, 6]],
+    [legend, "Improvement (%)"],
+    [xlabel, "Stage Improved by 10%"], [ylabel, "Total Improvement (%)"],
+    [title, "Fig.4: Sensitivity Analysis"])$
+print("")$
+print("全4グラフを出力しました")$
+print("==========================================")$
+print("HERO-03 解析完了")$
+print("==========================================")$
+

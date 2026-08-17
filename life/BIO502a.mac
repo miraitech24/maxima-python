@@ -22,32 +22,26 @@
 /* 4. グラフ描画                                                 */
 /*    draw2dで4つのグラフを表示                                   */
 /* ============================================================ */
-
 display2d:false;
 load(draw)$
-
 base_rejection_rate: 0.1$
 drug_efficacy: 0.8$
 side_effect_rate: 0.05$
 t_max: 365$
 w1: 0.6$
 w2: 0.4$
-
 print("==========================================")$
 print("BIO-502: 異種臓器拒絶反応確率")$
 print("==========================================")$
-
 print("パラメータ:")$
 print("  基本拒絶率 = ", base_rejection_rate, " /日")$
 print("  薬剤効果 = ", drug_efficacy)$
 print("  副作用率 = ", side_effect_rate, " /単位用量")$
-
 P_reject_no_drug(t) := 1 - exp(-base_rejection_rate * t)$
 lambda_eff(d) := base_rejection_rate * (1 - drug_efficacy * d)$
 P_reject(t, d) := 1 - exp(-lambda_eff(d) * t)$
 P_side_effect(d) := 1 - exp(-side_effect_rate * d * t_max / 30)$
 total_cost(d) := w1 * P_reject(t_max, d) + w2 * P_side_effect(d)$
-
 print("")$
 print("=== 各用量での拒絶確率 (1年後) ===")$
 print("用量      拒絶確率  副作用確率  総コスト")$
@@ -58,7 +52,6 @@ for i:0 thru 10 do (
     tc: float(total_cost(d_val)),
     print(d_val, "  ", pr, "  ", ps, "  ", tc)
 )$
-
 /* 最適用量計算（ループで探索） */
 optimal_dose: 0$
 min_cost: 1.0$
@@ -76,7 +69,6 @@ print("最適用量 = ", optimal_dose)$
 print("最小総コスト = ", min_cost)$
 print("最適用量での拒絶確率 = ", float(P_reject(t_max, optimal_dose)))$
 print("最適用量での副作用確率 = ", float(P_side_effect(optimal_dose)))$
-
 print("")$
 print("=== 拒絶確率の時間経過 ===")$
 print("日数      薬なし    最適用量  最大用量")$
@@ -86,8 +78,9 @@ for day:0 thru 365 step 30 do (
     pr_max: float(P_reject(day, 1.0)),
     print(day, "  ", pr0, "  ", pr_opt, "  ", pr_max)
 )$
-
-/* グラフ1: 拒絶確率の時間変化 */
+draw_renderer: gnuplot;
+/* 
+グラフ1: 拒絶確率の時間変化 */
 draw2d(
     title = "図1: 拒絶確率の時間変化",
     xlabel = "移植後日数", ylabel = "拒絶確率",
@@ -102,7 +95,6 @@ draw2d(
     color = green, line_width = 2,
     grid = true
 )$
-
 /* グラフ2: 用量反応曲線 */
 draw2d(
     title = "図2: 用量反応曲線 (1年後)",
@@ -118,7 +110,6 @@ draw2d(
     color = purple, line_width = 2,
     grid = true
 )$
-
 /* グラフ3: 重み係数と最適用量の関係（離散点で計算） */
 w1_list: makelist(i/10, i, 1, 9)$
 d_opt_list: makelist(block([w1v: w1_list[i], w2v: 1-w1_list[i], minc: 1.0, dopt: 0],
@@ -129,7 +120,6 @@ d_opt_list: makelist(block([w1v: w1_list[i], w2v: 1-w1_list[i], minc: 1.0, dopt:
     ),
     dopt
 ), i, 1, 9)$
-
 draw2d(
     title = "図3: 拒絶重視度と最適用量",
     xlabel = "拒絶反応の重み w1", ylabel = "最適用量",
@@ -138,7 +128,6 @@ draw2d(
     color = blue, line_width = 2,
     grid = true
 )$
-
 /* グラフ4: 基本拒絶率と最適用量の関係（離散点で計算） */
 br_list: makelist(i/100, i, 2, 20)$
 d_opt_br_list: makelist(block([br: br_list[i], minc: 1.0, dopt: 0],
@@ -149,7 +138,6 @@ d_opt_br_list: makelist(block([br: br_list[i], minc: 1.0, dopt: 0],
     ),
     dopt
 ), i, 1, 19)$
-
 draw2d(
     title = "図4: 基本拒絶率と最適用量",
     xlabel = "基本拒絶率", ylabel = "最適用量",
@@ -158,9 +146,9 @@ draw2d(
     color = green, line_width = 2,
     grid = true
 )$
-
 print("")$
 print("全4グラフを表示しました")$
 print("==========================================")$
 print("BIO-502 analysis complete")$
 print("==========================================")$
+

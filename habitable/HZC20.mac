@@ -1,0 +1,233 @@
+/* ============================================================
+   HZC-20: 天然HZ開拓 vs 人工HZ創出の費用対効果比較
+   目的：100年後の人口維持数を指標として、天然HZ（惑星テラフォーミング）と
+         人工HZ（オニールシリンダー等の宇宙コロニー）の費用対効果を比較する。
+   仕様：
+     - 天然HZ: 火星・金星のテラフォーミング、プロキシマbの地下基地
+     - 人工HZ: オニールシリンダー（直径10km、長さ20km、100万人収容）
+     - 比較指標: 100年後の維持可能人口 / 総投資コスト
+     - コストは建設費＋維持費の100年分
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（折れ線グラフ）
+     - .png出力は行わない
+     - printfのf-directiveには整数値のみ渡す（floor/ceilはfloatを返すため）
+     - 整数が必要な場合はfloor()の結果をさらに整数化する
+   出力:
+     1. HZC20_results.csv: 費用対効果比較結果
+     2. HZC20_summary.txt: 計算サマリー
+   ============================================================ */
+kill(all);
+print("===== HZC-20: 天然HZ開拓 vs 人工HZ創出の費用対効果比較 =====")$
+print("")$
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+/* 時間枠 */
+eval_period : 100;                   /* 評価期間 [年] */
+
+/* 人口パラメータ */
+current_population : 8.0e9;          /* 現在の地球人口 [人] */
+population_growth_rate : 0.01;       /* 自然人口増加率 [1/年]（1%） */
+max_population_density_earth : 100;  /* 地球の最大人口密度 [人/km^2] */
+
+printf(true, "評価期間: ~,0f 年~%", eval_period)$
+printf(true, "現在の地球人口: ~,2e 人~%", current_population)$
+printf(true, "自然人口増加率: ~,2f %/年~%~%", population_growth_rate*100)$
+/* ----- 天然HZオプション ----- */
+print("--- 天然HZオプション ---")$
+/* 1. 火星テラフォーミング */
+mars_area : 1.448e8;                 /* 火星表面積 [km^2] */
+mars_habitable_ratio : 0.3;          /* テラフォーミング後居住可能比率 */
+mars_effective_area : mars_area * mars_habitable_ratio;
+mars_population_capacity : mars_effective_area * max_population_density_earth;
+mars_construction_cost : 5.0e15;     /* テラフォーミング建設費 [USD] */
+mars_maintenance_cost : 1.0e12;      /* 年間維持費 [USD/年] */
+mars_total_cost : mars_construction_cost + mars_maintenance_cost * eval_period;
+mars_cost_per_person : mars_total_cost / mars_population_capacity;
+/* 2. 金星テラフォーミング */
+venus_area : 4.602e8;                /* 金星表面積 [km^2] */
+venus_habitable_ratio : 0.2;         /* テラフォーミング後居住可能比率（高圧・高温のため低め） */
+venus_effective_area : venus_area * venus_habitable_ratio;
+venus_population_capacity : venus_effective_area * max_population_density_earth;
+venus_construction_cost : 1.0e16;    /* テラフォーミング建設費 [USD]（火星の2倍） */
+venus_maintenance_cost : 2.0e12;     /* 年間維持費 [USD/年] */
+venus_total_cost : venus_construction_cost + venus_maintenance_cost * eval_period;
+venus_cost_per_person : venus_total_cost / venus_population_capacity;
+/* 3. プロキシマb地下基地 */
+proximab_habitable_area : 1.0e6;     /* プロキシマbの居住可能地下面積 [km^2] */
+proximab_population_capacity : proximab_habitable_area * max_population_density_earth * 0.5;  /* 地下のため密度半減 */
+proximab_construction_cost : 2.0e15; /* 地下基地建設費 [USD] */
+proximab_maintenance_cost : 5.0e11;  /* 年間維持費 [USD/年] */
+proximab_transport_cost : 1.0e15;    /* 輸送コスト [USD]（ワームホール開通後） */
+proximab_total_cost : proximab_construction_cost + proximab_maintenance_cost * eval_period + proximab_transport_cost;
+proximab_cost_per_person : proximab_total_cost / proximab_population_capacity;
+printf(true, "天然HZオプション:~%")$
+printf(true, "  1. 火星テラフォーミング:~%")$
+printf(true, "     居住可能面積: ~,2e km^2~%", mars_effective_area)$
+printf(true, "     収容可能人口: ~,2e 人~%", mars_population_capacity)$
+printf(true, "     総コスト(100年): ~,2e USD~%", mars_total_cost)$
+printf(true, "     1人あたりコスト: ~,2e USD/人~%", mars_cost_per_person)$
+print("")$
+printf(true, "  2. 金星テラフォーミング:~%")$
+printf(true, "     居住可能面積: ~,2e km^2~%", venus_effective_area)$
+printf(true, "     収容可能人口: ~,2e 人~%", venus_population_capacity)$
+printf(true, "     総コスト(100年): ~,2e USD~%", venus_total_cost)$
+printf(true, "     1人あたりコスト: ~,2e USD/人~%", venus_cost_per_person)$
+print("")$
+printf(true, "  3. プロキシマb地下基地:~%")$
+printf(true, "     居住可能面積: ~,2e km^2~%", proximab_habitable_area)$
+printf(true, "     収容可能人口: ~,2e 人~%", proximab_population_capacity)$
+printf(true, "     総コスト(100年): ~,2e USD~%", proximab_total_cost)$
+printf(true, "     1人あたりコスト: ~,2e USD/人~%", proximab_cost_per_person)$
+print("")$
+/* ----- 人工HZオプション ----- */
+print("--- 人工HZオプション ---")$
+/* オニールシリンダー */
+cylinder_diameter : 10;              /* 直径 [km] */
+cylinder_length : 20;                /* 長さ [km] */
+cylinder_area : %pi * cylinder_diameter * cylinder_length;  /* 内部表面積 [km^2] */
+cylinder_population : 1.0e6;         /* 1基あたり収容人口 [人] */
+cylinder_construction_cost : 1.0e12; /* 1基あたり建設費 [USD] */
+cylinder_maintenance_cost : 1.0e9;   /* 1基あたり年間維持費 [USD/年] */
+cylinder_total_cost_per_unit : cylinder_construction_cost + cylinder_maintenance_cost * eval_period;
+cylinder_cost_per_person : cylinder_total_cost_per_unit / cylinder_population;
+/* 必要な基数（100年後の人口を収容するため） */
+future_population : current_population * exp(population_growth_rate * eval_period);
+cylinders_needed_float : future_population / cylinder_population;
+cylinders_needed_int : fix(cylinders_needed_float) + 1;  /* fixで整数化、+1で切り上げ */
+cylinders_total_cost : cylinders_needed_int * cylinder_total_cost_per_unit;
+printf(true, "人工HZ（オニールシリンダー）:~%")$
+printf(true, "  1基あたり:~%")$
+printf(true, "     直径: ~,0f km~%", cylinder_diameter)$
+printf(true, "     長さ: ~,0f km~%", cylinder_length)$
+printf(true, "     内部表面積: ~,2f km^2~%", cylinder_area)$
+printf(true, "     収容人口: ~,2e 人~%", cylinder_population)$
+printf(true, "     建設費: ~,2e USD~%", cylinder_construction_cost)$
+printf(true, "     年間維持費: ~,2e USD/年~%", cylinder_maintenance_cost)$
+printf(true, "     総コスト(100年): ~,2e USD~%", cylinder_total_cost_per_unit)$
+printf(true, "     1人あたりコスト: ~,2e USD/人~%", cylinder_cost_per_person)$
+print("")$
+printf(true, "100年後の予測人口: ~,2e 人~%", future_population)$
+printf(true, "必要なオニールシリンダー基数: ~,0f 基~%", cylinders_needed_float)$
+printf(true, "必要なオニールシリンダー基数（整数）: ~d 基~%", cylinders_needed_int)$
+printf(true, "総コスト(100年): ~,2e USD~%~%", cylinders_total_cost)$
+/* ----- 費用対効果比較 ----- */
+print("--- 費用対効果比較 ---")$
+/* 各オプションの100年後維持可能人口 */
+natural_hz_total_pop : mars_population_capacity + venus_population_capacity + proximab_population_capacity;
+artificial_hz_total_pop : cylinders_needed_int * cylinder_population;
+/* コスト効率（1USDあたりの維持可能人口） */
+natural_cost_efficiency : natural_hz_total_pop / (mars_total_cost + venus_total_cost + proximab_total_cost);
+artificial_cost_efficiency : artificial_hz_total_pop / cylinders_total_cost;
+printf(true, "100年後の維持可能人口比較:~%")$
+printf(true, "  天然HZ合計: ~,2e 人~%", natural_hz_total_pop)$
+printf(true, "  人工HZ合計: ~,2e 人~%", artificial_hz_total_pop)$
+print("")$
+printf(true, "コスト効率（1USDあたりの維持可能人口）:~%")$
+printf(true, "  天然HZ: ~,2e 人/USD~%", natural_cost_efficiency)$
+printf(true, "  人工HZ: ~,2e 人/USD~%", artificial_cost_efficiency)$
+print("")$
+/* コスト対効果比率 */
+cost_effectiveness_ratio : artificial_cost_efficiency / natural_cost_efficiency;
+printf(true, "人工HZ / 天然HZ のコスト効率比: ~,2f~%", cost_effectiveness_ratio)$
+printf(true, "  → 人工HZの方が ~,1f 倍 効率的~%~%", cost_effectiveness_ratio)$
+/* ----- 感度分析 ----- */
+print("--- 感度分析 ---")$
+/* 人口増加率を変化させた場合の必要基数 */
+printf(true, "人口増加率[%/年] | 100年後人口 | 必要基数 | 総コスト[USD]~%")$
+printf(true, "----------------+-----------+--------+-------------~%")$
+for rate:0.0 thru 0.03 step 0.005 do block(
+    [future_pop, needed_float, needed_int, total_cost],
+    future_pop : current_population * exp(rate * eval_period),
+    needed_float : future_pop / cylinder_population,
+    needed_int : fix(needed_float) + 1,
+    total_cost : needed_int * cylinder_total_cost_per_unit,
+    printf(true, "~8,3f       | ~9,2e  | ~6,0f   | ~11,2e~%", rate*100, future_pop, needed_float, total_cost)
+)$
+print("")$
+/* ----- グラフ描画 ----- */
+set_plot_option([plot_format, gnuplot]);
+print("グラフ1: 各オプションの1人あたりコスト比較 を表示します...")$
+/* グラフ1: 1人あたりコスト比較（横棒グラフ） */
+plot2d(
+    [discrete, [[1, mars_cost_per_person], [2, venus_cost_per_person], 
+                [3, proximab_cost_per_person], [4, cylinder_cost_per_person]]],
+    [style, [points, 3, 5, 1]],
+    [xlabel, "Option"],
+    [ylabel, "Cost per Person [USD]"],
+    [title, "Cost per Person Comparison (100 years)"],
+    [gnuplot_preamble, "set xtics ('Mars' 1, 'Venus' 2, 'Proxima b' 3, 'O''Neill Cyl' 4); set logscale y;"])$
+print("グラフ2: 人口増加率vs必要基数 を表示します...")$
+/* グラフ2: 人口増加率vs必要基数 */
+plot2d(
+    [discrete, makelist([i*0.005*100, fix(current_population * exp(i*0.005 * eval_period) / cylinder_population) + 1], i, 0, 6)],
+    [xlabel, "Population Growth Rate [%/year]"],
+    [ylabel, "Number of Cylinders Needed"],
+    [title, "Cylinders Needed vs Population Growth Rate"],
+    [style, [lines, 2]],
+    [color, blue])$
+print("グラフ3: 累積人口推移（各シナリオ） を表示します...")$
+/* グラフ3: 累積人口推移 */
+plot2d(
+    [discrete, makelist([i*10, current_population * exp(population_growth_rate * i*10)], i, 0, 10)],
+    [xlabel, "Years"],
+    [ylabel, "Population"],
+    [title, "Population Projection (1% growth)"],
+    [style, [lines, 2]],
+    [color, green])$
+/* ----- CSV出力 ----- */
+csv_file : "HZC20_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Option,Population_Capacity[people],Total_Cost[USD],Cost_per_Person[USD/person],Cost_Efficiency[people/USD]~%")$
+printf(f_csv, "Mars_Terraforming,~,2e,~,2e,~,2e,~,2e~%", mars_population_capacity, mars_total_cost, mars_cost_per_person, mars_population_capacity/mars_total_cost)$
+printf(f_csv, "Venus_Terraforming,~,2e,~,2e,~,2e,~,2e~%", venus_population_capacity, venus_total_cost, venus_cost_per_person, venus_population_capacity/venus_total_cost)$
+printf(f_csv, "Proxima_b_Underground,~,2e,~,2e,~,2e,~,2e~%", proximab_population_capacity, proximab_total_cost, proximab_cost_per_person, proximab_population_capacity/proximab_total_cost)$
+printf(f_csv, "O'Neill_Cylinder,~,2e,~,2e,~,2e,~,2e~%", cylinder_population, cylinder_total_cost_per_unit, cylinder_cost_per_person, cylinder_population/cylinder_total_cost_per_unit)$
+printf(f_csv, "Natural_HZ_Total,~,2e,~,2e,~,2e,~,2e~%", natural_hz_total_pop, mars_total_cost+venus_total_cost+proximab_total_cost, (mars_total_cost+venus_total_cost+proximab_total_cost)/natural_hz_total_pop, natural_cost_efficiency)$
+printf(f_csv, "Artificial_HZ_Total,~,2e,~,2e,~,2e,~,2e~%", artificial_hz_total_pop, cylinders_total_cost, cylinders_total_cost/artificial_hz_total_pop, artificial_cost_efficiency)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+/* ----- サマリー出力 ----- */
+sum_file : "HZC20_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "HZC-20: 天然HZ開拓 vs 人工HZ創出の費用対効果比較 サマリー~%")$
+printf(f_sum, "====================================================~%~%")$
+printf(f_sum, "【評価期間】~%")$
+printf(f_sum, "  100年間の建設費＋維持費で比較~%~%")$
+printf(f_sum, "【天然HZオプション】~%")$
+printf(f_sum, "  1. 火星テラフォーミング:~%")$
+printf(f_sum, "     収容人口: ~,2e 人, 1人あたりコスト: ~,2e USD~%", mars_population_capacity, mars_cost_per_person)$
+printf(f_sum, "  2. 金星テラフォーミング:~%")$
+printf(f_sum, "     収容人口: ~,2e 人, 1人あたりコスト: ~,2e USD~%", venus_population_capacity, venus_cost_per_person)$
+printf(f_sum, "  3. プロキシマb地下基地:~%")$
+printf(f_sum, "     収容人口: ~,2e 人, 1人あたりコスト: ~,2e USD~%", proximab_population_capacity, proximab_cost_per_person)$
+printf(f_sum, "  天然HZ合計収容人口: ~,2e 人~%~%", natural_hz_total_pop)$
+printf(f_sum, "【人工HZオプション】~%")$
+printf(f_sum, "  オニールシリンダー（直径10km×長さ20km）:~%")$
+printf(f_sum, "  1基あたり収容人口: ~,2e 人~%", cylinder_population)$
+printf(f_sum, "  1基あたりコスト(100年): ~,2e USD~%", cylinder_total_cost_per_unit)$
+printf(f_sum, "  1人あたりコスト: ~,2e USD~%", cylinder_cost_per_person)$
+printf(f_sum, "  100年後の必要基数: ~d 基~%", cylinders_needed_int)$
+printf(f_sum, "  人工HZ合計収容人口: ~,2e 人~%~%", artificial_hz_total_pop)$
+printf(f_sum, "【費用対効果比較】~%")$
+printf(f_sum, "  天然HZコスト効率: ~,2e 人/USD~%", natural_cost_efficiency)$
+printf(f_sum, "  人工HZコスト効率: ~,2e 人/USD~%", artificial_cost_efficiency)$
+printf(f_sum, "  効率比（人工/天然）: ~,2f~%", cost_effectiveness_ratio)$
+printf(f_sum, "  結論: 人工HZの方が ~,1f 倍 コスト効率が良い~%~%", cost_effectiveness_ratio)$
+printf(f_sum, "【考察】~%")$
+printf(f_sum, "人工HZ（オニールシリンダー）は、天然HZ（惑星テラフォーミング）と比較して、~%")$
+printf(f_sum, "1人あたりのコストが圧倒的に低く、拡張性も高い。~%")$
+printf(f_sum, "特に、ワームホール技術により材料調達コストが下がれば、~%")$
+printf(f_sum, "人工HZの優位性はさらに拡大する。~%")$
+printf(f_sum, "天然HZは長期的な安定性と「惑星での生活」という心理的価値があるが、~%")$
+printf(f_sum, "純粋な費用対効果では人工HZに劣る。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+/* ----- 完了 ----- */
+print("")$
+print("===== HZC-20 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$
+

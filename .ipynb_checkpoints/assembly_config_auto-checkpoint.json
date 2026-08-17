@@ -1,0 +1,6324 @@
+{
+  "project": "working",
+  "root": "/home/iwamura/ドキュメント/coupling/working",
+  "parts": {
+    "Untitled": {
+      "path": "habitable",
+      "entry": "Untitled.ipynb",
+      "description": "Untitled コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "lattice_hydrogen_loading": {
+      "path": "fusion",
+      "entry": "lattice_hydrogen_loading.py",
+      "description": "lattice_hydrogen_loading コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "lattice_hydrogen_loading.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "fusion8": {
+      "path": "fusion",
+      "entry": "fusion8.mac",
+      "description": "fusion8 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "wireless_power_grid_tesla": {
+      "path": "fusion",
+      "entry": "wireless_power_grid_tesla.py",
+      "description": "wireless_power_grid_tesla コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "importlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "wireless_power_grid_tesla.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "coulomb_barrier_vanilla": {
+      "path": "fusion",
+      "entry": "coulomb_barrier_vanilla.py",
+      "description": "coulomb_barrier_vanilla コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "coulomb_barrier_vanilla.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "terraforming_venus_calc": {
+      "path": "fusion",
+      "entry": "terraforming_venus_calc.py",
+      "description": "terraforming_venus_calc コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "terraforming_venus_calc.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "screening_effect_sim": {
+      "path": "fusion",
+      "entry": "screening_effect_sim.py",
+      "description": "screening_effect_sim コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "screening_effect_sim.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "multi_body_fusion_4d": {
+      "path": "fusion",
+      "entry": "multi_body_fusion_4d.py",
+      "description": "multi_body_fusion_4d コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "multi_body_fusion_4d.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "maxima_output": {
+      "path": "fusion",
+      "entry": "maxima_output.py",
+      "description": "maxima_output コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "maxima_output.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "nano_structure_enhancement": {
+      "path": "fusion",
+      "entry": "nano_structure_enhancement.py",
+      "description": "nano_structure_enhancement コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "nano_structure_enhancement.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "FOURIER_model": {
+      "path": "fourier",
+      "entry": "FOURIER_model.mac",
+      "description": "FOURIER_model コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "coupling_solve": {
+      "path": "fourier",
+      "entry": "coupling_solve.py",
+      "description": "coupling_solve コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "coupling_solve.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "Fourier": {
+      "path": "fourier",
+      "entry": "Fourier.mac",
+      "description": "Fourier コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "fourier": {
+      "path": "fourier",
+      "entry": "fourier.py",
+      "description": "fourier コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "fourier.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "wave_functions": {
+      "path": "ryosi",
+      "entry": "wave_functions.py",
+      "description": "wave_functions コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "wave_functions.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "main": {
+      "path": "ryosi",
+      "entry": "main.py",
+      "description": "main コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "wave_functions"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "main.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "wave": {
+      "path": "ryosi",
+      "entry": "wave.mac",
+      "description": "wave コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "thermal_logic": {
+      "path": "bodyteraform",
+      "entry": "thermal_logic.py",
+      "description": "thermal_logic コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "thermal_logic.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "visionchips": {
+      "path": "bodyteraform",
+      "entry": "visionchips.mac",
+      "description": "visionchips コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "stap": {
+      "path": "bodyteraform",
+      "entry": "stap.mac",
+      "description": "stap コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "thermal_module": {
+      "path": "bodyteraform",
+      "entry": "thermal_module.py",
+      "description": "thermal_module コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "thermal_module.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "model_functions": {
+      "path": "bodyteraform",
+      "entry": "model_functions.py",
+      "description": "model_functions コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "model_functions.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "formula_module": {
+      "path": "bodyteraform",
+      "entry": "formula_module.py",
+      "description": "formula_module コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "formula_module.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "boomerang": {
+      "path": "boomerang",
+      "entry": "boomerang.mac",
+      "description": "boomerang コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "boomerang2": {
+      "path": "boomerang",
+      "entry": "boomerang2.py",
+      "description": "boomerang2 コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "boomerang2.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "austerity": {
+      "path": "boomerang",
+      "entry": "austerity.mac",
+      "description": "austerity コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "reform": {
+      "path": "boomerang",
+      "entry": "reform.mac",
+      "description": "reform コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO508_EXT1": {
+      "path": "habitable",
+      "entry": "BIO508_EXT1.mac",
+      "description": "BIO508_EXT1 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "c202": {
+      "path": "habitable",
+      "entry": "c202.mac",
+      "description": "c202 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "penrose_params": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "penrose_params.py",
+      "description": "penrose_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "penrose_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "ハビタブルゾーン発見確率": {
+      "path": "habitable",
+      "entry": "ハビタブルゾーン発見確率.mac",
+      "description": "ハビタブルゾーン発見確率 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "c217": {
+      "path": "habitable",
+      "entry": "c217.mac",
+      "description": "c217 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "DNA06": {
+      "path": "habitable",
+      "entry": "DNA06.mac",
+      "description": "DNA06 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "HZC04": {
+      "path": "habitable",
+      "entry": "HZC04.mac",
+      "description": "HZC04 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "WAR03": {
+      "path": "habitable",
+      "entry": "WAR03.mac",
+      "description": "WAR03 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1007BZ": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "task1007BZ.py",
+      "description": "task1007BZ コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task1007BZ.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "HZC01": {
+      "path": "habitable",
+      "entry": "HZC01.mac",
+      "description": "HZC01 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "人類進化形態と共存戦略": {
+      "path": "habitable",
+      "entry": "人類進化形態と共存戦略.mac",
+      "description": "人類進化形態と共存戦略 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "ワームホール生体転送": {
+      "path": "habitable",
+      "entry": "ワームホール生体転送.mac",
+      "description": "ワームホール生体転送 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO508_EXT5": {
+      "path": "habitable",
+      "entry": "BIO508_EXT5.mac",
+      "description": "BIO508_EXT5 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "c201": {
+      "path": "habitable",
+      "entry": "c201.mac",
+      "description": "c201 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "c207": {
+      "path": "habitable",
+      "entry": "c207.mac",
+      "description": "c207 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1007": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "task1007.mac",
+      "description": "task1007 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "DNA情報保存転送": {
+      "path": "habitable",
+      "entry": "DNA情報保存転送.mac",
+      "description": "DNA情報保存転送 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1003": {
+      "path": "interstellar(skip)/chapter1",
+      "entry": "task1003.mac",
+      "description": "task1003 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "地球人類生存確率解析": {
+      "path": "habitable",
+      "entry": "地球人類生存確率解析.mac",
+      "description": "地球人類生存確率解析 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO-508ワームホール通勤": {
+      "path": "habitable",
+      "entry": "BIO-508ワームホール通勤.mac",
+      "description": "BIO-508ワームホール通勤 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "HZC08": {
+      "path": "habitable",
+      "entry": "HZC08.mac",
+      "description": "HZC08 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "HZC03": {
+      "path": "habitable",
+      "entry": "HZC03.mac",
+      "description": "HZC03 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "HZ01_20光年": {
+      "path": "habitable",
+      "entry": "HZ01_20光年.mac",
+      "description": "HZ01_20光年 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "0.2c連続発射": {
+      "path": "habitable",
+      "entry": "0.2c連続発射.mac",
+      "description": "0.2c連続発射 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "HZC13": {
+      "path": "habitable",
+      "entry": "HZC13.mac",
+      "description": "HZC13 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "資材準備": {
+      "path": "habitable",
+      "entry": "資材準備.mac",
+      "description": "資材準備 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "HZ01": {
+      "path": "habitable",
+      "entry": "HZ01.mac",
+      "description": "HZ01 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "HZC20": {
+      "path": "habitable",
+      "entry": "HZC20.mac",
+      "description": "HZC20 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "FER06": {
+      "path": "habitable",
+      "entry": "FER06.mac",
+      "description": "FER06 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "flow_equations": {
+      "path": "NS",
+      "entry": "flow_equations.py",
+      "description": "flow_equations コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "flow_equations.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "pipe": {
+      "path": "NS",
+      "entry": "pipe.mac",
+      "description": "pipe コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "spipe": {
+      "path": "NS",
+      "entry": "spipe.mac",
+      "description": "spipe コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "AIRFLOW_model": {
+      "path": "NS",
+      "entry": "AIRFLOW_model.mac",
+      "description": "AIRFLOW_model コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "airflow": {
+      "path": "NS",
+      "entry": "airflow.py",
+      "description": "airflow コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "airflow.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "spipev": {
+      "path": "NS",
+      "entry": "spipev.py",
+      "description": "spipev コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "spipev.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "spipe10": {
+      "path": "NS",
+      "entry": "spipe10.mac",
+      "description": "spipe10 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "random": {
+      "path": "NS",
+      "entry": "random.py",
+      "description": "random コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "random.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "laser": {
+      "path": "laser",
+      "entry": "laser.mac",
+      "description": "laser コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "E001": {
+      "path": "energy",
+      "entry": "E001.mac",
+      "description": "E001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "E002": {
+      "path": "energy",
+      "entry": "E002.mac",
+      "description": "E002 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "energy_calc": {
+      "path": "energy",
+      "entry": "energy_calc.mac",
+      "description": "energy_calc コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "E004_sweep": {
+      "path": "energy",
+      "entry": "E004_sweep.mac",
+      "description": "E004_sweep コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "E003": {
+      "path": "energy",
+      "entry": "E003.py",
+      "description": "E003 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "E003.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "energy_priority": {
+      "path": "energy",
+      "entry": "energy_priority.py",
+      "description": "energy_priority コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "energy_priority.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "E011": {
+      "path": "energy",
+      "entry": "E011.mac",
+      "description": "E011 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "E004": {
+      "path": "energy",
+      "entry": "E004.py",
+      "description": "E004 コンポーネント (自動生成)",
+      "depends_on": [
+        "csv",
+        "os",
+        "sys"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "E004.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "data_bridge": {
+      "path": "integral",
+      "entry": "data_bridge.py",
+      "description": "data_bridge コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "data_bridge.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "integral": {
+      "path": "integral",
+      "entry": "integral.mac",
+      "description": "integral コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "simulation": {
+      "path": "turing",
+      "entry": "simulation.py",
+      "description": "simulation コンポーネント (自動生成)",
+      "depends_on": [
+        "sys",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "simulation.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "grow_pattern": {
+      "path": "turing",
+      "entry": "grow_pattern.py",
+      "description": "grow_pattern コンポーネント (自動生成)",
+      "depends_on": [
+        "sys",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "grow_pattern.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "turing": {
+      "path": "turing",
+      "entry": "turing.mac",
+      "description": "turing コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO507_01": {
+      "path": "life",
+      "entry": "BIO507_01.py",
+      "description": "BIO507_01 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "datetime"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO507_01.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BIO501": {
+      "path": "life",
+      "entry": "BIO501.mac",
+      "description": "BIO501 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO510": {
+      "path": "life",
+      "entry": "BIO510.mac",
+      "description": "BIO510 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO004": {
+      "path": "life",
+      "entry": "BIO004.mac",
+      "description": "BIO004 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "HERO03": {
+      "path": "life",
+      "entry": "HERO03.mac",
+      "description": "HERO03 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO102": {
+      "path": "life",
+      "entry": "BIO102.mac",
+      "description": "BIO102 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO530": {
+      "path": "life",
+      "entry": "BIO530.mac",
+      "description": "BIO530 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO003": {
+      "path": "life",
+      "entry": "BIO003.mac",
+      "description": "BIO003 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO104": {
+      "path": "life",
+      "entry": "BIO104.mac",
+      "description": "BIO104 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO504": {
+      "path": "life",
+      "entry": "BIO504.mac",
+      "description": "BIO504 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO002+": {
+      "path": "life",
+      "entry": "BIO002+.py",
+      "description": "BIO002+ コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "scipy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO002+.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "BIO502": {
+      "path": "life",
+      "entry": "BIO502.mac",
+      "description": "BIO502 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "HERO02": {
+      "path": "life",
+      "entry": "HERO02.mac",
+      "description": "HERO02 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO504C": {
+      "path": "life",
+      "entry": "BIO504C.py",
+      "description": "BIO504C コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy",
+        "sympy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO504C.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BIO518": {
+      "path": "life",
+      "entry": "BIO518.py",
+      "description": "BIO518 コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO518.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "HERO01": {
+      "path": "life",
+      "entry": "HERO01.mac",
+      "description": "HERO01 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "bio102_maxima_results": {
+      "path": "life",
+      "entry": "bio102_maxima_results.mac",
+      "description": "bio102_maxima_results コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "HERO04": {
+      "path": "life",
+      "entry": "HERO04.mac",
+      "description": "HERO04 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO201": {
+      "path": "life",
+      "entry": "BIO201.py",
+      "description": "BIO201 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO201.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "bio518_analysis": {
+      "path": "life",
+      "entry": "bio518_analysis.mac",
+      "description": "bio518_analysis コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO507": {
+      "path": "life",
+      "entry": "BIO507.py",
+      "description": "BIO507 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "datetime"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO507.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BIO506": {
+      "path": "life",
+      "entry": "BIO506.mac",
+      "description": "BIO506 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO103": {
+      "path": "life",
+      "entry": "BIO103.mac",
+      "description": "BIO103 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO201a": {
+      "path": "life",
+      "entry": "BIO201a.mac",
+      "description": "BIO201a コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO504+": {
+      "path": "life",
+      "entry": "BIO504+.py",
+      "description": "BIO504+ コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "pandas"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO504+.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "BIO507_09": {
+      "path": "life",
+      "entry": "BIO507_09.mac",
+      "description": "BIO507_09 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO507-04": {
+      "path": "life",
+      "entry": "BIO507-04.mac",
+      "description": "BIO507-04 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO503": {
+      "path": "life",
+      "entry": "BIO503.mac",
+      "description": "BIO503 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO504B": {
+      "path": "life",
+      "entry": "BIO504B.mac",
+      "description": "BIO504B コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO533": {
+      "path": "life",
+      "entry": "BIO533.py",
+      "description": "BIO533 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "datetime"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO533.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BIO001": {
+      "path": "life",
+      "entry": "BIO001.py",
+      "description": "BIO001 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "scipy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO001.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "bio103_maxima_results": {
+      "path": "life",
+      "entry": "bio103_maxima_results.mac",
+      "description": "bio103_maxima_results コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO504A": {
+      "path": "life",
+      "entry": "BIO504A.mac",
+      "description": "BIO504A コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO505": {
+      "path": "life",
+      "entry": "BIO505.py",
+      "description": "BIO505 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "datetime"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO505.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BIO507_02": {
+      "path": "life",
+      "entry": "BIO507_02.py",
+      "description": "BIO507_02 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "datetime"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BIO507_02.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BIO502a": {
+      "path": "life",
+      "entry": "BIO502a.mac",
+      "description": "BIO502a コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BIO507-03": {
+      "path": "life",
+      "entry": "BIO507-03.mac",
+      "description": "BIO507-03 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "auto_deployment_grid": {
+      "path": "venusfusion",
+      "entry": "auto_deployment_grid.py",
+      "description": "auto_deployment_grid コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "auto_deployment_grid.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task24": {
+      "path": "venusfusion",
+      "entry": "task24.py",
+      "description": "task24 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task24.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "terraforming_timeline": {
+      "path": "venusfusion",
+      "entry": "terraforming_timeline.py",
+      "description": "terraforming_timeline コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "terraforming_timeline.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task22": {
+      "path": "venusfusion",
+      "entry": "task22.mac",
+      "description": "task22 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "venusfusion": {
+      "path": "venusfusion",
+      "entry": "venusfusion.py",
+      "description": "venusfusion コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venusfusion.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task08": {
+      "path": "venusfusion",
+      "entry": "task08.mac",
+      "description": "task08 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "mothership_thermal_shield": {
+      "path": "venusfusion",
+      "entry": "mothership_thermal_shield.py",
+      "description": "mothership_thermal_shield コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "mothership_thermal_shield.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venus_weather_forecast": {
+      "path": "venusfusion",
+      "entry": "venus_weather_forecast.py",
+      "description": "venus_weather_forecast コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venus_weather_forecast.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "additive_manufacturing": {
+      "path": "venusfusion",
+      "entry": "additive_manufacturing.py",
+      "description": "additive_manufacturing コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "additive_manufacturing.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task02": {
+      "path": "venusfusion",
+      "entry": "task02.mac",
+      "description": "task02 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task23": {
+      "path": "venusfusion",
+      "entry": "task23.mac",
+      "description": "task23 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "transport": {
+      "path": "venusfusion",
+      "entry": "transport.mac",
+      "description": "transport コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "venus_pressure_boost": {
+      "path": "venusfusion",
+      "entry": "venus_pressure_boost.py",
+      "description": "venus_pressure_boost コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venus_pressure_boost.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "active_cooling_system": {
+      "path": "venusfusion",
+      "entry": "active_cooling_system.py",
+      "description": "active_cooling_system コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "active_cooling_system.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task10": {
+      "path": "venusfusion",
+      "entry": "task10.py",
+      "description": "task10 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task10.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "earth_energy_rescue_sim": {
+      "path": "venusfusion",
+      "entry": "earth_energy_rescue_sim.py",
+      "description": "earth_energy_rescue_sim コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "earth_energy_rescue_sim.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "runner": {
+      "path": "venusfusion",
+      "entry": "runner.py",
+      "description": "runner コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "runner.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "HEROes": {
+      "path": "tasklist",
+      "entry": "HEROes.mac",
+      "description": "HEROes コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "gap": {
+      "path": "gap",
+      "entry": "gap.py",
+      "description": "gap コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "gap.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "mass": {
+      "path": "mass",
+      "entry": "mass.mac",
+      "description": "mass コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "params": {
+      "path": "interstellar(skip)/chapter1",
+      "entry": "params.py",
+      "description": "params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "analytic_core": {
+      "path": "mass",
+      "entry": "analytic_core.py",
+      "description": "analytic_core コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "analytic_core.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "problem": {
+      "path": "mass",
+      "entry": "problem.mac",
+      "description": "problem コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "spyder_solve_and_plot": {
+      "path": "mass",
+      "entry": "spyder_solve_and_plot.py",
+      "description": "spyder_solve_and_plot コンポーネント (自動生成)",
+      "depends_on": [
+        "math",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "spyder_solve_and_plot.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "mass_spring_damper": {
+      "path": "mass",
+      "entry": "mass_spring_damper.py",
+      "description": "mass_spring_damper コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "subprocess"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "mass_spring_damper.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "nobel": {
+      "path": "nobel",
+      "entry": "nobel.py",
+      "description": "nobel コンポーネント (自動生成)",
+      "depends_on": [
+        "sys"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "nobel.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "倒立振子debug": {
+      "path": "kinematics",
+      "entry": "倒立振子debug.mac",
+      "description": "倒立振子debug コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "mainkinema": {
+      "path": "kinematics",
+      "entry": "mainkinema.py",
+      "description": "mainkinema コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "mainkinema.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "kinematics": {
+      "path": "kinematics",
+      "entry": "kinematics.py",
+      "description": "kinematics コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "kinematics.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "kinematics_core": {
+      "path": "kinematics",
+      "entry": "kinematics_core.py",
+      "description": "kinematics_core コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "kinematics_core.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "mainkinemad": {
+      "path": "kinematics",
+      "entry": "mainkinemad.py",
+      "description": "mainkinemad コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "kinematics"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "mainkinemad.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "kinematicsN": {
+      "path": "kinematics",
+      "entry": "kinematicsN.py",
+      "description": "kinematicsN コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "subprocess"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "kinematicsN.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "noiman": {
+      "path": "noiman",
+      "entry": "noiman.py",
+      "description": "noiman コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "formula"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "noiman.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "formula": {
+      "path": "venusfusion/chapter3",
+      "entry": "formula.mac",
+      "description": "formula コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "Fodder": {
+      "path": "6th",
+      "entry": "Fodder.py",
+      "description": "Fodder コンポーネント (自動生成)",
+      "depends_on": [
+        "json"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "Fodder.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "model_script": {
+      "path": "6th",
+      "entry": "model_script.mac",
+      "description": "model_script コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "Fodder1": {
+      "path": "6th",
+      "entry": "Fodder1.py",
+      "description": "Fodder1 コンポーネント (自動生成)",
+      "depends_on": [
+        "sys",
+        "json",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "Fodder1.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "gravity": {
+      "path": "gravity",
+      "entry": "gravity.py",
+      "description": "gravity コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "subprocess"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "gravity.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "TESLA_model": {
+      "path": "tesla",
+      "entry": "TESLA_model.mac",
+      "description": "TESLA_model コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "teslagrid": {
+      "path": "tesla",
+      "entry": "teslagrid.py",
+      "description": "teslagrid コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "teslagrid.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "game1": {
+      "path": "nash",
+      "entry": "game1.py",
+      "description": "game1 コンポーネント (自動生成)",
+      "depends_on": [
+        "sys",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "game1.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "game": {
+      "path": "nash",
+      "entry": "game.mac",
+      "description": "game コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "rice": {
+      "path": "nash",
+      "entry": "rice.py",
+      "description": "rice コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "os",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "rice.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "process": {
+      "path": "nash",
+      "entry": "process.mac",
+      "description": "process コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "dist_calc": {
+      "path": "nash",
+      "entry": "dist_calc.mac",
+      "description": "dist_calc コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "calc": {
+      "path": "nash",
+      "entry": "calc.mac",
+      "description": "calc コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "game10": {
+      "path": "nash",
+      "entry": "game10.mac",
+      "description": "game10 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "geometry": {
+      "path": "geometry",
+      "entry": "geometry.py",
+      "description": "geometry コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "subprocess"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "geometry.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "DIFFGEO_model": {
+      "path": "geometry",
+      "entry": "DIFFGEO_model.mac",
+      "description": "DIFFGEO_model コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "DIFFGEO": {
+      "path": "geometry",
+      "entry": "DIFFGEO.py",
+      "description": "DIFFGEO コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "DIFFGEO.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "PROJECTILE_model": {
+      "path": "airresi",
+      "entry": "PROJECTILE_model.mac",
+      "description": "PROJECTILE_model コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "airresi": {
+      "path": "airresi",
+      "entry": "airresi.py",
+      "description": "airresi コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "airresi.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "近傍BH探査効率": {
+      "path": "habitable/Centauri",
+      "entry": "近傍BH探査効率.py",
+      "description": "近傍BH探査効率 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "近傍BH探査効率.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BHエネルギー2WH網": {
+      "path": "habitable/Centauri",
+      "entry": "BHエネルギー2WH網.py",
+      "description": "BHエネルギー2WH網 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BHエネルギー2WH網.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "c106": {
+      "path": "habitable/Centauri",
+      "entry": "c106.py",
+      "description": "c106 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "c106.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "c205": {
+      "path": "habitable/Centauri",
+      "entry": "c205.mac",
+      "description": "c205 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "ペンローズ過程によるエネルギー抽出": {
+      "path": "habitable/Centauri",
+      "entry": "ペンローズ過程によるエネルギー抽出.mac",
+      "description": "ペンローズ過程によるエネルギー抽出 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "auto_20260527_093614": {
+      "path": "habitable/Centauri",
+      "entry": "auto_20260527_093614.py",
+      "description": "auto_20260527_093614 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "auto_20260527_093614.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "ケンタウリBH寿命計算": {
+      "path": "habitable/Centauri",
+      "entry": "ケンタウリBH寿命計算.mac",
+      "description": "ケンタウリBH寿命計算 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "負エネルギー密度空間分布": {
+      "path": "habitable/Centauri",
+      "entry": "負エネルギー密度空間分布.py",
+      "description": "負エネルギー密度空間分布 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "負エネルギー密度空間分布.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "複数ワームホール曲率干渉": {
+      "path": "habitable/Centauri",
+      "entry": "複数ワームホール曲率干渉.mac",
+      "description": "複数ワームホール曲率干渉 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "rank3": {
+      "path": "habitable/Centauri",
+      "entry": "rank3.py",
+      "description": "rank3 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "rank3.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "c012": {
+      "path": "habitable/Centauri",
+      "entry": "c012.py",
+      "description": "c012 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "c012.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "c010": {
+      "path": "habitable/Centauri",
+      "entry": "c010.py",
+      "description": "c010 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "c010.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "c108": {
+      "path": "habitable/Centauri",
+      "entry": "c108.py",
+      "description": "c108 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "c108.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "c003": {
+      "path": "habitable/Centauri",
+      "entry": "c003.py",
+      "description": "c003 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "c003.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "0秒通信多拠点同時運用": {
+      "path": "habitable/Centauri",
+      "entry": "0秒通信多拠点同時運用.mac",
+      "description": "0秒通信多拠点同時運用 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BHvsWH環境負荷": {
+      "path": "habitable/Centauri",
+      "entry": "BHvsWH環境負荷.mac",
+      "description": "BHvsWH環境負荷 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "銀河系内BH推定数と近傍存在確率": {
+      "path": "habitable/Centauri",
+      "entry": "銀河系内BH推定数と近傍存在確率.mac",
+      "description": "銀河系内BH推定数と近傍存在確率 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "c106_topology_optimization": {
+      "path": "habitable/Centauri",
+      "entry": "c106_topology_optimization.mac",
+      "description": "c106_topology_optimization コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "重力波ビーム運用シミュレーション": {
+      "path": "habitable/Centauri",
+      "entry": "重力波ビーム運用シミュレーション.py",
+      "description": "重力波ビーム運用シミュレーション コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "重力波ビーム運用シミュレーション.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "静止BHでも動くWH": {
+      "path": "habitable/Centauri",
+      "entry": "静止BHでも動くWH.mac",
+      "description": "静止BHでも動くWH コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "静止BHホーキング放射": {
+      "path": "habitable/Centauri",
+      "entry": "静止BHホーキング放射.mac",
+      "description": "静止BHホーキング放射 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "c108_vacuum_seal": {
+      "path": "habitable/Centauri",
+      "entry": "c108_vacuum_seal.mac",
+      "description": "c108_vacuum_seal コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "c203": {
+      "path": "habitable/Centauri",
+      "entry": "c203.mac",
+      "description": "c203 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "0.8光年先BHエネルギー供給": {
+      "path": "habitable/Centauri",
+      "entry": "0.8光年先BHエネルギー供給.mac",
+      "description": "0.8光年先BHエネルギー供給 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "静止BH性質": {
+      "path": "habitable/Centauri",
+      "entry": "静止BH性質.mac",
+      "description": "静止BH性質 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "c001": {
+      "path": "habitable/Centauri",
+      "entry": "c001.py",
+      "description": "c001 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "c001.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BH回転エネルギー枯渇": {
+      "path": "habitable/Centauri",
+      "entry": "BH回転エネルギー枯渇.mac",
+      "description": "BH回転エネルギー枯渇 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "自己複製ロボット能力": {
+      "path": "habitable/Centauri",
+      "entry": "自己複製ロボット能力.mac",
+      "description": "自己複製ロボット能力 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "c010_haptic_feedback": {
+      "path": "habitable/Centauri",
+      "entry": "c010_haptic_feedback.mac",
+      "description": "c010_haptic_feedback コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "ダイソン環維持管理シミュレーション": {
+      "path": "habitable/Centauri",
+      "entry": "ダイソン環維持管理シミュレーション.py",
+      "description": "ダイソン環維持管理シミュレーション コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "ダイソン環維持管理シミュレーション.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "人工BHエネルギー抽出可能性": {
+      "path": "habitable/Centauri",
+      "entry": "人工BHエネルギー抽出可能性.mac",
+      "description": "人工BHエネルギー抽出可能性 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "MER11_12": {
+      "path": "habitable/Mercury",
+      "entry": "MER11_12.mac",
+      "description": "MER11_12 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "DEV06": {
+      "path": "habitable/Mercury",
+      "entry": "DEV06.mac",
+      "description": "DEV06 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "dyson_construction_flow": {
+      "path": "habitable/Mercury",
+      "entry": "dyson_construction_flow.py",
+      "description": "dyson_construction_flow コンポーネント (自動生成)",
+      "depends_on": [
+        "matplotlib",
+        "matplotlib",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "dyson_construction_flow.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "MER09": {
+      "path": "habitable/Mercury",
+      "entry": "MER09.mac",
+      "description": "MER09 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "DEV08": {
+      "path": "habitable/Mercury",
+      "entry": "DEV08.mac",
+      "description": "DEV08 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "DEV07_polygon": {
+      "path": "habitable/Mercury",
+      "entry": "DEV07_polygon.mac",
+      "description": "DEV07_polygon コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "DEV07": {
+      "path": "habitable/Mercury",
+      "entry": "DEV07.mac",
+      "description": "DEV07 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "MER_Dyson": {
+      "path": "habitable/Mercury",
+      "entry": "MER_Dyson.mac",
+      "description": "MER_Dyson コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task903": {
+      "path": "habitable/wormhole/chapter4",
+      "entry": "task903.py",
+      "description": "task903 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task903.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task4001": {
+      "path": "habitable/wormhole/chapter4",
+      "entry": "task4001.mac",
+      "description": "task4001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task3021": {
+      "path": "habitable/wormhole/chapter3",
+      "entry": "task3021.mac",
+      "description": "task3021 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task3023": {
+      "path": "habitable/wormhole/chapter3",
+      "entry": "task3023.py",
+      "description": "task3023 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task3023.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task3022": {
+      "path": "habitable/wormhole/chapter3",
+      "entry": "task3022.py",
+      "description": "task3022 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task3022.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "BH002": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "BH002.py",
+      "description": "BH002 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "pandas"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "BH002.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "WH004": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "WH004.mac",
+      "description": "WH004 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "WH001": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "WH001.mac",
+      "description": "WH001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "ZS001": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "ZS001.mac",
+      "description": "ZS001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "ZSINTEGRATION": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "ZSINTEGRATION.mac",
+      "description": "ZSINTEGRATION コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "WH 003": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "WH 003.mac",
+      "description": "WH 003 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "WH004c": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "WH004c.mac",
+      "description": "WH004c コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "ZS003": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "ZS003.mac",
+      "description": "ZS003 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BH001sp": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "BH001sp.mac",
+      "description": "BH001sp コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "WH004b": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "WH004b.mac",
+      "description": "WH004b コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "ZS002": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "ZS002.mac",
+      "description": "ZS002 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "BH001": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "BH001.mac",
+      "description": "BH001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "WH002": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "WH002.py",
+      "description": "WH002 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "pandas"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "WH002.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BH001test": {
+      "path": "habitable/wormhole/appendix",
+      "entry": "BH001test.mac",
+      "description": "BH001test コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task3002": {
+      "path": "habitable/wormhole/chapter1",
+      "entry": "task3002.py",
+      "description": "task3002 コンポーネント (自動生成)",
+      "depends_on": [
+        "json",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task3002.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task3004": {
+      "path": "habitable/wormhole/chapter1",
+      "entry": "task3004.mac",
+      "description": "task3004 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task3001": {
+      "path": "habitable/wormhole/chapter1",
+      "entry": "task3001.mac",
+      "description": "task3001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task3003": {
+      "path": "habitable/wormhole/chapter1",
+      "entry": "task3003.mac",
+      "description": "task3003 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task3013": {
+      "path": "habitable/wormhole/chapter2",
+      "entry": "task3013.py",
+      "description": "task3013 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task3013.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task3012": {
+      "path": "habitable/wormhole/chapter2",
+      "entry": "task3012.mac",
+      "description": "task3012 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task3011": {
+      "path": "habitable/wormhole/chapter2",
+      "entry": "task3011.py",
+      "description": "task3011 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task3011.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "PAI25": {
+      "path": "habitable/physicalAI/WH",
+      "entry": "PAI25.py",
+      "description": "PAI25 コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "tempfile",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "PAI25.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "PAI25_maxima": {
+      "path": "habitable/physicalAI/WH",
+      "entry": "PAI25_maxima.mac",
+      "description": "PAI25_maxima コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "PAI20": {
+      "path": "habitable/physicalAI/VF",
+      "entry": "PAI20.py",
+      "description": "PAI20 コンポーネント (自動生成)",
+      "depends_on": [
+        "csv",
+        "math",
+        "datetime"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "PAI20.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "PAI21": {
+      "path": "habitable/physicalAI/WH",
+      "entry": "PAI21.py",
+      "description": "PAI21 コンポーネント (自動生成)",
+      "depends_on": [
+        "csv",
+        "math",
+        "datetime"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "PAI21.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "PAI23_maxima": {
+      "path": "habitable/physicalAI/WH",
+      "entry": "PAI23_maxima.mac",
+      "description": "PAI23_maxima コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "PAI181": {
+      "path": "habitable/physicalAI/IS",
+      "entry": "PAI181.py",
+      "description": "PAI181 コンポーネント (自動生成)",
+      "depends_on": [
+        "csv",
+        "datetime",
+        "math"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "PAI181.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "PAI18": {
+      "path": "habitable/physicalAI/IS",
+      "entry": "PAI18.py",
+      "description": "PAI18 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "PAI18.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "PAI12": {
+      "path": "habitable/physicalAI/VF",
+      "entry": "PAI12.mac",
+      "description": "PAI12 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "PAI16": {
+      "path": "habitable/physicalAI/VF",
+      "entry": "PAI16.py",
+      "description": "PAI16 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "PAI16.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "PAI01": {
+      "path": "habitable/physicalAI/VF",
+      "entry": "PAI01.mac",
+      "description": "PAI01 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "PAI20２": {
+      "path": "habitable/physicalAI/VF",
+      "entry": "PAI20２.py",
+      "description": "PAI20２ コンポーネント (自動生成)",
+      "depends_on": [
+        "csv",
+        "math",
+        "datetime"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "PAI20２.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "PAI32": {
+      "path": "habitable/physicalAI/VF",
+      "entry": "PAI32.py",
+      "description": "PAI32 コンポーネント (自動生成)",
+      "depends_on": [
+        "csv",
+        "math",
+        "datetime"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "PAI32.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "コマ割り第1話": {
+      "path": "数値解析漫画/第1話",
+      "entry": "コマ割り第1話.py",
+      "description": "コマ割り第1話 コンポーネント (自動生成)",
+      "depends_on": [
+        "PIL",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "コマ割り第1話.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "コマ割り第3話": {
+      "path": "数値解析漫画/第3話",
+      "entry": "コマ割り第3話.py",
+      "description": "コマ割り第3話 コンポーネント (自動生成)",
+      "depends_on": [
+        "PIL",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "コマ割り第3話.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "コマ割り第4話": {
+      "path": "数値解析漫画/第4話",
+      "entry": "コマ割り第4話.py",
+      "description": "コマ割り第4話 コンポーネント (自動生成)",
+      "depends_on": [
+        "PIL",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "コマ割り第4話.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "コマ割り第2話": {
+      "path": "数値解析漫画/第2話",
+      "entry": "コマ割り第2話.py",
+      "description": "コマ割り第2話 コンポーネント (自動生成)",
+      "depends_on": [
+        "PIL",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "コマ割り第2話.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "stable": {
+      "path": "数値解析漫画/Colab",
+      "entry": "stable.py",
+      "description": "stable コンポーネント (自動生成)",
+      "depends_on": [
+        "os",
+        "torch",
+        "diffusers"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "stable.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "時超えケンタsongmidi": {
+      "path": "数値解析漫画/「時超えケンタ」テーマソング",
+      "entry": "時超えケンタsongmidi.py",
+      "description": "時超えケンタsongmidi コンポーネント (自動生成)",
+      "depends_on": [
+        "struct",
+        "subprocess",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "時超えケンタsongmidi.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BIO508a": {
+      "path": "life/mindupload",
+      "entry": "BIO508a.mac",
+      "description": "BIO508a コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "upload": {
+      "path": "life/mindupload",
+      "entry": "upload.py",
+      "description": "upload コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "upload.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "BIO508b": {
+      "path": "life/mindupload",
+      "entry": "BIO508b.mac",
+      "description": "BIO508b コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "upload5": {
+      "path": "life/mindupload",
+      "entry": "upload5.py",
+      "description": "upload5 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "params"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "upload5.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task101": {
+      "path": "venusfusion/chapter5",
+      "entry": "task101.mac",
+      "description": "task101 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task103": {
+      "path": "venusfusion/chapter5",
+      "entry": "task103.mac",
+      "description": "task103 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task104": {
+      "path": "venusfusion/chapter5",
+      "entry": "task104.mac",
+      "description": "task104 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task100": {
+      "path": "venusfusion/chapter5",
+      "entry": "task100.mac",
+      "description": "task100 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task102": {
+      "path": "venusfusion/chapter5",
+      "entry": "task102.py",
+      "description": "task102 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task102.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task103_params": {
+      "path": "venusfusion/chapter5",
+      "entry": "task103_params.py",
+      "description": "task103_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task103_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task101_params": {
+      "path": "venusfusion/chapter5",
+      "entry": "task101_params.py",
+      "description": "task101_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task101_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "threshold_params": {
+      "path": "venusfusion/chapter5",
+      "entry": "threshold_params.mac",
+      "description": "threshold_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task34c": {
+      "path": "venusfusion/chapter4",
+      "entry": "task34c.py",
+      "description": "task34c コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "pandas"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task34c.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task34d": {
+      "path": "venusfusion/chapter4",
+      "entry": "task34d.py",
+      "description": "task34d コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task34d.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task72+73": {
+      "path": "venusfusion/chapter4",
+      "entry": "task72+73.py",
+      "description": "task72+73 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task72+73.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task304": {
+      "path": "venusfusion/chapter3",
+      "entry": "task304.py",
+      "description": "task304 コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task304.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task34b": {
+      "path": "venusfusion/chapter3",
+      "entry": "task34b.py",
+      "description": "task34b コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "subprocess"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task34b.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task53": {
+      "path": "venusfusion/chapter3",
+      "entry": "task53.py",
+      "description": "task53 コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task53.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task42b": {
+      "path": "venusfusion/chapter3",
+      "entry": "task42b.py",
+      "description": "task42b コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task42b.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "recycle_logic": {
+      "path": "venusfusion/chapter3",
+      "entry": "recycle_logic.mac",
+      "description": "recycle_logic コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task303a": {
+      "path": "venusfusion/chapter3",
+      "entry": "task303a.py",
+      "description": "task303a コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task303a.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task60": {
+      "path": "venusfusion/chapter3",
+      "entry": "task60.py",
+      "description": "task60 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "subprocess"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task60.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task61": {
+      "path": "venusfusion/chapter3",
+      "entry": "task61.py",
+      "description": "task61 コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task61.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task303": {
+      "path": "venusfusion/chapter3",
+      "entry": "task303.py",
+      "description": "task303 コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task303.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task34a": {
+      "path": "venusfusion/chapter3",
+      "entry": "task34a.py",
+      "description": "task34a コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "subprocess"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task34a.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "impact_logic": {
+      "path": "venusfusion/chapter3",
+      "entry": "impact_logic.mac",
+      "description": "impact_logic コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task36": {
+      "path": "venusfusion/3Dprinter",
+      "entry": "task36.mac",
+      "description": "task36 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task32": {
+      "path": "venusfusion/3Dprinter",
+      "entry": "task32.mac",
+      "description": "task32 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "LENR_VENUS_010": {
+      "path": "venusfusion/venus",
+      "entry": "LENR_VENUS_010.mac",
+      "description": "LENR_VENUS_010 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "venus44++": {
+      "path": "venusfusion/venus",
+      "entry": "venus44++.py",
+      "description": "venus44++ コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venus44++.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "LENR_VENUS_007": {
+      "path": "venusfusion/venus",
+      "entry": "LENR_VENUS_007.mac",
+      "description": "LENR_VENUS_007 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task281": {
+      "path": "venusfusion/venus",
+      "entry": "task281.py",
+      "description": "task281 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task281.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task251": {
+      "path": "venusfusion/venus",
+      "entry": "task251.py",
+      "description": "task251 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task251.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venus44": {
+      "path": "venusfusion/venus",
+      "entry": "venus44.py",
+      "description": "venus44 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venus44.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task25": {
+      "path": "venusfusion/venus",
+      "entry": "task25.mac",
+      "description": "task25 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "LENR_VENUS_005": {
+      "path": "venusfusion/venus",
+      "entry": "LENR_VENUS_005.mac",
+      "description": "LENR_VENUS_005 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task282": {
+      "path": "venusfusion/venus",
+      "entry": "task282.py",
+      "description": "task282 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task282.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task253D": {
+      "path": "venusfusion/venus",
+      "entry": "task253D.py",
+      "description": "task253D コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task253D.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venus32+": {
+      "path": "venusfusion/venus",
+      "entry": "venus32+.py",
+      "description": "venus32+ コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venus32+.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venus13": {
+      "path": "venusfusion/venus",
+      "entry": "venus13.mac",
+      "description": "venus13 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task253Dcomp": {
+      "path": "venusfusion/venus",
+      "entry": "task253Dcomp.py",
+      "description": "task253Dcomp コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task253Dcomp.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venus37sympy": {
+      "path": "venusfusion/venus",
+      "entry": "venus37sympy.py",
+      "description": "venus37sympy コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venus37sympy.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venus41": {
+      "path": "venusfusion/venus",
+      "entry": "venus41.py",
+      "description": "venus41 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venus41.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task28alon": {
+      "path": "venusfusion/venus",
+      "entry": "task28alon.py",
+      "description": "task28alon コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "sympy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task28alon.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "LENR_VENUS_016": {
+      "path": "venusfusion/venus",
+      "entry": "LENR_VENUS_016.mac",
+      "description": "LENR_VENUS_016 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task25comp": {
+      "path": "venusfusion/venus",
+      "entry": "task25comp.py",
+      "description": "task25comp コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task25comp.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venus44+": {
+      "path": "venusfusion/venus",
+      "entry": "venus44+.py",
+      "description": "venus44+ コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venus44+.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "stress_functions": {
+      "path": "venusfusion/venus",
+      "entry": "stress_functions.py",
+      "description": "stress_functions コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "stress_functions.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task28": {
+      "path": "venusfusion/venus",
+      "entry": "task28.mac",
+      "description": "task28 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task44": {
+      "path": "venusfusion/venus",
+      "entry": "task44.mac",
+      "description": "task44 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "params_C": {
+      "path": "venusfusion/venus",
+      "entry": "params_C.py",
+      "description": "params_C コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "params_C.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venus13sympy": {
+      "path": "venusfusion/venus",
+      "entry": "venus13sympy.py",
+      "description": "venus13sympy コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venus13sympy.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task901": {
+      "path": "venusfusion/chapter6",
+      "entry": "task901.mac",
+      "description": "task901 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "epilogue_params": {
+      "path": "venusfusion/chapter6",
+      "entry": "epilogue_params.py",
+      "description": "epilogue_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "epilogue_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "final_state": {
+      "path": "venusfusion/chapter6",
+      "entry": "final_state.py",
+      "description": "final_state コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "final_state.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task901a": {
+      "path": "venusfusion/chapter6",
+      "entry": "task901a.py",
+      "description": "task901a コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "structural_params"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task901a.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task901b": {
+      "path": "venusfusion/chapter6",
+      "entry": "task901b.py",
+      "description": "task901b コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "rectenna_params"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task901b.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "epilogue": {
+      "path": "venusfusion/chapter6",
+      "entry": "epilogue.mac",
+      "description": "epilogue コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task901c": {
+      "path": "venusfusion/chapter6",
+      "entry": "task901c.mac",
+      "description": "task901c コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "final_params": {
+      "path": "venusfusion/chapter6",
+      "entry": "final_params.py",
+      "description": "final_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "final_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task901z": {
+      "path": "venusfusion/chapter6",
+      "entry": "task901z.mac",
+      "description": "task901z コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "rectenna_params": {
+      "path": "venusfusion/chapter6",
+      "entry": "rectenna_params.py",
+      "description": "rectenna_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "rectenna_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "repair_params_v2": {
+      "path": "venusfusion/chapter6",
+      "entry": "repair_params_v2.py",
+      "description": "repair_params_v2 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "repair_params_v2.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "structural_params": {
+      "path": "venusfusion/chapter6",
+      "entry": "structural_params.py",
+      "description": "structural_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "structural_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "repair_params": {
+      "path": "venusfusion/chapter6",
+      "entry": "repair_params.py",
+      "description": "repair_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "repair_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "torque_params": {
+      "path": "venusfusion/chapter6",
+      "entry": "torque_params.py",
+      "description": "torque_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "torque_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "thermal_impact": {
+      "path": "venusfusion/chapter6",
+      "entry": "thermal_impact.py",
+      "description": "thermal_impact コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "thermal_impact.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task901e": {
+      "path": "venusfusion/chapter6",
+      "entry": "task901e.mac",
+      "description": "task901e コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task901R": {
+      "path": "venusfusion/chapter6",
+      "entry": "task901R.mac",
+      "description": "task901R コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task901d": {
+      "path": "venusfusion/chapter6",
+      "entry": "task901d.mac",
+      "description": "task901d コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "hesperus_physics": {
+      "path": "venusfusion/hesperus",
+      "entry": "hesperus_physics.py",
+      "description": "hesperus_physics コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "hesperus_physics.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "hesperus47bR": {
+      "path": "venusfusion/hesperus",
+      "entry": "hesperus47bR.py",
+      "description": "hesperus47bR コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "hesperus47bR.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task31": {
+      "path": "venusfusion/hesperus",
+      "entry": "task31.mac",
+      "description": "task31 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "hesperus33": {
+      "path": "venusfusion/hesperus",
+      "entry": "hesperus33.py",
+      "description": "hesperus33 コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "hesperus33.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task12": {
+      "path": "venusfusion/hesperus",
+      "entry": "task12.py",
+      "description": "task12 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "re"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task12.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "hesperus14bsympy": {
+      "path": "venusfusion/hesperus",
+      "entry": "hesperus14bsympy.py",
+      "description": "hesperus14bsympy コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "hesperus14bsympy.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "rocket_science": {
+      "path": "venusfusion/hesperus",
+      "entry": "rocket_science.py",
+      "description": "rocket_science コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "rocket_science.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "maxima_physics_bridge": {
+      "path": "venusfusion/hesperus",
+      "entry": "maxima_physics_bridge.py",
+      "description": "maxima_physics_bridge コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "maxima_physics_bridge.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "hesperus48+57": {
+      "path": "venusfusion/hesperus",
+      "entry": "hesperus48+57.py",
+      "description": "hesperus48+57 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "sympy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "hesperus48+57.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "hesperus47b+": {
+      "path": "venusfusion/hesperus",
+      "entry": "hesperus47b+.py",
+      "description": "hesperus47b+ コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "hesperus47b+.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "hesperus_orbit": {
+      "path": "venusfusion/hesperus",
+      "entry": "hesperus_orbit.py",
+      "description": "hesperus_orbit コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "hesperus_orbit.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "hesperus47b": {
+      "path": "venusfusion/hesperus",
+      "entry": "hesperus47b.py",
+      "description": "hesperus47b コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "hesperus47b.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "VF005": {
+      "path": "venusfusion/appendix",
+      "entry": "VF005.mac",
+      "description": "VF005 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "VF001": {
+      "path": "venusfusion/appendix",
+      "entry": "VF001.mac",
+      "description": "VF001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "VF004 integrated": {
+      "path": "venusfusion/appendix",
+      "entry": "VF004 integrated.sh",
+      "description": "VF004 integrated コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "VF003": {
+      "path": "venusfusion/appendix",
+      "entry": "VF003.py",
+      "description": "VF003 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "VF003.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "VF004_alone": {
+      "path": "venusfusion/appendix",
+      "entry": "VF004_alone.mac",
+      "description": "VF004_alone コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "VF002": {
+      "path": "venusfusion/appendix",
+      "entry": "VF002.py",
+      "description": "VF002 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "pandas"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "VF002.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "plot_VF005": {
+      "path": "venusfusion/appendix",
+      "entry": "plot_VF005.py",
+      "description": "plot_VF005 コンポーネント (自動生成)",
+      "depends_on": [
+        "matplotlib",
+        "pandas",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "plot_VF005.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "VF004_analytical": {
+      "path": "venusfusion/appendix",
+      "entry": "VF004_analytical.mac",
+      "description": "VF004_analytical コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "VF004_numerical": {
+      "path": "venusfusion/appendix",
+      "entry": "VF004_numerical.py",
+      "description": "VF004_numerical コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "VF004_numerical.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "VF004_integrated": {
+      "path": "venusfusion/appendix",
+      "entry": "VF004_integrated.sh",
+      "description": "VF004_integrated コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task11": {
+      "path": "venusfusion/venusatmos",
+      "entry": "task11.mac",
+      "description": "task11 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task11_v2": {
+      "path": "venusfusion/venusatmos",
+      "entry": "task11_v2.py",
+      "description": "task11_v2 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "re"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task11_v2.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task17": {
+      "path": "venusfusion/venusatmos",
+      "entry": "task17.py",
+      "description": "task17 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "math"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task17.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "venusatmos01sympyUP": {
+      "path": "venusfusion/venusatmos",
+      "entry": "venusatmos01sympyUP.py",
+      "description": "venusatmos01sympyUP コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "sympy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venusatmos01sympyUP.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "venusatmos33sympy_v2": {
+      "path": "venusfusion/venusatmos",
+      "entry": "venusatmos33sympy_v2.py",
+      "description": "venusatmos33sympy_v2 コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venusatmos33sympy_v2.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "venusatmos33sympy": {
+      "path": "venusfusion/venusatmos",
+      "entry": "venusatmos33sympy.py",
+      "description": "venusatmos33sympy コンポーネント (自動生成)",
+      "depends_on": [
+        "sympy",
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venusatmos33sympy.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "venusatmos33": {
+      "path": "venusfusion/venusatmos",
+      "entry": "venusatmos33.py",
+      "description": "venusatmos33 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "sys",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venusatmos33.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "venusatmos01": {
+      "path": "venusfusion/venusatmos",
+      "entry": "venusatmos01.py",
+      "description": "venusatmos01 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "subprocess"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venusatmos01.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task14": {
+      "path": "venusfusion/venusatmos",
+      "entry": "task14.mac",
+      "description": "task14 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "target_expr": {
+      "path": "venusfusion/chapter2/shuttle",
+      "entry": "target_expr.py",
+      "description": "target_expr コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "target_expr.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venusatmos14": {
+      "path": "venusfusion/venusatmos",
+      "entry": "venusatmos14.py",
+      "description": "venusatmos14 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "re"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venusatmos14.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venusatmos01sympy": {
+      "path": "venusfusion/venusatmos",
+      "entry": "venusatmos01sympy.py",
+      "description": "venusatmos01sympy コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "sympy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "venusatmos01sympy.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venuatmos33": {
+      "path": "venusfusion/venusatmos",
+      "entry": "venuatmos33.mac",
+      "description": "venuatmos33 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "model_export": {
+      "path": "venusfusion/venusatmos",
+      "entry": "model_export.py",
+      "description": "model_export コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "model_export.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task242": {
+      "path": "venusfusion/venusatmos",
+      "entry": "task242.py",
+      "description": "task242 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task242.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "venusatmos26": {
+      "path": "venusfusion/venusatmos",
+      "entry": "venusatmos26.mac",
+      "description": "venusatmos26 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "auto_visualization": {
+      "path": "venusfusion/appendix/VF003_AutoCoupling_Results_20260321_132208",
+      "entry": "auto_visualization.py",
+      "description": "auto_visualization コンポーネント (自動生成)",
+      "depends_on": [
+        "pandas",
+        "matplotlib",
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "auto_visualization.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "shuttle101": {
+      "path": "venusfusion/chapter2/shuttle",
+      "entry": "shuttle101.py",
+      "description": "shuttle101 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "trajectory_params"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "shuttle101.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "trajectory_params": {
+      "path": "venusfusion/chapter2/shuttle",
+      "entry": "trajectory_params.py",
+      "description": "trajectory_params コンポーネント (自動生成)",
+      "depends_on": [
+        "math"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "trajectory_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "orbit_expr": {
+      "path": "venusfusion/chapter2/shuttle",
+      "entry": "orbit_expr.py",
+      "description": "orbit_expr コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "orbit_expr.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "shuttle100taper": {
+      "path": "venusfusion/chapter2/shuttle",
+      "entry": "shuttle100taper.py",
+      "description": "shuttle100taper コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "tether_params"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "shuttle100taper.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "tether_params": {
+      "path": "venusfusion/chapter2/shuttle",
+      "entry": "tether_params.py",
+      "description": "tether_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "tether_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "shuttle47": {
+      "path": "venusfusion/chapter2/shuttle",
+      "entry": "shuttle47.py",
+      "description": "shuttle47 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "target_expr"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "shuttle47.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "shuttle48sympyR": {
+      "path": "venusfusion/chapter2/shuttle",
+      "entry": "shuttle48sympyR.py",
+      "description": "shuttle48sympyR コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "shuttle48sympyR.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "shuttle100": {
+      "path": "venusfusion/chapter2/shuttle",
+      "entry": "shuttle100.mac",
+      "description": "shuttle100 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task43": {
+      "path": "venusfusion/chapter2/NGetc",
+      "entry": "task43.mac",
+      "description": "task43 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task432": {
+      "path": "venusfusion/chapter2/NGetc",
+      "entry": "task432.py",
+      "description": "task432 コンポーネント (自動生成)",
+      "depends_on": [
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task432.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task29": {
+      "path": "venusfusion/chapter2/NGetc",
+      "entry": "task29.mac",
+      "description": "task29 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task261": {
+      "path": "venusfusion/chapter2/NGetc",
+      "entry": "task261.py",
+      "description": "task261 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task261.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "params_31": {
+      "path": "venusfusion/chapter2/NGetc",
+      "entry": "params_31.py",
+      "description": "params_31 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "params_31.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "shuttle48sympy": {
+      "path": "venusfusion/chapter2/NGetc",
+      "entry": "shuttle48sympy.py",
+      "description": "shuttle48sympy コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "shuttle48sympy.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "shuttle48": {
+      "path": "venusfusion/chapter2/NGetc",
+      "entry": "shuttle48.py",
+      "description": "shuttle48 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "importlib",
+        "target_expr"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "shuttle48.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task431": {
+      "path": "venusfusion/chapter2/NGetc",
+      "entry": "task431.py",
+      "description": "task431 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task431.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "stabilization_params": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "stabilization_params.py",
+      "description": "stabilization_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "stabilization_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task902": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "task902.py",
+      "description": "task902 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task902.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task1008": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "task1008.mac",
+      "description": "task1008 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1010": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "task1010.mac",
+      "description": "task1010 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1009": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "task1009.py",
+      "description": "task1009 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task1009.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task1015": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task1015.py",
+      "description": "task1015 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "subprocess",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task1015.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "dyson_params": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "dyson_params.py",
+      "description": "dyson_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "dyson_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task1024": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "task1024.py",
+      "description": "task1024 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task1024.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "collision_logic": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "collision_logic.py",
+      "description": "collision_logic コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "collision_logic.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "exotic_params": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "exotic_params.py",
+      "description": "exotic_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "exotic_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "material_params": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "material_params.py",
+      "description": "material_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "material_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "ignition_params": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "ignition_params.py",
+      "description": "ignition_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "ignition_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "civ_params": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "civ_params.py",
+      "description": "civ_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "civ_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task1008+": {
+      "path": "interstellar(skip)/epilogue",
+      "entry": "task1008+.py",
+      "description": "task1008+ コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task1008+.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task1021+1023": {
+      "path": "interstellar(skip)/chapter3",
+      "entry": "task1021+1023.py",
+      "description": "task1021+1023 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "subprocess",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task1021+1023.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "AI001": {
+      "path": "interstellar(skip)/appendix",
+      "entry": "AI001.py",
+      "description": "AI001 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "AI001.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "IH001": {
+      "path": "interstellar(skip)/appendix",
+      "entry": "IH001.mac",
+      "description": "IH001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "IH002": {
+      "path": "interstellar(skip)/appendix",
+      "entry": "IH002.mac",
+      "description": "IH002 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "AI002": {
+      "path": "interstellar(skip)/appendix",
+      "entry": "AI002.py",
+      "description": "AI002 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "pandas",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "AI002.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "AI001_sim": {
+      "path": "interstellar(skip)/appendix",
+      "entry": "AI001_sim.py",
+      "description": "AI001_sim コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "datetime"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "AI001_sim.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task1004": {
+      "path": "interstellar(skip)/chapter1",
+      "entry": "task1004.mac",
+      "description": "task1004 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1005a": {
+      "path": "interstellar(skip)/chapter1",
+      "entry": "task1005a.mac",
+      "description": "task1005a コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "comm_params": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "comm_params.py",
+      "description": "comm_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "comm_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task1005b": {
+      "path": "interstellar(skip)/chapter1",
+      "entry": "task1005b.mac",
+      "description": "task1005b コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1005": {
+      "path": "interstellar(skip)/chapter1",
+      "entry": "task1005.py",
+      "description": "task1005 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "drill_params"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task1005.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "drill_params": {
+      "path": "interstellar(skip)/chapter1",
+      "entry": "drill_params.py",
+      "description": "drill_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "drill_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task1001": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task1001.mac",
+      "description": "task1001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "swarm_params": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "swarm_params.py",
+      "description": "swarm_params コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "swarm_params.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "He01": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "He01.mac",
+      "description": "He01 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1006c": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task1006c.py",
+      "description": "task1006c コンポーネント (自動生成)",
+      "depends_on": [
+        "subprocess",
+        "os",
+        "re"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task1006c.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task1001h": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task1001h.mac",
+      "description": "task1001h コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "He02": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "He02.mac",
+      "description": "He02 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task2003": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task2003.py",
+      "description": "task2003 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "os"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task2003.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "He03": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "He03.mac",
+      "description": "He03 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1001h_ignition": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task1001h_ignition.py",
+      "description": "task1001h_ignition コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task1001h_ignition.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task2004+": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task2004+.py",
+      "description": "task2004+ コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task2004+.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task2001": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task2001.mac",
+      "description": "task2001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1006": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task1006.mac",
+      "description": "task1006 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1001h_sun": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task1001h_sun.py",
+      "description": "task1001h_sun コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task1001h_sun.py"
+        ]
+      },
+      "is_entry": true
+    },
+    "task1015a": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task1015a.mac",
+      "description": "task1015a コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task1001m": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task1001m.mac",
+      "description": "task1001m コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "interstellarhuck2_2005": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "interstellarhuck2_2005.mac",
+      "description": "interstellarhuck2_2005 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "interstellarhuck2_2004": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "interstellarhuck2_2004.mac",
+      "description": "interstellarhuck2_2004 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "He02polygon": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "He02polygon.mac",
+      "description": "He02polygon コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task2002": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task2002.mac",
+      "description": "task2002 コンポーネント (自動生成)",
+      "depends_on": [],
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "task2004": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task2004.py",
+      "description": "task2004 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "json"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task2004.py"
+        ]
+      },
+      "is_entry": false
+    },
+    "task2005": {
+      "path": "interstellar(skip)/chapter2",
+      "entry": "task2005.py",
+      "description": "task2005 コンポーネント (自動生成)",
+      "depends_on": [
+        "numpy",
+        "matplotlib",
+        "csv"
+      ],
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "task2005.py"
+        ]
+      },
+      "is_entry": false
+    }
+  },
+  "assemblies": {
+    "lattice_hydrogen_loading": {
+      "parts": [
+        "lattice_hydrogen_loading"
+      ],
+      "order": [
+        "lattice_hydrogen_loading"
+      ],
+      "description": "lattice_hydrogen_loading を中心とした組立 (自動生成)"
+    },
+    "coupling_solve": {
+      "parts": [
+        "coupling_solve"
+      ],
+      "order": [
+        "coupling_solve"
+      ],
+      "description": "coupling_solve を中心とした組立 (自動生成)"
+    },
+    "fourier": {
+      "parts": [
+        "fourier"
+      ],
+      "order": [
+        "fourier"
+      ],
+      "description": "fourier を中心とした組立 (自動生成)"
+    },
+    "boomerang2": {
+      "parts": [
+        "boomerang2"
+      ],
+      "order": [
+        "boomerang2"
+      ],
+      "description": "boomerang2 を中心とした組立 (自動生成)"
+    },
+    "airflow": {
+      "parts": [
+        "airflow"
+      ],
+      "order": [
+        "airflow"
+      ],
+      "description": "airflow を中心とした組立 (自動生成)"
+    },
+    "random": {
+      "parts": [
+        "random"
+      ],
+      "order": [
+        "random"
+      ],
+      "description": "random を中心とした組立 (自動生成)"
+    },
+    "energy_priority": {
+      "parts": [
+        "energy_priority"
+      ],
+      "order": [
+        "energy_priority"
+      ],
+      "description": "energy_priority を中心とした組立 (自動生成)"
+    },
+    "E004": {
+      "parts": [
+        "E004"
+      ],
+      "order": [
+        "E004"
+      ],
+      "description": "E004 を中心とした組立 (自動生成)"
+    },
+    "BIO002+": {
+      "parts": [
+        "BIO002+"
+      ],
+      "order": [
+        "BIO002+"
+      ],
+      "description": "BIO002+ を中心とした組立 (自動生成)"
+    },
+    "BIO201": {
+      "parts": [
+        "BIO201"
+      ],
+      "order": [
+        "BIO201"
+      ],
+      "description": "BIO201 を中心とした組立 (自動生成)"
+    },
+    "BIO504+": {
+      "parts": [
+        "BIO504+"
+      ],
+      "order": [
+        "BIO504+"
+      ],
+      "description": "BIO504+ を中心とした組立 (自動生成)"
+    },
+    "BIO001": {
+      "parts": [
+        "BIO001"
+      ],
+      "order": [
+        "BIO001"
+      ],
+      "description": "BIO001 を中心とした組立 (自動生成)"
+    },
+    "venusfusion": {
+      "parts": [
+        "venusfusion"
+      ],
+      "order": [
+        "venusfusion"
+      ],
+      "description": "venusfusion を中心とした組立 (自動生成)"
+    },
+    "venus_pressure_boost": {
+      "parts": [
+        "venus_pressure_boost"
+      ],
+      "order": [
+        "venus_pressure_boost"
+      ],
+      "description": "venus_pressure_boost を中心とした組立 (自動生成)"
+    },
+    "spyder_solve_and_plot": {
+      "parts": [
+        "spyder_solve_and_plot"
+      ],
+      "order": [
+        "spyder_solve_and_plot"
+      ],
+      "description": "spyder_solve_and_plot を中心とした組立 (自動生成)"
+    },
+    "mass_spring_damper": {
+      "parts": [
+        "mass_spring_damper"
+      ],
+      "order": [
+        "mass_spring_damper"
+      ],
+      "description": "mass_spring_damper を中心とした組立 (自動生成)"
+    },
+    "nobel": {
+      "parts": [
+        "nobel"
+      ],
+      "order": [
+        "nobel"
+      ],
+      "description": "nobel を中心とした組立 (自動生成)"
+    },
+    "kinematicsN": {
+      "parts": [
+        "kinematicsN"
+      ],
+      "order": [
+        "kinematicsN"
+      ],
+      "description": "kinematicsN を中心とした組立 (自動生成)"
+    },
+    "noiman": {
+      "parts": [
+        "noiman"
+      ],
+      "order": [
+        "noiman"
+      ],
+      "description": "noiman を中心とした組立 (自動生成)"
+    },
+    "Fodder1": {
+      "parts": [
+        "Fodder1"
+      ],
+      "order": [
+        "Fodder1"
+      ],
+      "description": "Fodder1 を中心とした組立 (自動生成)"
+    },
+    "gravity": {
+      "parts": [
+        "gravity"
+      ],
+      "order": [
+        "gravity"
+      ],
+      "description": "gravity を中心とした組立 (自動生成)"
+    },
+    "teslagrid": {
+      "parts": [
+        "teslagrid"
+      ],
+      "order": [
+        "teslagrid"
+      ],
+      "description": "teslagrid を中心とした組立 (自動生成)"
+    },
+    "game1": {
+      "parts": [
+        "game1"
+      ],
+      "order": [
+        "game1"
+      ],
+      "description": "game1 を中心とした組立 (自動生成)"
+    },
+    "geometry": {
+      "parts": [
+        "geometry"
+      ],
+      "order": [
+        "geometry"
+      ],
+      "description": "geometry を中心とした組立 (自動生成)"
+    },
+    "DIFFGEO": {
+      "parts": [
+        "DIFFGEO"
+      ],
+      "order": [
+        "DIFFGEO"
+      ],
+      "description": "DIFFGEO を中心とした組立 (自動生成)"
+    },
+    "airresi": {
+      "parts": [
+        "airresi"
+      ],
+      "order": [
+        "airresi"
+      ],
+      "description": "airresi を中心とした組立 (自動生成)"
+    },
+    "task903": {
+      "parts": [
+        "task903"
+      ],
+      "order": [
+        "task903"
+      ],
+      "description": "task903 を中心とした組立 (自動生成)"
+    },
+    "task3023": {
+      "parts": [
+        "task3023"
+      ],
+      "order": [
+        "task3023"
+      ],
+      "description": "task3023 を中心とした組立 (自動生成)"
+    },
+    "task3022": {
+      "parts": [
+        "task3022"
+      ],
+      "order": [
+        "task3022"
+      ],
+      "description": "task3022 を中心とした組立 (自動生成)"
+    },
+    "task3013": {
+      "parts": [
+        "task3013"
+      ],
+      "order": [
+        "task3013"
+      ],
+      "description": "task3013 を中心とした組立 (自動生成)"
+    },
+    "PAI20": {
+      "parts": [
+        "PAI20"
+      ],
+      "order": [
+        "PAI20"
+      ],
+      "description": "PAI20 を中心とした組立 (自動生成)"
+    },
+    "PAI21": {
+      "parts": [
+        "PAI21"
+      ],
+      "order": [
+        "PAI21"
+      ],
+      "description": "PAI21 を中心とした組立 (自動生成)"
+    },
+    "PAI181": {
+      "parts": [
+        "PAI181"
+      ],
+      "order": [
+        "PAI181"
+      ],
+      "description": "PAI181 を中心とした組立 (自動生成)"
+    },
+    "PAI20２": {
+      "parts": [
+        "PAI20２"
+      ],
+      "order": [
+        "PAI20２"
+      ],
+      "description": "PAI20２ を中心とした組立 (自動生成)"
+    },
+    "PAI32": {
+      "parts": [
+        "PAI32"
+      ],
+      "order": [
+        "PAI32"
+      ],
+      "description": "PAI32 を中心とした組立 (自動生成)"
+    },
+    "stable": {
+      "parts": [
+        "stable"
+      ],
+      "order": [
+        "stable"
+      ],
+      "description": "stable を中心とした組立 (自動生成)"
+    },
+    "task102": {
+      "parts": [
+        "task102"
+      ],
+      "order": [
+        "task102"
+      ],
+      "description": "task102 を中心とした組立 (自動生成)"
+    },
+    "task34b": {
+      "parts": [
+        "task34b"
+      ],
+      "order": [
+        "task34b"
+      ],
+      "description": "task34b を中心とした組立 (自動生成)"
+    },
+    "task53": {
+      "parts": [
+        "task53"
+      ],
+      "order": [
+        "task53"
+      ],
+      "description": "task53 を中心とした組立 (自動生成)"
+    },
+    "task303a": {
+      "parts": [
+        "task303a"
+      ],
+      "order": [
+        "task303a"
+      ],
+      "description": "task303a を中心とした組立 (自動生成)"
+    },
+    "task60": {
+      "parts": [
+        "task60"
+      ],
+      "order": [
+        "task60"
+      ],
+      "description": "task60 を中心とした組立 (自動生成)"
+    },
+    "task61": {
+      "parts": [
+        "task61"
+      ],
+      "order": [
+        "task61"
+      ],
+      "description": "task61 を中心とした組立 (自動生成)"
+    },
+    "task34a": {
+      "parts": [
+        "task34a"
+      ],
+      "order": [
+        "task34a"
+      ],
+      "description": "task34a を中心とした組立 (自動生成)"
+    },
+    "hesperus14bsympy": {
+      "parts": [
+        "hesperus14bsympy"
+      ],
+      "order": [
+        "hesperus14bsympy"
+      ],
+      "description": "hesperus14bsympy を中心とした組立 (自動生成)"
+    },
+    "VF003": {
+      "parts": [
+        "VF003"
+      ],
+      "order": [
+        "VF003"
+      ],
+      "description": "VF003 を中心とした組立 (自動生成)"
+    },
+    "VF002": {
+      "parts": [
+        "VF002"
+      ],
+      "order": [
+        "VF002"
+      ],
+      "description": "VF002 を中心とした組立 (自動生成)"
+    },
+    "VF004_numerical": {
+      "parts": [
+        "VF004_numerical"
+      ],
+      "order": [
+        "VF004_numerical"
+      ],
+      "description": "VF004_numerical を中心とした組立 (自動生成)"
+    },
+    "task17": {
+      "parts": [
+        "task17"
+      ],
+      "order": [
+        "task17"
+      ],
+      "description": "task17 を中心とした組立 (自動生成)"
+    },
+    "venusatmos01sympyUP": {
+      "parts": [
+        "venusatmos01sympyUP"
+      ],
+      "order": [
+        "venusatmos01sympyUP"
+      ],
+      "description": "venusatmos01sympyUP を中心とした組立 (自動生成)"
+    },
+    "venusatmos33sympy_v2": {
+      "parts": [
+        "venusatmos33sympy_v2"
+      ],
+      "order": [
+        "venusatmos33sympy_v2"
+      ],
+      "description": "venusatmos33sympy_v2 を中心とした組立 (自動生成)"
+    },
+    "venusatmos33sympy": {
+      "parts": [
+        "venusatmos33sympy"
+      ],
+      "order": [
+        "venusatmos33sympy"
+      ],
+      "description": "venusatmos33sympy を中心とした組立 (自動生成)"
+    },
+    "venusatmos33": {
+      "parts": [
+        "venusatmos33"
+      ],
+      "order": [
+        "venusatmos33"
+      ],
+      "description": "venusatmos33 を中心とした組立 (自動生成)"
+    },
+    "shuttle101": {
+      "parts": [
+        "shuttle101"
+      ],
+      "order": [
+        "shuttle101"
+      ],
+      "description": "shuttle101 を中心とした組立 (自動生成)"
+    },
+    "shuttle100taper": {
+      "parts": [
+        "shuttle100taper"
+      ],
+      "order": [
+        "shuttle100taper"
+      ],
+      "description": "shuttle100taper を中心とした組立 (自動生成)"
+    },
+    "shuttle47": {
+      "parts": [
+        "shuttle47"
+      ],
+      "order": [
+        "shuttle47"
+      ],
+      "description": "shuttle47 を中心とした組立 (自動生成)"
+    },
+    "shuttle48": {
+      "parts": [
+        "shuttle48"
+      ],
+      "order": [
+        "shuttle48"
+      ],
+      "description": "shuttle48 を中心とした組立 (自動生成)"
+    },
+    "task902": {
+      "parts": [
+        "task902"
+      ],
+      "order": [
+        "task902"
+      ],
+      "description": "task902 を中心とした組立 (自動生成)"
+    },
+    "task1009": {
+      "parts": [
+        "task1009"
+      ],
+      "order": [
+        "task1009"
+      ],
+      "description": "task1009 を中心とした組立 (自動生成)"
+    },
+    "task1015": {
+      "parts": [
+        "task1015"
+      ],
+      "order": [
+        "task1015"
+      ],
+      "description": "task1015 を中心とした組立 (自動生成)"
+    },
+    "task1024": {
+      "parts": [
+        "task1024"
+      ],
+      "order": [
+        "task1024"
+      ],
+      "description": "task1024 を中心とした組立 (自動生成)"
+    },
+    "task1021+1023": {
+      "parts": [
+        "task1021+1023"
+      ],
+      "order": [
+        "task1021+1023"
+      ],
+      "description": "task1021+1023 を中心とした組立 (自動生成)"
+    },
+    "task1005": {
+      "parts": [
+        "task1005"
+      ],
+      "order": [
+        "task1005"
+      ],
+      "description": "task1005 を中心とした組立 (自動生成)"
+    },
+    "task1006c": {
+      "parts": [
+        "task1006c"
+      ],
+      "order": [
+        "task1006c"
+      ],
+      "description": "task1006c を中心とした組立 (自動生成)"
+    },
+    "task2003": {
+      "parts": [
+        "task2003"
+      ],
+      "order": [
+        "task2003"
+      ],
+      "description": "task2003 を中心とした組立 (自動生成)"
+    },
+    "task1001h_ignition": {
+      "parts": [
+        "task1001h_ignition"
+      ],
+      "order": [
+        "task1001h_ignition"
+      ],
+      "description": "task1001h_ignition を中心とした組立 (自動生成)"
+    },
+    "task1001h_sun": {
+      "parts": [
+        "task1001h_sun"
+      ],
+      "order": [
+        "task1001h_sun"
+      ],
+      "description": "task1001h_sun を中心とした組立 (自動生成)"
+    }
+  },
+  "execution": {
+    "default_assembly": "main",
+    "timeout": 60,
+    "parallel": false,
+    "log_dir": "logs/"
+  },
+  "environment": {
+    "PYTHONPATH": "/home/iwamura/ドキュメント/coupling/working",
+    "OLLAMA_URL": "http://localhost:11434",
+    "MAXIMA_PATH": "/home/iwamura/local/maxima/bin/maxima"
+  }
+}

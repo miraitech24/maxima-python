@@ -232,6 +232,7 @@ printf(true, "  イオンエンジン: ~,2f 億USD/年~%~%", ion_annual_cost/1e8
 /* ============================================================
    グラフ1: 推進方式別コスト比較（横棒グラフ）
    ============================================================ */
+draw_renderer: gnuplot;
 print("グラフ1: 推進方式別コスト比較（横棒）を表示します...")$
 draw2d(
   title = "Annual Transport Cost Comparison",
@@ -313,7 +314,7 @@ draw2d(
    グラフ3: レールガン加速距離比較（横棒グラフ）
    ============================================================ */
 print("グラフ3: レールガン加速距離比較（横棒）を表示します...")$
-draw2d(
+draw2d( 
   title = "Required Railgun Length",
   xlabel = "Railgun Length [km]",
   ylabel = "Route",

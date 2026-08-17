@@ -1,0 +1,16 @@
+Parameter,Value,Unit
+NV_wavelength,637.,nm
+NV_lifetime,13.,ns
+Quantum_yield,0.80,-
+Nanodiamond_diameter,100.,nm
+Waveguide_length,1.00,mm
+Waveguide_loss,3.0,dB/cm
+Detector_efficiency,0.90,-
+Absorption_transmission,1.0000,-
+Surface_transmission,0.8304,-
+Collection_transmission,0.0670,-
+Coupling_transmission,0.7000,-
+Waveguide_transmission,0.9333,-
+Detector_transmission,0.9000,-
+Total_transmission,0.0327,-
+Total_loss_probability,0.9673,-

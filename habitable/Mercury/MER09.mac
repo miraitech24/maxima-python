@@ -185,6 +185,7 @@ for i:1 thru 10 do block(
 print("")$
 
 /* ----- グラフ描画（折れ線グラフ） ----- */
+set_plot_option([plot_format, gnuplot]);
 print("グラフ1: 夜間時間 vs 必要蓄電容量 を表示します...")$
 
 /* グラフ1: 夜間時間vs蓄電容量 */

@@ -1,0 +1,16 @@
+Item,Value,Unit
+Population,1000000.,persons
+Calorie_requirement,2500.,kcal/day/person
+Total_calories_needed,9.12e+11,kcal/year
+Soil_area,34564.4,ha
+Soil_area_km2,345.6,km2
+Hydroponic_area,3456.4,ha
+Hydroponic_area_km2,34.6,km2
+Vertical_farm_area,345.6,ha
+Vertical_farm_area_km2,3.46,km2
+Cylinder_surface_area,643.4,km2
+Habitable_area,321.7,km2
+Soil_ratio,107.4,%
+Hydroponic_ratio,10.7,%
+Self_sufficiency_soil,65.2,%
+Self_sufficiency_hybrid,158.2,%

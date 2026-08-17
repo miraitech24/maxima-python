@@ -1,0 +1,17 @@
+Item,Value,Unit
+Mercury_gravity,3.70,m/s2
+Geo_orbit_radius,2.43E+8,m
+Geo_orbit_height,2.40E+8,m
+Cable_length,2.40E+8,m
+Taper_ratio,1.90E+8,-
+Cable_mass,3.60E+14,kg
+Elevator_daily_capacity,0.00,tons/day
+Orbital_velocity,3.01,km/s
+Railgun_length,10000.,m
+Railgun_daily_capacity,1440.00,tons/day
+Railgun_power,82.97,MW
+Annual_transport_needed,500000.,tons/year
+Elevators_needed,1001.,-
+Railguns_needed,1.,-
+Recommended_elevators,2.,-
+Recommended_railguns,3.,-

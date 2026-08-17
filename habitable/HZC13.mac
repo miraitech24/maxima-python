@@ -1,0 +1,236 @@
+/* ============================================================
+   HZC-13: 人工磁場シールドの必要強度とエネルギー
+   目的：宇宙コロニー（オニールシリンダー型HZ）に必要な
+         人工磁場シールドの強度とエネルギーを計算する。
+         地球の磁場（NS極）と同じ構造が必要かを検証する。
+   仕様：
+     - 地球磁場: 約30μT（赤道）、約60μT（極）
+     - 太陽風・宇宙線から生命を守るには磁場が必要
+     - 人工磁場の方式: 超伝導コイルによるダイポール磁場
+     - 必要磁場強度: 地球と同等以上（30-60μT）
+     - エネルギー計算: 磁場エネルギー密度から算出
+   注意：
+     - set_plot_option([plot_format, gnuplot]) で別window表示
+     - グラフはplot2dで個別に描画
+     - .png出力は行わない
+   出力:
+     1. HZC13_results.csv: 計算結果
+     2. HZC13_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+/* グラフを別windowに表示 */
+set_plot_option([plot_format, gnuplot])$
+
+print("===== HZC-13: 人工磁場シールドの必要強度とエネルギー =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+/* 地球磁場 */
+B_earth_eq : 30e-6;                  /* 地球赤道磁場 [T] (30μT) */
+B_earth_pole : 60e-6;                /* 地球極磁場 [T] (60μT) */
+
+/* 宇宙コロニー（オニールシリンダー） */
+R_colony : 5000;                     /* コロニー半径 [m] (5km) */
+L_colony : 20000;                    /* コロニー長さ [m] (20km) */
+V_colony : %pi * R_colony^2 * L_colony;  /* コロニー体積 [m^3] */
+
+/* 物理定数 */
+mu0 : 4 * %pi * 1e-7;                /* 真空透磁率 [H/m] */
+c_light : 3e8;                       /* 光速 [m/s] */
+
+printf(true, "地球磁場: 赤道 ~,0f μT, 極 ~,0f μT~%", B_earth_eq*1e6, B_earth_pole*1e6)$
+printf(true, "コロニー半径: ~,0f m (~,0f km)~%", R_colony, R_colony/1000)$
+printf(true, "コロニー長さ: ~,0f m (~,0f km)~%", L_colony, L_colony/1000)$
+printf(true, "コロニー体積: ~,2e m^3~%~%", V_colony)$
+
+/* ----- 必要磁場強度の検討 ----- */
+print("--- 必要磁場強度の検討 ---")$
+
+/* 地球と同じ磁場が必要か？ */
+/* 太陽風の動圧と磁気圧のバランスから必要磁場を計算 */
+n_solarwind : 5e6;                   /* 太陽風密度 [個/m^3] */
+v_solarwind : 4.5e5;                 /* 太陽風速度 [m/s] */
+m_proton : 1.67e-27;                 /* 陽子質量 [kg] */
+
+/* 太陽風動圧 */
+P_dyn : n_solarwind * m_proton * v_solarwind^2;
+
+/* 磁気圧 P_B = B^2 / (2*mu0) が動圧と釣り合う条件 */
+B_required : sqrt(2 * mu0 * P_dyn);
+
+printf(true, "太陽風動圧: ~,2e Pa~%", P_dyn)$
+printf(true, "必要磁場強度（太陽風遮断）: ~,2f μT~%", B_required*1e6)$
+printf(true, "地球磁場との比較: ~,1f 倍~%~%", B_required / B_earth_eq)$
+
+/* 結論：地球と同じ30μTで十分か？ */
+printf(true, "地球磁場（30μT）で太陽風を遮断できるか？~%")$
+if B_earth_eq >= B_required then
+    printf(true, "  ✅ 十分（地球磁場で対応可能）~%~%")
+else
+    printf(true, "  ⚠️ 不足（より強い磁場が必要）~%~%")$
+
+/* ----- 人工磁場の設計 ----- */
+print("--- 人工磁場の設計 ---")$
+
+/* 超伝導コイルによるダイポール磁場 */
+/* コイル半径 = コロニー半径 */
+/* 中心磁場 B = mu0 * I / (2 * R) */
+
+B_target : 30e-6;                    /* 目標磁場 [T] (30μT) */
+I_required : 2 * R_colony * B_target / mu0;  /* 必要電流 [A] */
+
+printf(true, "目標磁場: ~,0f μT~%", B_target*1e6)$
+printf(true, "必要電流: ~,2e A~%", I_required)$
+
+/* 超伝導コイルの設計 */
+J_critical : 1e9;                    /* 超伝導体臨界電流密度 [A/m^2] */
+A_coil : I_required / J_critical;    /* コイル断面積 [m^2] */
+r_coil : sqrt(A_coil / %pi);         /* コイル半径 [m] */
+
+printf(true, "超伝導体臨界電流密度: ~,2e A/m^2~%", J_critical)$
+printf(true, "必要コイル断面積: ~,2e m^2~%", A_coil)$
+printf(true, "コイル半径: ~,2f m~%~%", r_coil)$
+
+/* ----- エネルギー計算 ----- */
+print("--- エネルギー計算 ---")$
+
+/* 磁場エネルギー密度 u = B^2 / (2*mu0) */
+u_mag : B_target^2 / (2 * mu0);
+
+/* 磁場が占める体積（コロニー全体） */
+E_mag : u_mag * V_colony;
+
+printf(true, "磁場エネルギー密度: ~,2e J/m^3~%", u_mag)$
+printf(true, "磁場総エネルギー: ~,2e J~%", E_mag)$
+printf(true, "  これは TNT換算で ~,2f トン~%", E_mag / 4.184e9)$
+printf(true, "  これは石油換算で ~,2f バレル~%~%", E_mag / 6.1e9)$
+
+/* 維持に必要な電力（超伝導なので損失ゼロ） */
+/* ただし、冷却にエネルギーが必要 */
+T_cool : 4.2;                        /* 冷却温度 [K] (液体ヘリウム) */
+C_cooling : 0.01;                    /* 冷却効率（カルノー効率の10%） */
+P_cooling : E_mag * C_cooling / (24 * 3600);  /* 1日あたり冷却電力 [W] */
+
+printf(true, "冷却温度: ~,1f K (液体ヘリウム)~%", T_cool)$
+printf(true, "冷却電力（初期）: ~,2e W = ~,2f MW~%~%", P_cooling, P_cooling/1e6)$
+
+/* ----- 地球のNS極と同じ構造が必要か？ ----- */
+print("--- 地球のNS極と同じ構造が必要か？ ---")$
+
+printf(true, "地球の磁場構造（ダイポール）:~%")$
+printf(true, "  N極とS極が存在し、磁力線が南北を結ぶ~%")$
+printf(true, "  宇宙空間では磁場の向きは重要でない~%")$
+printf(true, "  重要なのは磁場の強さと分布~%~%")$
+
+printf(true, "人工磁場の設計指針:~%")$
+printf(true, "  1. ダイポール磁場（地球と同じ）: 自然で安定~%")$
+printf(true, "  2. トロイダル磁場（ドーナツ型）: より効率的~%")$
+printf(true, "  3. ミラー磁場（両端集中）: 省エネだが不安定~%~%")$
+
+printf(true, "結論: 地球と同じNS極構造は必須ではない。~%")$
+printf(true, "  重要なのは磁場の強さ（30μT以上）と~%")$
+printf(true, "  コロニー全体を覆う磁力線の分布である。~%~%")$
+
+/* ----- パラメータスイープ ----- */
+print("--- パラメータスイープ ---")$
+
+printf(true, "コロニー半径[km] | 必要電流[MA] | 磁場エネルギー[GJ]~%")$
+printf(true, "----------------+-------------+------------------~%")$
+
+for R_km:1 thru 10 do block(
+    [R_m, I_val, E_val],
+    R_m : R_km * 1000,
+    I_val : 2 * R_m * B_target / mu0,
+    E_val : u_mag * %pi * R_m^2 * L_colony,
+    printf(true, "~10,0f       | ~11,2f    | ~14,2f~%", R_km, I_val/1e6, E_val/1e9)
+)$
+print("")$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: コロニー半径vs必要電流 を表示します...")$
+
+/* グラフ1: 半径vs電流 */
+plot2d(
+    2 * R * B_target / mu0 / 1e6, [R, 1000, 10000],
+    [xlabel, "Colony Radius [m]"],
+    [ylabel, "Required Current [MA]"],
+    [title, "Required Current vs Colony Radius"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ2: コロニー半径vs磁場エネルギー を表示します...")$
+
+/* グラフ2: 半径vsエネルギー */
+plot2d(
+    u_mag * %pi * R^2 * L_colony / 1e9, [R, 1000, 10000],
+    [xlabel, "Colony Radius [m]"],
+    [ylabel, "Magnetic Energy [GJ]"],
+    [title, "Magnetic Energy vs Colony Radius"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ3: 磁場強度vs遮蔽能力 を表示します...")$
+
+/* グラフ3: 磁場強度vs遮蔽 */
+plot2d(
+    [B^2 / (2*mu0) / P_dyn * 100, 100], [B, 0, 100e-6],
+    [xlabel, "Magnetic Field [T]"],
+    [ylabel, "Shielding Efficiency [%]"],
+    [title, "Magnetic Field vs Shielding Efficiency"],
+    [style, [lines, 2, lines, 2]],
+    [color, green, black],
+    [legend, "Shielding %", "100% Line"])$
+
+/* ----- CSV出力 ----- */
+csv_file : "HZC13_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Parameter,Value,Unit~%")$
+printf(f_csv, "B_earth_equator,~,0f,μT~%", B_earth_eq*1e6)$
+printf(f_csv, "B_earth_pole,~,0f,μT~%", B_earth_pole*1e6)$
+printf(f_csv, "B_required,~,2f,μT~%", B_required*1e6)$
+printf(f_csv, "B_target,~,0f,μT~%", B_target*1e6)$
+printf(f_csv, "I_required,~,2e,A~%", I_required)$
+printf(f_csv, "A_coil,~,2e,m^2~%", A_coil)$
+printf(f_csv, "E_magnetic,~,2e,J~%", E_mag)$
+printf(f_csv, "P_cooling,~,2e,W~%", P_cooling)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "HZC13_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "HZC-13: 人工磁場シールドの必要強度とエネルギー サマリー~%")$
+printf(f_sum, "====================================================~%~%")$
+printf(f_sum, "【地球磁場との比較】~%")$
+printf(f_sum, "  地球赤道磁場: ~,0f μT~%", B_earth_eq*1e6)$
+printf(f_sum, "  地球極磁場: ~,0f μT~%", B_earth_pole*1e6)$
+printf(f_sum, "  太陽風遮断に必要な磁場: ~,2f μT~%", B_required*1e6)$
+printf(f_sum, "  地球磁場で十分: ~a~%~%", if B_earth_eq >= B_required then "YES" else "NO")$
+printf(f_sum, "【人工磁場設計】~%")$
+printf(f_sum, "  目標磁場: ~,0f μT~%", B_target*1e6)$
+printf(f_sum, "  必要電流: ~,2e A~%", I_required)$
+printf(f_sum, "  コイル断面積: ~,2e m^2~%", A_coil)$
+printf(f_sum, "  磁場エネルギー: ~,2e J (~,2f GJ)~%~%", E_mag, E_mag/1e9)$
+printf(f_sum, "【NS極の必要性】~%")$
+printf(f_sum, "  地球と同じNS極構造は必須ではない。~%")$
+printf(f_sum, "  重要なのは磁場強度（30μT以上）と分布。~%")$
+printf(f_sum, "  ダイポール型が最も自然で安定。~%~%")$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "  1. 地球磁場と同等の30μTで太陽風を遮断可能~%")$
+printf(f_sum, "  2. 超伝導コイルで実現可能（電流 ~,2e A）~%", I_required)$
+printf(f_sum, "  3. 磁場エネルギーは ~,2f GJ で実現可能~%", E_mag/1e9)$
+printf(f_sum, "  4. NS極構造は不要、磁場強度と分布が本質~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== HZC-13 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

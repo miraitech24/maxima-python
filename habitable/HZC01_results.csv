@@ -1,0 +1,14 @@
+Parameter,Value,Unit
+Target_gravity,1.00,G
+Planet_radius,5.00,km
+Shell_thickness,10.00,m
+Angular_velocity,0.0443,rad/s
+Rotation_period,2.36,min
+Surface_velocity,221.43,m/s
+Hoop_stress,7.35E+7,Pa
+Allowable_stress,2.33E+10,Pa
+Shell_mass,4.71E+12,kg
+Internal_mass,1.41E+12,kg
+Air_mass,9.62E+11,kg
+Total_mass,7.09E+12,kg
+Interior_volume,7.85E+11,m^3

@@ -1,0 +1,210 @@
+/* ============================================================
+   DEV-10: 水星パネル製造 - シリコンインゴット製造効率
+   目的：水星ダイソン環建設に必要なソーラーパネル用シリコン
+         インゴットの製造効率を最適化する。
+   仕様：
+     - 水星の砂からシリコンを抽出・精錬
+     - チョクラルスキー法（CZ法）による単結晶インゴット製造
+     - 製造効率: 原料投入量に対する良品インゴットの比率
+     - 温度勾配、引き上げ速度、回転数が品質に影響
+   注意：
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画（折れ線グラフ）
+     - .png出力は行わない
+   出力:
+     1. DEV10_results.csv: 製造効率シミュレーション結果
+     2. DEV10_summary.txt: 計算サマリー
+   ============================================================ */
+kill(all);
+print("===== DEV-10: シリコンインゴット製造効率 =====")$
+print("")$
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+/* 水星の砂の組成（仮定） */
+SiO2_content : 0.45;                 /* 砂中のSiO2含有率 45% */
+Si_purity_target : 0.999999;         /* 目標純度 99.9999% (6N) */
+
+/* CZ法パラメータ */
+pull_rate : 2.0;                     /* 引き上げ速度 [mm/min] */
+crystal_rotation : 20;               /* 結晶回転数 [rpm] */
+crucible_rotation : 10;              /* 坩堝回転数 [rpm] */
+temperature_gradient : 50;           /* 温度勾配 [K/cm] */
+ingot_diameter : 200;                /* インゴット直径 [mm] */
+ingot_length : 1000;                 /* インゴット長さ [mm] */
+
+/* 製造効率パラメータ */
+material_loss : 0.15;                /* 材料ロス 15% */
+energy_consumption : 50;             /* エネルギー消費 [kWh/kg-Si] */
+production_time_per_ingot : 8;       /* 1本あたり製造時間 [時間] */
+
+printf(true, "砂中のSiO2含有率: ~,1f%~%", SiO2_content*100)$
+printf(true, "目標純度: 6N (99.9999%)~%")$
+printf(true, "引き上げ速度: ~,1f mm/min~%", pull_rate)$
+printf(true, "結晶回転数: ~,0f rpm~%", crystal_rotation)$
+printf(true, "坩堝回転数: ~,0f rpm~%", crucible_rotation)$
+printf(true, "温度勾配: ~,0f K/cm~%", temperature_gradient)$
+printf(true, "インゴット径: ~,0f mm~%", ingot_diameter)$
+printf(true, "インゴット長さ: ~,0f mm~%", ingot_length)$
+printf(true, "材料ロス: ~,1f%~%", material_loss*100)$
+printf(true, "エネルギー消費: ~,0f kWh/kg-Si~%~%", energy_consumption)$
+/* ----- インゴット体積・質量計算 ----- */
+print("--- インゴット体積・質量 ---")$
+ingot_radius : ingot_diameter / 2;   /* 半径 [mm] */
+ingot_volume : %pi * ingot_radius^2 * ingot_length;  /* 体積 [mm^3] */
+ingot_volume_cm3 : ingot_volume / 1000;  /* 体積 [cm^3] */
+
+Si_density : 2.33;                   /* シリコン密度 [g/cm^3] */
+ingot_mass_kg : ingot_volume_cm3 * Si_density / 1000;  /* 質量 [kg] */
+
+printf(true, "インゴット体積: ~,2f cm^3~%", ingot_volume_cm3)$
+printf(true, "インゴット質量: ~,2f kg~%", ingot_mass_kg)$
+printf(true, "製造時間: ~,1f 時間/本~%~%", production_time_per_ingot)$
+/* ----- 原料必要量 ----- */
+print("--- 原料必要量 ---")$
+/* 良品インゴット質量 */
+good_ingot_mass : ingot_mass_kg * (1 - material_loss);  /* [kg] */
+
+/* 必要なシリコン原料 */
+Si_needed : good_ingot_mass;         /* 純シリコン必要量 [kg] */
+
+/* 必要な砂量 */
+sand_needed : Si_needed / (SiO2_content * (28.0855 / 60.0843));  
+/* SiO2中のSi重量比 = 28.0855/60.0843 = 0.4674 */
+
+printf(true, "良品インゴット質量: ~,2f kg~%", good_ingot_mass)$
+printf(true, "必要な純シリコン: ~,2f kg~%", Si_needed)$
+printf(true, "必要な砂量: ~,2f kg~%", sand_needed)$
+printf(true, "砂→シリコン変換効率: ~,2f%~%~%", good_ingot_mass/sand_needed*100)$
+/* ----- 製造効率の最適化 ----- */
+print("--- 製造効率の最適化 ---")$
+/* 効率関数: 引き上げ速度と温度勾配の関数 */
+/* 効率 = 基準効率 * 速度補正 * 温度勾配補正 */
+base_efficiency : 0.85;              /* 基準効率 85% */
+
+/* 速度補正: 遅すぎると生産性低下、速すぎると品質劣化 */
+speed_factor(v) := exp(-((v - 2.0)/1.5)^2)$
+/* 温度勾配補正: 適正範囲で最大 */
+temp_factor(g) := exp(-((g - 50)/20)^2)$
+/* 総合効率 */
+total_efficiency(v, g) := base_efficiency * speed_factor(v) * temp_factor(g)$
+printf(true, "効率モデル:~%")$
+printf(true, "  総合効率 = 基準効率 × 速度補正 × 温度勾配補正~%")$
+printf(true, "  基準効率: ~,2f~%", base_efficiency)$
+printf(true, "  速度補正: exp(-((v-2.0)/1.5)^2)~%")$
+printf(true, "  温度勾配補正: exp(-((g-50)/20)^2)~%~%")$
+/* 最適条件の探索 */
+optimal_efficiency : 0;
+optimal_speed : 0;
+optimal_temp : 0;
+for v:0.5 thru 5.0 step 0.1 do
+    for g:10 thru 100 step 5 do block(
+        [eff],
+        eff : float(total_efficiency(v, g)),
+        if eff > optimal_efficiency then (
+            optimal_efficiency : eff,
+            optimal_speed : v,
+            optimal_temp : g
+        )
+    )$
+printf(true, "最適引き上げ速度: ~,1f mm/min~%", optimal_speed)$
+printf(true, "最適温度勾配: ~,0f K/cm~%", optimal_temp)$
+printf(true, "最大効率: ~,2f%~%~%", optimal_efficiency*100)$
+/* ----- パラメータスイープ ----- */
+print("--- パラメータスイープ ---")$
+printf(true, "引き上げ速度[mm/min] | 効率[%] | 1日生産量[kg]~%")$
+printf(true, "--------------------+---------+-------------~%")$
+for v:0.5 thru 5.0 step 0.5 do block(
+    [eff, daily_prod],
+    eff : float(total_efficiency(v, optimal_temp)),
+    daily_prod : good_ingot_mass * eff * (24 / production_time_per_ingot),
+    printf(true, "~18,1f | ~7,2f  | ~11,1f~%", v, eff*100, daily_prod)
+)$
+print("")$
+/* ----- エネルギー収支 ----- */
+print("--- エネルギー収支 ---")$
+energy_per_ingot : ingot_mass_kg * energy_consumption;  /* [kWh] */
+energy_per_good_kg : energy_per_ingot / good_ingot_mass;  /* [kWh/kg] */
+
+printf(true, "1本あたりエネルギー消費: ~,1f kWh~%", energy_per_ingot)$
+printf(true, "良品1kgあたりエネルギー: ~,1f kWh/kg~%", energy_per_good_kg)$
+printf(true, "ダイソン環電力で賄えるか: ~a~%~%", 
+       if energy_per_ingot < 1.2e15 * 3600 / 1e3 then "✅ 余裕" else "⚠️ 要検討")$
+/* ----- グラフ描画 ----- */
+set_plot_option([plot_format, gnuplot]);
+print("グラフ1: 引き上げ速度vs効率 を表示します...")$
+/* グラフ1: 速度vs効率 */
+plot2d(
+    total_efficiency(v, optimal_temp)*100, [v, 0.5, 5.0],
+    [xlabel, "Pull Rate [mm/min]"],
+    [ylabel, "Efficiency [%]"],
+    [title, "Pull Rate vs Efficiency"],
+    [style, [lines, 2]],
+    [color, blue])$
+print("グラフ2: 温度勾配vs効率 を表示します...")$
+/* グラフ2: 温度勾配vs効率 */
+plot2d(
+    total_efficiency(optimal_speed, g)*100, [g, 10, 100],
+    [xlabel, "Temperature Gradient [K/cm]"],
+    [ylabel, "Efficiency [%]"],
+    [title, "Temperature Gradient vs Efficiency"],
+    [style, [lines, 2]],
+    [color, red])$
+print("グラフ3: 速度vs1日生産量 を表示します...")$
+/* グラフ3: 速度vs生産量 */
+plot2d(
+    good_ingot_mass * total_efficiency(v, optimal_temp) * (24 / production_time_per_ingot),
+    [v, 0.5, 5.0],
+    [xlabel, "Pull Rate [mm/min]"],
+    [ylabel, "Daily Production [kg]"],
+    [title, "Pull Rate vs Daily Production"],
+    [style, [lines, 2]],
+    [color, green])$
+/* ----- CSV出力 ----- */
+csv_file : "DEV10_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Pull_Rate, Efficiency, Daily_Production~%")$
+for v:0.5 thru 5.0 step 0.1 do
+    printf(f_csv, "~,1f,~,4f,~,2f~%",
+           v, float(total_efficiency(v, optimal_temp)), 
+           float(good_ingot_mass * total_efficiency(v, optimal_temp) * (24 / production_time_per_ingot)))$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+/* ----- サマリー出力 ----- */
+sum_file : "DEV10_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "DEV-10: シリコンインゴット製造効率 サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【基本パラメータ】~%")$
+printf(f_sum, "  砂中のSiO2含有率: ~,1f%~%", SiO2_content*100)$
+printf(f_sum, "  目標純度: 6N~%")$
+printf(f_sum, "  インゴット径: ~,0f mm~%", ingot_diameter)$
+printf(f_sum, "  インゴット長さ: ~,0f mm~%", ingot_length)$
+printf(f_sum, "  インゴット質量: ~,2f kg~%", ingot_mass_kg)$
+printf(f_sum, "  製造時間: ~,1f 時間/本~%~%", production_time_per_ingot)$
+printf(f_sum, "【最適条件】~%")$
+printf(f_sum, "  最適引き上げ速度: ~,1f mm/min~%", optimal_speed)$
+printf(f_sum, "  最適温度勾配: ~,0f K/cm~%", optimal_temp)$
+printf(f_sum, "  最大効率: ~,2f%~%~%", optimal_efficiency*100)$
+printf(f_sum, "【生産能力】~%")$
+printf(f_sum, "  1本あたり良品質量: ~,2f kg~%", good_ingot_mass)$
+printf(f_sum, "  1日生産量(最適時): ~,1f kg~%", 
+       good_ingot_mass * optimal_efficiency * (24 / production_time_per_ingot))$
+printf(f_sum, "  1年生産量: ~,1f トン~%~%", 
+       good_ingot_mass * optimal_efficiency * (24 / production_time_per_ingot) * 365 / 1000)$
+printf(f_sum, "【エネルギー収支】~%")$
+printf(f_sum, "  1本あたり: ~,1f kWh~%", energy_per_ingot)$
+printf(f_sum, "  良品1kgあたり: ~,1f kWh/kg~%~%", energy_per_good_kg)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "水星の砂から高効率でシリコンインゴットを製造可能。~%")$
+printf(f_sum, "最適条件で効率~,1f%を達成。~%", optimal_efficiency*100)$
+printf(f_sum, "ダイソン環のパネル製造に十分な生産能力を確保。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+/* ----- 完了 ----- */
+print("")$
+print("===== DEV-10 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$
+

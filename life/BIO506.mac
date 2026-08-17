@@ -24,7 +24,7 @@
 /*    sunlight_hours: 日照時間 = 8 h/day                         */
 /*                                                              */
 /* 4. グラフ描画                                                 */
-/*    draw2dで4つのグラフをPNG出力                                */
+/*    draw2dで4つのグラフを別windowに表示                                */
 /* ============================================================ */
 
 display2d:false;
@@ -76,11 +76,9 @@ for ep_val in [0.05, 0.10, 0.15, 0.20, 0.25, 0.30] do (
     E_opt_val: E_solar_daily * ep_val * f_opt + E_req * (1 - f_opt),
     print(float(ep_val), "  ", float(f_opt), "  ", float(E_opt_val), "  ", float(E_opt_val/E_req*100), "%")
 )$
-
+draw_renderer: gnuplot;
 /* グラフ1: 配分率 vs エネルギー収支 */
 draw2d(
-    file_name = "BIO506_fig1_energy_balance",
-    terminal = png,
     title = "Fig.1: Energy Balance vs Allocation Ratio",
     xlabel = "Photosynthesis Allocation Ratio f",
     ylabel = "Energy (J/day)",
@@ -99,8 +97,6 @@ draw2d(
 
 /* グラフ2: 配分率 vs エネルギー充足率 */
 draw2d(
-    file_name = "BIO506_fig2_sufficiency",
-    terminal = png,
     title = "Fig.2: Energy Sufficiency vs Allocation Ratio",
     xlabel = "Photosynthesis Allocation Ratio f",
     ylabel = "Energy Sufficiency (%)",
@@ -113,8 +109,6 @@ draw2d(
 
 /* グラフ3: 光合成効率 vs 最適配分率 */
 draw2d(
-    file_name = "BIO506_fig3_optimal_allocation",
-    terminal = png,
     title = "Fig.3: Optimal Allocation vs Photosynthesis Efficiency",
     xlabel = "Photosynthesis Efficiency eta_photo",
     ylabel = "Optimal Allocation Ratio f_opt",
@@ -127,8 +121,6 @@ draw2d(
 
 /* グラフ4: 光合成効率 vs 最大充足率 */
 draw2d(
-    file_name = "BIO506_fig4_max_sufficiency",
-    terminal = png,
     title = "Fig.4: Max Sufficiency vs Photosynthesis Efficiency",
     xlabel = "Photosynthesis Efficiency eta_photo",
     ylabel = "Max Energy Sufficiency (%)",
@@ -140,11 +132,6 @@ draw2d(
 )$
 
 print("")$
-print("全4グラフを出力しました")$
-print("ファイル: BIO506_fig1_energy_balance.png")$
-print("ファイル: BIO506_fig2_sufficiency.png")$
-print("ファイル: BIO506_fig3_optimal_allocation.png")$
-print("ファイル: BIO506_fig4_max_sufficiency.png")$
 print("==========================================")$
 print("BIO-506 analysis complete")$
 print("==========================================")$
