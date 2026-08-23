@@ -1,0 +1,10 @@
+Item,Value,Unit
+Total_Power,1.20E+15,W
+Waste_Heat,8.40E+14,W
+Useful_Power,3.60E+14,W
+Day_Surface_Temp,703.,K
+Night_Surface_Temp,93.,K
+Radiator_Area_Day,6.38E+10,m^2
+Radiator_Area_Night,2.08E+14,m^2
+Thermoelectric_Power,3.64E+14,W
+Panel_Temp_Gradient,0.0000,K

@@ -1,7 +1,7 @@
 {
   "project": "working",
   "root": "/home/iwamura/ドキュメント/coupling/working",
-  "last_scan": "2026-08-16T11:18:26.821172",
+  "last_scan": "2026-08-23T14:37:05.905152",
   "parts": {
     "Untitled": {
       "path": ".",
@@ -36,6 +36,36 @@
         "args": [
           "main.py"
         ]
+      },
+      "is_entry": false
+    },
+    "Untitled3": {
+      "path": ".",
+      "entry": "Untitled3.ipynb",
+      "full_path": "/home/iwamura/ドキュメント/coupling/working/Untitled3.ipynb",
+      "display_name": "Untitled3.ipynb",
+      "last_modified": "2026-08-17T20:01:40.657911",
+      "description": "Untitled3 コンポーネント (自動生成)",
+      "depends_on": [],
+      "status": "⬜ 未入力",
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "Untitled1": {
+      "path": ".",
+      "entry": "Untitled1.ipynb",
+      "full_path": "/home/iwamura/ドキュメント/coupling/working/Untitled1.ipynb",
+      "display_name": "Untitled1.ipynb",
+      "last_modified": "2026-08-17T19:57:19.610263",
+      "description": "Untitled1 コンポーネント (自動生成)",
+      "depends_on": [],
+      "status": "⬜ 未入力",
+      "subprocess": {
+        "command": "bash",
+        "args": []
       },
       "is_entry": false
     },
@@ -2263,6 +2293,27 @@
       },
       "is_entry": false
     },
+    "POWERFUL_LLM": {
+      "path": "POWERFUL_LLM",
+      "entry": "POWERFUL_LLM.py",
+      "full_path": "/home/iwamura/ドキュメント/coupling/working/POWERFUL_LLM/POWERFUL_LLM.py",
+      "display_name": "POWERFUL_LLM.py",
+      "last_modified": "2026-08-17T14:40:15.907012",
+      "description": "POWERFUL_LLM コンポーネント (自動生成)",
+      "depends_on": [
+        "dotenv",
+        "os",
+        "json"
+      ],
+      "status": "⬜ 未入力",
+      "subprocess": {
+        "command": "python3",
+        "args": [
+          "POWERFUL_LLM.py"
+        ]
+      },
+      "is_entry": true
+    },
     "gap": {
       "path": "gap",
       "entry": "gap.py",
@@ -2886,6 +2937,51 @@
       },
       "is_entry": true
     },
+    "DSP-001": {
+      "path": "AIcar",
+      "entry": "DSP-001.mac",
+      "full_path": "/home/iwamura/ドキュメント/coupling/working/AIcar/DSP-001.mac",
+      "display_name": "DSP-001.mac",
+      "last_modified": "2026-08-23T12:15:01.452770",
+      "description": "DSP-001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "status": "⬜ 未入力",
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "DEM-001": {
+      "path": "AIcar",
+      "entry": "DEM-001.mac",
+      "full_path": "/home/iwamura/ドキュメント/coupling/working/AIcar/DEM-001.mac",
+      "display_name": "DEM-001.mac",
+      "last_modified": "2026-08-20T12:26:28.484829",
+      "description": "DEM-001 コンポーネント (自動生成)",
+      "depends_on": [],
+      "status": "⬜ 未入力",
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "SIM-003": {
+      "path": "AIcar",
+      "entry": "SIM-003.mac",
+      "full_path": "/home/iwamura/ドキュメント/coupling/working/AIcar/SIM-003.mac",
+      "display_name": "SIM-003.mac",
+      "last_modified": "2026-08-23T13:38:39.361825",
+      "description": "SIM-003 コンポーネント (自動生成)",
+      "depends_on": [],
+      "status": "⬜ 未入力",
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
     "近傍BH探査効率": {
       "path": "habitable/Centauri",
       "entry": "近傍BH探査効率.py",
@@ -3490,8 +3586,23 @@
       "entry": "load(.mac).ipynb",
       "full_path": "/home/iwamura/ドキュメント/coupling/working/habitable/Mercury/load(.mac).ipynb",
       "display_name": "load(.mac).ipynb",
-      "last_modified": "2026-08-14T12:19:01.760100",
+      "last_modified": "2026-08-17T19:51:58.023597",
       "description": "load(.mac) コンポーネント (自動生成)",
+      "depends_on": [],
+      "status": "⬜ 未入力",
+      "subprocess": {
+        "command": "bash",
+        "args": []
+      },
+      "is_entry": false
+    },
+    "MER16": {
+      "path": "habitable/Mercury",
+      "entry": "MER16.mac",
+      "full_path": "/home/iwamura/ドキュメント/coupling/working/habitable/Mercury/MER16.mac",
+      "display_name": "MER16.mac",
+      "last_modified": "2026-08-18T09:48:31.434694",
+      "description": "MER16 コンポーネント (自動生成)",
       "depends_on": [],
       "status": "⬜ 未入力",
       "subprocess": {
@@ -5095,7 +5206,7 @@
       "depends_on": [
         "sympy"
       ],
-      "status": "⬜ 未入力",
+      "status": "✅ 完了",
       "subprocess": {
         "command": "python3",
         "args": [
@@ -7559,6 +7670,15 @@
         "venus_pressure_boost"
       ],
       "description": "venus_pressure_boost を中心とした組立 (自動生成)"
+    },
+    "POWERFUL_LLM": {
+      "parts": [
+        "POWERFUL_LLM"
+      ],
+      "order": [
+        "POWERFUL_LLM"
+      ],
+      "description": "POWERFUL_LLM を中心とした組立 (自動生成)"
     },
     "spyder_solve_and_plot": {
       "parts": [

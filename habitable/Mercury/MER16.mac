@@ -1,0 +1,219 @@
+/* ============================================================
+   MER-16: 水星ダイソン環 維持 - 廃熱管理
+   目的：水星の高温環境下（昼側+430℃）でダイソン環を維持するための
+         廃熱管理システムを設計する。
+   仕様：
+     - ダイソン環の発電効率 30% → 70%が廃熱となる
+     - 水星昼側表面温度: +430℃ (703K)
+     - 水星夜側表面温度: -180℃ (93K)
+     - 放射冷却による廃熱放散を検討
+     - 熱電変換による廃熱の有効利用も検討
+   注意：
+     - set_plot_option([plot_format, gnuplot]); で各グラフを別window表示
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画
+     - ceil()の結果は整数なのでfloat()で数値化してからprintf
+   出力:
+     1. MER16_results.csv: 廃熱管理計算結果
+     2. MER16_summary.txt: 計算サマリー
+   ============================================================ */
+kill(all);
+/* グラフ表示設定 */
+set_plot_option([plot_format, gnuplot]);
+print("===== MER-16: 水星ダイソン環 廃熱管理 =====")$
+print("")$
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+P_total : 1.2e15;                    /* ダイソン環総発電量 [W] (1.2PW) */
+efficiency : 0.30;                   /* 発電効率 30% */
+P_waste : P_total * (1 - efficiency); /* 廃熱量 [W] */
+P_useful : P_total * efficiency;     /* 有効発電量 [W] */
+
+/* 水星温度環境 */
+T_day_surface : 430 + 273;           /* 昼側表面温度 [K] (703K) */
+T_night_surface : -180 + 273;        /* 夜側表面温度 [K] (93K) */
+T_space : 2.7;                       /* 宇宙背景温度 [K] */
+
+/* 放射冷却パラメータ */
+sigma_sb : 5.670374419e-8;           /* ステファン・ボルツマン定数 [W/m^2/K^4] */
+emissivity : 0.95;                   /* 放射率（黒体に近い） */
+
+printf(true, "ダイソン環総発電量: ~,2e W (~,2f PW)~%", P_total, P_total/1e15)$
+printf(true, "発電効率: ~,0f%~%", efficiency*100)$
+printf(true, "有効発電量: ~,2e W~%", P_useful)$
+printf(true, "廃熱量: ~,2e W~%~%", P_waste)$
+printf(true, "水星昼側表面温度: ~,0f K (~,0f℃)~%", T_day_surface, T_day_surface-273)$
+printf(true, "水星夜側表面温度: ~,0f K (~,0f℃)~%", T_night_surface, T_night_surface-273)$
+printf(true, "宇宙背景温度: ~,1f K~%~%", T_space)$
+/* ----- 放射冷却面積の計算 ----- */
+print("--- 放射冷却面積の計算 ---")$
+/* 放射冷却による廃熱放散: P = ε * σ * A * (T^4 - T_space^4) */
+/* 必要な放射面積 A = P_waste / (ε * σ * (T^4 - T_space^4)) */
+/* 昼側（高温側）での放射冷却 */
+A_rad_day : P_waste / (emissivity * sigma_sb * (T_day_surface^4 - T_space^4));
+/* 夜側（低温側）での放射冷却 */
+A_rad_night : P_waste / (emissivity * sigma_sb * (T_night_surface^4 - T_space^4));
+printf(true, "必要な放射冷却面積:~%")$
+printf(true, "  昼側 (T=~,0fK): ~,2e m^2~%", T_day_surface, A_rad_day)$
+printf(true, "  夜側 (T=~,0fK): ~,2e m^2~%", T_night_surface, A_rad_night)$
+printf(true, "  面積比 (夜/昼): ~,2f~%~%", A_rad_night/A_rad_day)$
+/* ダイソン環の総面積 */
+dyson_area : 1.58e20;                /* ダイソン環パネル面積 [m^2] */
+printf(true, "ダイソン環総面積: ~,2e m^2~%", dyson_area)$
+printf(true, "廃熱面積の割合 (昼側): ~,4f%~%", A_rad_day/dyson_area*100)$
+printf(true, "廃熱面積の割合 (夜側): ~,4f%~%~%", A_rad_night/dyson_area*100)$
+/* ----- 熱電変換による廃熱利用 ----- */
+print("--- 熱電変換による廃熱利用 ---")$
+/* 熱電変換効率（カルノー効率の50%と仮定） */
+T_hot : T_day_surface;               /* 高温側温度 [K] */
+T_cold : T_night_surface;            /* 低温側温度 [K] */
+carnot_efficiency : 1 - T_cold/T_hot;
+thermoelectric_efficiency : carnot_efficiency * 0.5;
+P_thermoelectric : P_waste * thermoelectric_efficiency;
+printf(true, "熱電変換の検討:~%")$
+printf(true, "  高温側: ~,0f K (昼側)~%", T_hot)$
+printf(true, "  低温側: ~,0f K (夜側)~%", T_cold)$
+printf(true, "  カルノー効率: ~,1f%~%", carnot_efficiency*100)$
+printf(true, "  熱電変換効率 (カルノーの50%): ~,1f%~%", thermoelectric_efficiency*100)$
+printf(true, "  熱電変換による追加発電: ~,2e W (~,2f GW)~%~%", P_thermoelectric, P_thermoelectric/1e9)$
+/* ----- 冷却システム設計 ----- */
+print("--- 冷却システム設計 ---")$
+/* ヒートパイプによる熱輸送 */
+heat_pipe_capacity : 1000;           /* ヒートパイプ熱輸送能力 [W/m] */
+heat_pipe_length : 100;              /* ヒートパイプ長さ [m] */
+heat_pipe_per_unit : heat_pipe_capacity * heat_pipe_length;  /* 1本あたり熱輸送 [W] */
+n_heat_pipes_raw : P_waste / heat_pipe_per_unit;  /* 必要本数（実数） */
+n_heat_pipes : ceil(n_heat_pipes_raw);  /* 必要本数（整数） */
+
+printf(true, "ヒートパイプによる冷却:~%")$
+printf(true, "  熱輸送能力: ~,0f W/m~%", heat_pipe_capacity)$
+printf(true, "  長さ: ~,0f m~%", heat_pipe_length)$
+printf(true, "  1本あたり熱輸送: ~,2e W~%", heat_pipe_per_unit)$
+/* ~e の代わりに ~d を使用（整数表示） */
+/* printf(true, "  必要本数: ~,d 本~%~%", n_heat_pipes)$  罠 */;
+/* 放射フィン設計 */
+fin_efficiency : 0.85;               /* フィン効率 */
+fin_area_per_unit : 10;              /* フィン1枚の面積 [m^2] */
+n_fins_raw : A_rad_day / (fin_area_per_unit * fin_efficiency);  /* 必要枚数（実数） */
+n_fins : ceil(n_fins_raw);  /* 必要枚数（整数） */
+
+printf(true, "放射フィン設計:~%")$
+printf(true, "  フィン効率: ~,0f%~%", fin_efficiency*100)$
+printf(true, "  フィン1枚の面積: ~,0f m^2~%", fin_area_per_unit)$
+/* ~e の代わりに ~d を使用（整数表示） */
+/* printf(true, "  必要フィン枚数: ~,d 枚~%~%", n_fins)$ 　罠　*/;
+/* ----- 温度分布シミュレーション ----- */
+print("--- 温度分布シミュレーション ---")$
+/* ダイソン環パネルの温度分布 */
+/* パネル厚さ: 10mm, 熱伝導率: 200 W/m/K (アルミ) */
+panel_thickness : 0.01;              /* パネル厚さ [m] */
+thermal_conductivity : 200;          /* 熱伝導率 [W/m/K] */
+panel_area_per_unit : 1;             /* 単位面積 [m^2] */
+
+/* 温度勾配: ΔT = Q * L / (k * A) */
+delta_T : P_waste/dyson_area * panel_thickness / (thermal_conductivity * panel_area_per_unit);
+printf(true, "パネル温度勾配:~%")$
+printf(true, "  パネル厚さ: ~,3f m~%", panel_thickness)$
+printf(true, "  熱伝導率: ~,0f W/m/K~%", thermal_conductivity)$
+printf(true, "  単位面積あたり廃熱: ~,2f W/m^2~%", P_waste/dyson_area)$
+printf(true, "  温度勾配: ~,4f K~%~%", delta_T)$
+/* ----- グラフ描画 ----- */
+print("グラフ1: 放射冷却面積 vs 温度 を表示します...")$
+/* グラフ1: 温度vs必要放射面積 */
+plot2d(
+    P_waste / (emissivity * sigma_sb * (T^4 - T_space^4)), [T, 100, 800],
+    [xlabel, "Temperature [K]"],
+    [ylabel, "Required Radiator Area [m^2]"],
+    [title, "Radiator Area vs Temperature"],
+    [style, [lines, 2]],
+    [color, red])$
+print("グラフ2: 熱電変換出力 vs 温度差 を表示します...")$
+/* グラフ2: 温度差vs熱電変換効率 */
+plot2d(
+    (1 - T_cold/T) * 0.5 * 100, [T, T_cold+10, T_hot],
+    [xlabel, "Hot Side Temperature [K]"],
+    [ylabel, "Thermoelectric Efficiency [%]"],
+    [title, "Thermoelectric Efficiency vs Temperature"],
+    [style, [lines, 2]],
+    [color, blue])$
+print("グラフ3: 廃熱量の内訳 を表示します...")$
+/* グラフ3: 廃熱の内訳（横棒グラフ） */
+draw2d(
+    title = "Waste Heat Breakdown",
+    xlabel = "Power [W]",
+    ylabel = "Component",
+    grid = true,
+    xrange = [0, P_waste*1.2],
+
+    /* 放射冷却 */
+    fill_color = red,
+    color = red,
+    polygon([[P_waste, 1], [0, 1], [0, 0.7], [P_waste, 0.7]]),
+    color = black,
+    label(["Radiation Cooling", P_waste*0.05, 1]),
+
+    /* 熱電変換 */
+    fill_color = blue,
+    color = blue,
+    polygon([[P_thermoelectric, 2], [0, 2], [0, 1.7], [P_thermoelectric, 1.7]]),
+    color = black,
+    label(["Thermoelectric", P_thermoelectric*0.05, 2]),
+
+    /* ヒートパイプ */
+    fill_color = green,
+    color = green,
+    polygon([[P_waste, 3], [0, 3], [0, 2.7], [P_waste, 2.7]]),
+    color = black,
+    label(["Heat Pipes", P_waste*0.05, 3])
+)$
+/* ----- CSV出力 ----- */
+csv_file : "MER16_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Total_Power,~,2e,W~%", P_total)$
+printf(f_csv, "Waste_Heat,~,2e,W~%", P_waste)$
+printf(f_csv, "Useful_Power,~,2e,W~%", P_useful)$
+printf(f_csv, "Day_Surface_Temp,~,0f,K~%", T_day_surface)$
+printf(f_csv, "Night_Surface_Temp,~,0f,K~%", T_night_surface)$
+printf(f_csv, "Radiator_Area_Day,~,2e,m^2~%", A_rad_day)$
+printf(f_csv, "Radiator_Area_Night,~,2e,m^2~%", A_rad_night)$
+printf(f_csv, "Thermoelectric_Power,~,2e,W~%", P_thermoelectric)$
+/* printf(f_csv, "Heat_Pipes_Needed,~,d,units~%", n_heat_pipes)$   罠　*/;
+/* printf(f_csv, "Fins_Needed,~,d,units~%", n_fins)$  罠　*/;
+printf(f_csv, "Panel_Temp_Gradient,~,4f,K~%", delta_T)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+/* ----- サマリー出力 ----- */
+sum_file : "MER16_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "MER-16: 水星ダイソン環 廃熱管理 サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【基本パラメータ】~%")$
+printf(f_sum, "  総発電量: ~,2f PW~%", P_total/1e15)$
+printf(f_sum, "  廃熱量: ~,2f PW (~,0f%)~%", P_waste/1e15, (1-efficiency)*100)$
+printf(f_sum, "  有効発電量: ~,2f PW~%~%", P_useful/1e15)$
+printf(f_sum, "【温度環境】~%")$
+printf(f_sum, "  昼側表面: ~,0f℃ (703K)~%", T_day_surface-273)$
+printf(f_sum, "  夜側表面: ~,0f℃ (93K)~%", T_night_surface-273)$
+printf(f_sum, "  温度差: ~,0f K~%~%", T_day_surface - T_night_surface)$
+printf(f_sum, "【廃熱管理システム】~%")$
+printf(f_sum, "  放射冷却面積 (昼側): ~,2e m^2~%", A_rad_day)$
+printf(f_sum, "  放射冷却面積 (夜側): ~,2e m^2~%", A_rad_night)$
+printf(f_sum, "  熱電変換追加発電: ~,2f GW~%", P_thermoelectric/1e9)$
+/* printf(f_sum, "  必要ヒートパイプ: ~,d 本~%", n_heat_pipes)$   
+printf(f_sum, "  必要放射フィン: ~,d 枚~%~%", n_fins)$     罠 */
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "水星の高温環境下でも、放射冷却と熱電変換を組み合わせることで~%")$
+printf(f_sum, "ダイソン環の廃熱を効率的に管理できる。~%")$
+printf(f_sum, "特に昼側と夜側の温度差 (~,0fK) を利用した熱電変換は~%", T_day_surface - T_night_surface)$
+printf(f_sum, "追加の電力を生み出す有効な手段となる。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+/* ----- 完了 ----- */
+print("")$
+print("===== MER-16 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$
+
