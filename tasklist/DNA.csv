@@ -1,7 +1,0 @@
-課題ID,カテゴリ,サブカテゴリ,課題名,計算内容,入力変数,出力形式,備考
-DNA-01,DNA情報管理,ブロックチェーン,DNA情報のブロックチェーン保存と共有,DNAデータサイズD_size ブロックサイズB_size TX数N_tx ガス代G_cost,D_size[GB] B_size[MB] N_tx G_cost[USD],保存コストC_total[USD] 転送時間T_trans[sec],マイクロスロートAR回線で常時接続。0.2cレーザーはバックアップ
-DNA-02,DNA情報管理,マイクロスロートAR,マイクロスロートAR回線によるDNA情報のリアルタイム共有,スロート帯域B_throat レーザー帯域B_laser DNAサイズD_size,B_throat[Tbps] B_laser[Gbps] D_size[GB],転送時間T_throat[sec] T_laser[sec] 遅延D[ms],AR回線は瞬時（理論上） レーザーは0.2cで物理的限界
-DNA-03,DNA情報管理,ハイブリッド転送,マイクロスロートARと0.2cレーザーのハイブリッド転送戦略,緊急度U データ重要度I サイズS コストC,U[0-1] I[0-1] S[GB] C[USD/GB],最適経路選択 コスト最小化,緊急・重要データはAR回線 大容量バルクデータはレーザー
-DNA-04,DNA情報管理,プライバシー保護,ゼロ知識証明によるDNA情報のプライバシー保護,証明サイズP_size 検証時間V_time プライバシーレベルL,P_size[KB] V_time[ms] L[1-5],オーバーヘッド比R_overhead 安全性評価S_score,AR回線の広帯域を活かし完全準同型暗号も併用
-DNA-05,DNA情報管理,統合システム,全DNA情報管理システムの統合モデル,総ユーザー数N_user 1人あたりDNAサイズD_person 保存期間T_years,N_user[人] D_person[MB] T_years[年],総保存容量C_total[EB] 総コストCost[USD],AR回線＋ブロックチェーン＋ゼロ知識証明の統合
-

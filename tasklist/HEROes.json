@@ -1,0 +1,92 @@
+[
+  {
+    "Task ID": "HERO-01",
+    "Category": "Cyborgization",
+    "Core Task": "Cyborg Enhancement Probability",
+    "Calculation Content": "Probability of successful cybernetic enhancement",
+    "Necessity of Coupling": "Essential",
+    "Urgency": "High",
+    "Expected Resolution Year": "2040",
+    "": "26/07/31"
+  },
+  {
+    "Task ID": "HERO-02",
+    "Category": "Mutation",
+    "Core Task": "Genetic Mutation Success Rate",
+    "Calculation Content": "Probability of beneficial genetic mutation",
+    "Necessity of Coupling": "Analysis",
+    "Urgency": "Medium",
+    "Expected Resolution Year": "2050",
+    "": "26/08/01"
+  },
+  {
+    "Task ID": "HERO-03",
+    "Category": "Training",
+    "Core Task": "Peak Human Performance Probability",
+    "Calculation Content": "Probability of achieving peak human performance through training",
+    "Necessity of Coupling": "Essential",
+    "Urgency": "High",
+    "Expected Resolution Year": "2030",
+    "": "26/08/02"
+  },
+  {
+    "Task ID": "HERO-04",
+    "Category": "Integration",
+    "Core Task": "Cyborg-Human Integration Rate",
+    "Calculation Content": "Probability of seamless integration between human and machine",
+    "Necessity of Coupling": "Essential",
+    "Urgency": "High",
+    "Expected Resolution Year": "2045",
+    "": "26/08/03"
+  },
+  {
+    "Task ID": "HERO-05",
+    "Category": "Ethics",
+    "Core Task": "HEROes Ethical Threshold",
+    "Calculation Content": "Quantification of acceptable enhancement limits",
+    "Necessity of Coupling": "Analysis",
+    "Urgency": "High",
+    "Expected Resolution Year": "2040",
+    "": ""
+  },
+  {
+    "Task ID": "HERO-06",
+    "Category": "Cost",
+    "Core Task": "Economic Feasibility of HEROes",
+    "Calculation Content": "Resources required for HEROes creation",
+    "Necessity of Coupling": "Essential",
+    "Urgency": "Medium",
+    "Expected Resolution Year": "2050",
+    "": ""
+  },
+  {
+    "Task ID": "HERO-07",
+    "Category": "Society",
+    "Core Task": "Social Acceptance Rate",
+    "Calculation Content": "Probability of society accepting HEROes",
+    "Necessity of Coupling": "Analysis",
+    "Urgency": "High",
+    "Expected Resolution Year": "2045",
+    "": ""
+  },
+  {
+    "Task ID": "HERO-08",
+    "Category": "Regulation",
+    "Core Task": "Legal Framework Probability",
+    "Calculation Content": "Probability of establishing legal framework for HEROes",
+    "Necessity of Coupling": "Essential",
+    "Urgency": "High",
+    "Expected Resolution Year": "2040",
+    "": ""
+  },
+  {
+    "Task ID": "",
+    "Category": "",
+    "Core Task": "",
+    "Calculation Content": "",
+    "Necessity of Coupling": "",
+    "Urgency": "",
+    "Expected Resolution Year": "",
+    "": ""
+  }
+]

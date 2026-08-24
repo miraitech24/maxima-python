@@ -1,0 +1,13 @@
+{
+  "project": "venus-assembly",
+  "version": "2.0.0",
+  "parts": {
+    "LENR": "venus/LENR.json",
+    "": "venus/.json",
+    "": "venus/.json",
+    "": "venus/.json",
+    "": "venus/.json",
+    "": "venus/.json",
+    "": "venus/.json"   
+  }
+}

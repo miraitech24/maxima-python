@@ -1,0 +1,230 @@
+
+/* ===== TRF-001 信号最適制御 ===== */
+/* 交通量に応じた信号タイミング最適化 */
+
+/* 仕様:
+   自動運転車（AV: Autonomous Vehicle）と手動運転車（MV: Manual Vehicle）が
+   混在する交通環境において、交差点の信号タイミングを最適化する。
+
+   前提:
+   - 自動運転車はV2I（Vehicle-to-Infrastructure）通信により信号情報を受信
+   - 手動運転車は従来の信号に従う
+   - 混在率によって最適な信号サイクルが変化する
+
+   目的:
+   - 交差点での平均待ち時間を最小化
+   - 交通流の円滑化
+   - 二酸化炭素排出量の削減
+*/
+
+/* パラメータ設定 */
+/* 交通量パラメータ */
+q_main: 800$      /* 主道路の交通量 [台/時] */
+q_sub: 400$       /* 従道路の交通量 [台/時] */
+av_ratio: 0.3$    /* 自動運転車の混在率 [0-1] */
+
+/* 信号パラメータ */
+t_cycle_min: 30$  /* 最小サイクル長 [秒] */
+t_cycle_max: 120$ /* 最大サイクル長 [秒] */
+t_green_min: 10$  /* 最小青時間 [秒] */
+t_yellow: 3$      /* 黄時間 [秒] */
+t_all_red: 2$     /* 全赤時間 [秒] */
+
+/* 自動運転車の挙動パラメータ */
+/* 自動運転車はV2I通信により、信号変更を事前に知ることができる */
+av_reaction_improvement: 0.5$  /* 反応時間の改善率 */
+av_platoon_factor: 0.8$        /* プラトゥーン（隊列）効果 */
+
+/* 手動運転車の挙動パラメータ */
+mv_reaction_time: 1.5$  /* 反応時間 [秒] */
+mv_startup_delay: 2.0$  /* 発進遅れ [秒] */
+
+/* 交差点の飽和流量 */
+saturation_flow: 1800$  /* [台/時] */
+
+/* 遅延時間の計算式（Websterの式） */
+/* d = C*(1-λ)^2 / (2*(1-λ*x)) + x^2 / (2*q*(1-x)) - 0.65*(C/q^2)^(1/3)*x^(2+5*λ) */
+/* ここで:
+   C: サイクル長
+   λ: 青時間比（g/C）
+   x: 飽和度（q/(λ*s)）
+   q: 交通量
+   s: 飽和流量
+*/
+
+/* 最適サイクル長の計算 */
+/* Websterの最適サイクル長: C_opt = (1.5*L + 5) / (1 - Y) */
+/* ここで:
+   L: 損失時間（黄+全赤）
+   Y: 臨界レーン交通量比の合計
+*/
+
+/* 損失時間の計算 */
+L: t_yellow + t_all_red$
+print("=== 損失時間 ===")$
+print("L = ", L, " [秒]")$
+
+/* 臨界レーン交通量比 */
+Y_main: q_main / saturation_flow$
+Y_sub: q_sub / saturation_flow$
+Y: Y_main + Y_sub$
+print("=== 臨界レーン交通量比 ===")$
+print("Y_main = ", float(Y_main))$
+print("Y_sub = ", float(Y_sub))$
+print("Y = ", float(Y))$
+
+/* Websterの最適サイクル長 */
+C_opt: (1.5 * L + 5) / (1 - Y)$
+print("=== Websterの最適サイクル長 ===")$
+print("C_opt = ", float(C_opt), " [秒]")$
+
+/* サイクル長の制約チェック */
+if C_opt < t_cycle_min then C_opt: t_cycle_min$
+if C_opt > t_cycle_max then C_opt: t_cycle_max$
+print("制約後のC_opt = ", float(C_opt), " [秒]")$
+
+/* 青時間の配分 */
+/* 主道路の青時間 */
+g_main: (C_opt - L) * Y_main / Y$
+/* 従道路の青時間 */
+g_sub: (C_opt - L) * Y_sub / Y$
+
+/* 青時間の制約チェック */
+if g_main < t_green_min then g_main: t_green_min$
+if g_sub < t_green_min then g_sub: t_green_min$
+
+print("=== 青時間配分 ===")$
+print("主道路の青時間: ", float(g_main), " [秒]")$
+print("従道路の青時間: ", float(g_sub), " [秒]")$
+
+/* 自動運転車混在の効果を考慮 */
+/* 自動運転車の割合に応じて、実効的な飽和流量が向上 */
+effective_saturation: saturation_flow * (1 + av_ratio * av_platoon_factor)$
+print("=== 自動運転車混在の効果 ===")$
+print("実効飽和流量: ", float(effective_saturation), " [台/時]")$
+
+/* 混在率を変化させた場合の最適サイクル長の計算 */
+print("=== 混在率と最適サイクル長の関係 ===")$
+for av_ratio_test: 0.0 thru 1.0 step 0.1 do (
+    eff_sat: saturation_flow * (1 + av_ratio_test * av_platoon_factor),
+    Y_main_test: q_main / eff_sat,
+    Y_sub_test: q_sub / eff_sat,
+    Y_test: Y_main_test + Y_sub_test,
+    C_test: (1.5 * L + 5) / (1 - Y_test),
+    if C_test < t_cycle_min then C_test: t_cycle_min,
+    if C_test > t_cycle_max then C_test: t_cycle_max,
+    print("AV比率=", float(av_ratio_test), " → 最適サイクル長=", float(C_test), " [秒]")
+)$
+
+/* 平均遅延時間の計算 */
+/* Websterの平均遅延式 */
+/* d = C*(1-λ)^2 / (2*(1-λ*x)) + x^2 / (2*q*(1-x)) */
+
+/* 主道路の遅延 */
+lambda_main: g_main / C_opt$
+x_main: q_main / (lambda_main * effective_saturation)$
+d_main: C_opt * (1 - lambda_main)^2 / (2 * (1 - lambda_main * x_main)) +
+        x_main^2 / (2 * q_main * (1 - x_main))$
+
+/* 従道路の遅延 */
+lambda_sub: g_sub / C_opt$
+x_sub: q_sub / (lambda_sub * effective_saturation)$
+d_sub: C_opt * (1 - lambda_sub)^2 / (2 * (1 - lambda_sub * x_sub)) +
+       x_sub^2 / (2 * q_sub * (1 - x_sub))$
+
+print("=== 平均遅延時間 ===")$
+print("主道路の平均遅延: ", float(d_main), " [秒/台]")$
+print("従道路の平均遅延: ", float(d_sub), " [秒/台]")$
+
+/* 総遅延時間 */
+total_delay: q_main * d_main + q_sub * d_sub$
+print("総遅延時間: ", float(total_delay), " [台・秒/時]")$
+
+/* グラフ1: 混在率と最適サイクル長の関係 */
+set_plot_option([plot_format, gnuplot])$
+
+/* データ生成 */
+av_ratios: makelist(0.1 * k, k, 0, 10)$
+opt_cycles: []$
+
+for av in av_ratios do (
+    eff_sat: saturation_flow * (1 + av * av_platoon_factor),
+    Y_m: q_main / eff_sat,
+    Y_s: q_sub / eff_sat,
+    Y_t: Y_m + Y_s,
+    C_t: (1.5 * L + 5) / (1 - Y_t),
+    if C_t < t_cycle_min then C_t: t_cycle_min,
+    if C_t > t_cycle_max then C_t: t_cycle_max,
+    opt_cycles: append(opt_cycles, [C_t])
+)$
+
+plot2d([discrete, makelist([av_ratios[k], opt_cycles[k]], k, 1, 11)],
+       [style, [lines, 2]],
+       [color, blue],
+       [xlabel, "AV Ratio"],
+       [ylabel, "Optimal Cycle Length [s]"],
+       [title, "Optimal Signal Cycle vs AV Ratio"],
+       [gnuplot_preamble, "set key outside;"])$
+
+/* グラフ2: 混在率と平均遅延の関係 */
+delays: []$
+for av in av_ratios do (
+    eff_sat: saturation_flow * (1 + av * av_platoon_factor),
+    Y_m: q_main / eff_sat,
+    Y_s: q_sub / eff_sat,
+    Y_t: Y_m + Y_s,
+    C_t: (1.5 * L + 5) / (1 - Y_t),
+    if C_t < t_cycle_min then C_t: t_cycle_min,
+    if C_t > t_cycle_max then C_t: t_cycle_max,
+    g_m: (C_t - L) * Y_m / Y_t,
+    g_s: (C_t - L) * Y_s / Y_t,
+    if g_m < t_green_min then g_m: t_green_min,
+    if g_s < t_green_min then g_s: t_green_min,
+    lam_m: g_m / C_t,
+    lam_s: g_s / C_t,
+    x_m: q_main / (lam_m * eff_sat),
+    x_s: q_sub / (lam_s * eff_sat),
+    d_m: C_t * (1 - lam_m)^2 / (2 * (1 - lam_m * x_m)) + x_m^2 / (2 * q_main * (1 - x_m)),
+    d_s: C_t * (1 - lam_s)^2 / (2 * (1 - lam_s * x_s)) + x_s^2 / (2 * q_sub * (1 - x_s)),
+    total_d: q_main * d_m + q_sub * d_s,
+    delays: append(delays, [total_d])
+)$
+
+plot2d([discrete, makelist([av_ratios[k], delays[k]], k, 1, 11)],
+       [style, [lines, 2]],
+       [color, red],
+       [xlabel, "AV Ratio"],
+       [ylabel, "Total Delay [veh·s/h]"],
+       [title, "Total Delay vs AV Ratio"],
+       [gnuplot_preamble, "set key outside;"])$
+
+/* グラフ3: 青時間配分の可視化 */
+plot2d([discrete, [[1, g_main], [2, g_sub]]],
+       [style, [points, 3, 1]],
+       [color, green, orange],
+       [legend, "Main Road", "Sub Road"],
+       [xlabel, "Road"],
+       [ylabel, "Green Time [s]"],
+       [title, "Green Time Allocation"],
+       [gnuplot_preamble, "set key outside;"])$
+
+/* 考察:
+   1. 自動運転車の混在率が上がると、実効飽和流量が向上し、
+      最適サイクル長が短縮される。
+
+   2. 自動運転車はV2I通信により信号情報を事前に受信できるため、
+      反応時間の短縮とプラトゥーン効果により交通流が改善する。
+
+   3. 混在率30%の場合:
+      - 最適サイクル長: [float(C_opt)] 秒
+      - 主道路の青時間: [float(g_main)] 秒
+      - 従道路の青時間: [float(g_sub)] 秒
+
+   4. 完全な自動運転社会では、信号機自体が不要になる可能性があるが、
+      移行期間中は混在を前提とした最適化が必要。
+
+   5. 今後の課題:
+      - 動的な信号制御（リアルタイム交通量に応じた調整）
+      - 複数交差点の協調制御
+      - 歩行者・自転車との共存
+*/
