@@ -1,0 +1,108 @@
+/* ===== TRF-003_priority_lane.mac ===== */
+/* 優先車線割り当て: 自動運転車専用レーンの動的割り当て */
+/* 備考: 専用レーンを給電レーンとする？普及度予測 */
+/* --- パラメータ設定 --- */
+/* 時間帯 (0-24時) */
+t_start: 0$
+t_end: 24$
+dt: 0.5$
+/* 自動運転車普及率の時間変化 (Sカーブ) */
+/* 普及率: adoption(t) = K / (1 + exp(-r*(t - t0))) */
+K: 0.8$          /* 最大普及率 */
+r: 0.5$          /* 普及速度 */
+t0: 12$          /* 普及率がK/2になる時間 */
+
+/* 専用レーン数 */
+total_lanes: 4$
+dedicated_lanes: 2$
+/* 交通量 (台/時) */
+traffic_volume(t) := 2000 + 500*sin(%pi*t/12)$
+/* 自動運転車の割合 */
+adoption(t) := K / (1 + exp(-r*(t - t0)))$
+/* 専用レーン1台あたりの容量 (台/時) */
+lane_capacity: 1800$
+/* 給電レーンとしての効率 */
+wireless_charge_efficiency: 0.85$
+avg_charge_power: 50$  /* kW */
+
+/* --- 計算 --- */
+/* 専用レーンが必要かどうかの判定 */
+dedicated_lane_demand(t) := adoption(t) * traffic_volume(t)$
+dedicated_lane_capacity(t) := dedicated_lanes * lane_capacity$
+/* 専用レーン利用率 */
+utilization(t) := dedicated_lane_demand(t) / dedicated_lane_capacity(t)$
+/* 給電レーンとしてのエネルギー供給量 */
+energy_supply(t) := dedicated_lane_demand(t) * avg_charge_power * wireless_charge_efficiency / 1000$  /* MWh/時 */
+
+/* --- グラフ描画 --- */
+set_plot_option([plot_format, gnuplot])$
+/* グラフ1: 自動運転車普及率と専用レーン需要 */
+plot2d(
+  [adoption(t), dedicated_lane_demand(t)/1000],
+  [t, t_start, t_end],
+  [xlabel, "Time (hour)"],
+  [ylabel, "Adoption rate / Demand (x1000)"],
+  [legend, "Adoption rate", "Dedicated lane demand (x1000)"],
+  [title, "AV Adoption and Dedicated Lane Demand"]
+)$
+/* グラフ2: 専用レーン利用率 */
+plot2d(
+  utilization(t),
+  [t, t_start, t_end],
+  [xlabel, "Time (hour)"],
+  [ylabel, "Utilization"],
+  [title, "Dedicated Lane Utilization"]
+)$
+/* グラフ3: 給電レーンとしてのエネルギー供給 */
+plot2d(
+  energy_supply(t),
+  [t, t_start, t_end],
+  [xlabel, "Time (hour)"],
+  [ylabel, "Energy Supply (MWh/h)"],
+  [title, "Wireless Charging Energy Supply"]
+)$
+/* --- 結果表示 --- */
+print("=== TRF-003: 優先車線割り当て ===")$
+print("自動運転車専用レーンの動的割り当て")$
+print("")$
+/* ピーク時の評価 */
+t_peak: 18$
+print("--- ピーク時 (18時) の評価 ---")$
+print("自動運転車普及率: ", float(adoption(t_peak)))$
+print("専用レーン需要: ", float(dedicated_lane_demand(t_peak)), " 台/時")$
+print("専用レーン容量: ", float(dedicated_lane_capacity(t_peak)), " 台/時")$
+print("専用レーン利用率: ", float(utilization(t_peak)))$
+print("給電エネルギー供給: ", float(energy_supply(t_peak)), " MWh/時")$
+print("")$
+/* 普及率が50%を超える時間 */
+t_50: solve(adoption(t) = 0.5, t)$
+print("普及率が50%に達する時間: ", float(rhs(t_50[1])), " 時")$
+print("")$
+/* 専用レーンが過負荷になる時間帯 */
+overload_times: []$
+for t_val: t_start step dt thru t_end do (
+  if utilization(t_val) > 1.0 then
+    overload_times: append(overload_times, [t_val])
+)$
+print("専用レーンが過負荷になる時間帯: ", overload_times)$
+print("")$
+/* 給電レーンとしての年間エネルギー供給量 */
+annual_energy: integrate(energy_supply(t), t, 0, 24) * 365$
+print("年間エネルギー供給量: ", float(annual_energy), " MWh/年")$
+print("")$
+/* --- 考察 --- */
+print("=== 考察 ===")$
+print("1. 自動運転車の普及率が50%を超えると、専用レーンの需要が急増する。")$
+print("2. 専用レーンを給電レーンとして活用することで、走行中充電が可能となり、")$
+print("   バッテリー容量の削減や航続距離の延長が期待できる。")$
+print("3. 過負荷時間帯には、動的なレーン割り当て（通常レーンとの切り替え）が必要。")$
+print("4. 給電レーンとしてのエネルギー供給量は、時間帯によって大きく変動するため、")$
+print("   系統側の負荷平準化策と連携した運用が重要。")$
+print("")$
+/* --- 結論 --- */
+print("=== 結論 ===")$
+print("自動運転車専用レーンを給電レーンとして活用することは、")$
+print("普及度に応じた動的割り当てとエネルギー管理の最適化により実現可能である。")$
+print("特に、普及率が50%を超える時間帯（", float(rhs(t_50[1])), "時以降）には、")$
+print("給電レーンとしての機能を最大限に活用できる。")$
+

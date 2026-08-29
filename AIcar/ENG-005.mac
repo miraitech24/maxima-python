@@ -1,0 +1,187 @@
+/* ===== ENG-005_V2G最適化.mac ===== */
+/* 交換ステーションのV2G最適化 */
+/* 交換用バッテリーを電力網の蓄電池として活用 */
+
+kill(all);
+
+/* パラメータ設定 */
+battery_capacity: 50$    /* バッテリー容量 [kWh] */
+num_batteries: 20$       /* 在庫バッテリー数 */
+grid_price: 15$          /* 電力価格 [円/kWh] */
+v2g_revenue: 25$         /* V2G収入 [円/kWh] */
+charge_efficiency: 0.95$ /* 充電効率 */
+discharge_efficiency: 0.95$ /* 放電効率 */
+
+/* 時間帯別電力価格（24時間） */
+price_profile: [12, 11, 10, 9, 8, 8, 9, 12, 15, 18, 20, 22,
+                23, 22, 20, 18, 16, 15, 14, 13, 12, 11, 10, 9]$
+
+/* 系統需要（24時間） */
+demand_profile: [0.6, 0.5, 0.4, 0.4, 0.5, 0.7, 0.9, 1.0, 0.95, 0.85,
+                 0.75, 0.7, 0.65, 0.7, 0.8, 0.9, 1.0, 0.95, 0.85, 0.75,
+                 0.7, 0.65, 0.6, 0.55]$
+
+/* 総バッテリー容量 */
+total_capacity: battery_capacity * num_batteries$
+
+/* V2G最適化の計算 */
+/* 各時間帯の充放電量を最適化 */
+
+/* 簡易最適化: 価格が高い時間帯に放電、安い時間帯に充電 */
+discharge_hours: []$
+charge_hours: []$
+
+for i: 1 thru 24 do (
+    if price_profile[i] >= 20 then
+        discharge_hours: append(discharge_hours, [i])
+    else if price_profile[i] <= 10 then
+        charge_hours: append(charge_hours, [i])
+)$
+
+/* 放電量と充電量の計算 */
+discharge_power: 0.5 * total_capacity / length(discharge_hours)$
+charge_power: 0.5 * total_capacity / length(charge_hours)$
+
+/* 収益計算 */
+revenue: 0$
+for i in discharge_hours do (
+    revenue: revenue + discharge_power * price_profile[i] * discharge_efficiency
+)$
+
+cost: 0$
+for i in charge_hours do (
+    cost: cost + charge_power * price_profile[i] / charge_efficiency
+)$
+
+profit: revenue - cost$
+
+/* 結果表示 */
+print("=== ENG-005: V2G最適化結果 ===")$
+printf(true, "総バッテリー容量: ~,2f kWh~%", total_capacity)$
+printf(true, "放電時間帯: ~a~%", discharge_hours)$
+printf(true, "充電時間帯: ~a~%", charge_hours)$
+printf(true, "放電電力: ~,2f kW~%", discharge_power)$
+printf(true, "充電電力: ~,2f kW~%", charge_power)$
+printf(true, "収益: ~,2f 円~%", revenue)$
+printf(true, "コスト: ~,2f 円~%", cost)$
+printf(true, "純利益: ~,2f 円~%", profit)$
+
+/* ===== グラフ描画 ===== */
+set_plot_option([plot_format, gnuplot])$
+
+/* 時間データ（1〜24） */
+time_data: makelist(i, i, 1, 24)$
+
+/* 時間帯別の充放電スケジュール */
+schedule: makelist(0, i, 1, 24)$
+for i in discharge_hours do schedule[i]: -discharge_power$
+for i in charge_hours do schedule[i]: charge_power$
+
+/* データポイント作成用の関数 */
+make_points(xlist, ylist) := makelist([xlist[i], ylist[i]], i, 1, length(xlist))$
+
+/* ----- グラフ1: 電力価格と充放電スケジュール ----- */
+print("グラフ1: 電力価格と充放電スケジュールを表示します...")$
+
+price_points: make_points(time_data, price_profile)$
+schedule_points: make_points(time_data, schedule)$
+
+plot2d([[discrete, price_points], [discrete, schedule_points]],
+       [style, [lines, 2], [lines, 2]],
+       [color, blue, red],
+       [legend, "電力価格 [円/kWh]", "充放電 [kW]"],
+       [xlabel, "時間 [h]"],
+       [ylabel, "価格/電力"],
+       [title, "V2G最適化: 電力価格と充放電スケジュール"],
+       [gnuplot_preamble, "set key outside; set grid; set xtics 1;"])$
+
+/* ----- グラフ2: 系統需要とバッテリー貢献 ----- */
+print("グラフ2: 系統需要とバッテリー貢献を表示します...")$
+
+demand_points: make_points(time_data, demand_profile)$
+schedule_points2: make_points(time_data, schedule)$
+
+plot2d([[discrete, demand_points], [discrete, schedule_points2]],
+       [style, [lines, 2], [lines, 2]],
+       [color, green, red],
+       [legend, "系統需要 [MW]", "充放電 [kW]"],
+       [xlabel, "時間 [h]"],
+       [ylabel, "需要/電力"],
+       [title, "系統安定化への貢献"],
+       [gnuplot_preamble, "set key outside; set grid; set xtics 1;"])$
+
+/* ----- グラフ3: 累積収益 ----- */
+print("グラフ3: 累積収益を表示します...")$
+
+cumulative_revenue: makelist(0, i, 1, 24)$
+cum: 0$
+for i: 1 thru 24 do (
+    if member(i, discharge_hours) then
+        cum: cum + discharge_power * price_profile[i] * discharge_efficiency
+    else if member(i, charge_hours) then
+        cum: cum - charge_power * price_profile[i] / charge_efficiency,
+    cumulative_revenue[i]: cum
+)$
+
+cum_points: make_points(time_data, cumulative_revenue)$
+
+plot2d([discrete, cum_points],
+       [style, [lines, 2]],
+       [color, magenta],  /* purple → magenta */
+       [legend, "累積収益 [円]"],
+       [xlabel, "時間 [h]"],
+       [ylabel, "累積収益"],
+       [title, "V2G累積収益"],
+       [gnuplot_preamble, "set key outside; set grid; set xtics 1;"])$
+
+/* ----- グラフ4: バッテリー残量 ----- */
+print("グラフ4: バッテリー残量推移を表示します...")$
+
+soc: makelist(0, i, 1, 24)$
+current_soc: 0.5 * total_capacity$
+for i: 1 thru 24 do (
+    if member(i, discharge_hours) then
+        current_soc: current_soc - discharge_power
+    else if member(i, charge_hours) then
+        current_soc: current_soc + charge_power,
+    soc[i]: current_soc
+)$
+
+soc_points: make_points(time_data, soc)$
+
+plot2d([discrete, soc_points],
+       [style, [lines, 2]],
+       [color, orange],
+       [legend, "バッテリー残量 [kWh]"],
+       [xlabel, "時間 [h]"],
+       [ylabel, "残量"],
+       [title, "バッテリー残量推移"],
+       [gnuplot_preamble, "set key outside; set grid; set xtics 1; set yrange [0:];"])$
+
+/* ----- グラフ5: 充放電の棒グラフ（修正） ----- */
+print("グラフ5: 充放電パターンを表示します...")$
+
+charge_points: makelist([i, schedule[i]], i, 1, 24)$
+
+plot2d([discrete, charge_points],
+       [style, [impulses, 3, 1]],
+       [color, blue],  /* darkblue → blue */
+       [legend, "充放電 [kW]"],
+       [xlabel, "時間 [h]"],
+       [ylabel, "充放電量"],
+       [title, "充放電パターン（正:充電, 負:放電）"],
+       [gnuplot_preamble, "set key outside; set grid; set xtics 1;"])$
+
+/* ===== 結論 ===== */
+print("")$
+print("=== 結論 ===")$
+printf(true, "1. 総バッテリー容量: ~,2f kWh~%", total_capacity)$
+printf(true, "2. 純利益: ~,2f 円/日~%", profit)$
+printf(true, "3. 年間利益: ~,2f 円 (~,2f 万円)~%", profit*365, profit*365/10000)$
+print("4. 最適化戦略:")$
+print("   - 価格が高い時間帯（20円以上）に放電")$
+print("   - 価格が安い時間帯（10円以下）に充電")$
+print("5. 系統安定化効果:")$
+print("   - 需要ピーク時に放電（ピークカット）")$
+print("   - 需要が低い時に充電（需要増加）")$
+print("========================================")$

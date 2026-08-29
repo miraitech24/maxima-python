@@ -1,0 +1,199 @@
+/* ============================================================
+   課題ID: RTE-001
+   課題名: 複数乗客同乗最適化（デマンドバス）
+   計算内容: 複数乗客の乗降順序を最適化
+
+   仕様:
+   - 乗用車ではなくデマンドバスを想定
+   - 乗車はバス停必須、降車は経路沿いどこでも可能
+   - 料金は一律
+   - ルートは走りながら各目的地を繋ぐ（事前に固定しない）
+
+   数式:
+   - 巡回セールスマン問題(TSP)の動的解法
+   - 逐次挿入法による近似最適化
+
+   結論:
+   デマンドバスでは、乗車バス停と降車希望地点を結ぶ動的ルート最適化が有効。
+   降車が経路沿いどこでも可能なため、柔軟な経路設計が可能。
+   ============================================================ */
+
+kill(all);
+
+/* パラメータ設定 */
+/* バス停の座標 */
+bus_stops: [
+  [0, 0],     /* バス停1: 中心部 */
+  [5, 3],     /* バス停2 */
+  [8, 6],     /* バス停3 */
+  [12, 4],    /* バス停4 */
+  [15, 8],    /* バス停5 */
+  [20, 5]     /* バス停6 */
+]$
+
+/* 乗客の乗車バス停と降車希望地点 */
+passengers: [
+  [1, 3, 2],   /* 乗客1: バス停1から乗車、降車希望地点(3,2) */
+  [2, 5, 4],   /* 乗客2: バス停2から乗車、降車希望地点(5,4) */
+  [3, 8, 7],   /* 乗客3: バス停3から乗車、降車希望地点(8,7) */
+  [4, 12, 5],  /* 乗客4: バス停4から乗車、降車希望地点(12,5) */
+  [5, 16, 9],  /* 乗客5: バス停5から乗車、降車希望地点(16,9) */
+  [6, 20, 6]   /* 乗客6: バス停6から乗車、降車希望地点(20,6) */
+]$
+
+/* 距離計算関数 */
+dist(p1, p2) := sqrt((p1[1] - p2[1])^2 + (p1[2] - p2[2])^2)$
+
+/* バス停間の距離行列 */
+num_stops: length(bus_stops)$
+stop_dist: zeromatrix(num_stops, num_stops)$
+for i: 1 thru num_stops do (
+  for j: 1 thru num_stops do (
+    stop_dist[i][j]: dist(bus_stops[i], bus_stops[j])
+  )
+)$
+
+print("=== バス停間の距離行列 ===")$
+print(stop_dist)$
+
+/* 乗客の降車地点までの距離 */
+passenger_drop_dist: makelist(
+  dist(bus_stops[passengers[i][1]], [passengers[i][2], passengers[i][3]]),
+  i, 1, length(passengers)
+)$
+
+print("=== 乗客の乗車バス停から降車希望地点までの距離 ===")$
+for i: 1 thru length(passengers) do (
+  print("乗客", i, ": 距離 =", float(passenger_drop_dist[i]))
+)$
+
+/* TSPの逐次挿入法による近似解法 */
+/* 訪問順序を最適化する */
+tsp_greedy() := block(
+  [visited: [1], current: 1, next_stop, min_dist, total_dist: 0, ii, jj],
+  for ii: 2 thru num_stops do (
+    min_dist: inf,
+    next_stop: 0,
+    for jj: 1 thru num_stops do (
+      if not member(jj, visited) then (
+        if stop_dist[current][jj] < min_dist then (
+          min_dist: stop_dist[current][jj],
+          next_stop: jj
+        )
+      )
+    ),
+    visited: append(visited, [next_stop]),
+    total_dist: total_dist + min_dist,
+    current: next_stop
+  ),
+  /* 出発点に戻る */
+  total_dist: total_dist + stop_dist[current][1],
+  return([visited, total_dist])
+)$
+
+result: tsp_greedy()$
+optimal_route: result[1]$
+total_route_dist: result[2]$
+
+print("=== TSP逐次挿入法による最適ルート ===")$
+print("訪問順序:", optimal_route)$
+print("総走行距離:", float(total_route_dist))$
+
+/* 乗客の乗降順序の最適化 */
+/* 各乗客について、乗車バス停と降車地点を訪問順に組み込む */
+passenger_route: []$
+for i: 1 thru length(passengers) do (
+  passenger_route: append(passenger_route, 
+    [[passengers[i][1], passengers[i][2], passengers[i][3]]])
+)$
+
+print("=== 乗客の乗降順序 ===")$
+for i: 1 thru length(passenger_route) do (
+  print("乗客", i, ": 乗車バス停 =", passenger_route[i][1], 
+        ", 降車地点 = (", passenger_route[i][2], ",", passenger_route[i][3], ")")
+)$
+
+/* 総走行距離の計算（乗客の乗降を含む） */
+total_passenger_dist: 0$
+current_pos: bus_stops[1]$
+for i: 1 thru length(passenger_route) do (
+  /* 乗車バス停へ移動 */
+  total_passenger_dist: total_passenger_dist + 
+    dist(current_pos, bus_stops[passenger_route[i][1]]),
+  current_pos: bus_stops[passenger_route[i][1]],
+  /* 降車地点へ移動 */
+  total_passenger_dist: total_passenger_dist + 
+    dist(current_pos, [passenger_route[i][2], passenger_route[i][3]]),
+  current_pos: [passenger_route[i][2], passenger_route[i][3]]
+)$
+
+print("乗客乗降を含む総走行距離:", float(total_passenger_dist))$
+
+/* ===== グラフ描画 ===== */
+set_plot_option([plot_format, gnuplot])$
+
+/* グラフ1: バス停とルートのプロット */
+print("グラフ1: デマンドバス最適ルートを表示します...")$
+
+/* ルートの座標リスト */
+route_coords: makelist(bus_stops[optimal_route[i]], i, 1, length(optimal_route))$
+/* 出発点に戻る */
+route_coords: append(route_coords, [bus_stops[optimal_route[1]]])$
+
+/* 降車地点の座標リスト */
+drop_coords: makelist([passengers[i][2], passengers[i][3]], i, 1, length(passengers))$
+
+/* バス停の座標リスト */
+stop_coords: bus_stops$
+
+plot2d([[discrete, stop_coords],
+        [discrete, route_coords],
+        [discrete, drop_coords]],
+       [style, [points, 2, 1],    /* バス停: 大きい点 */
+               [lines, 2],        /* ルート: 線 */
+               [points, 3, 1]],   /* 降車地点: 小さい点 */
+       [color, blue, red, green],
+       [xlabel, "X座標 [km]"],
+       [ylabel, "Y座標 [km]"],
+       [title, "デマンドバス最適ルート"],
+       [gnuplot_preamble, "set key outside; set grid;"],
+       [legend, "バス停", "ルート", "降車地点"])$
+
+/* グラフ2: 距離行列のヒートマップ（代わりに棒グラフ） */
+print("グラフ2: バス停間の距離を表示します...")$
+
+/* 距離行列を1次元に展開 */
+dist_flat: []$
+for i: 1 thru num_stops do (
+  for j: 1 thru num_stops do (
+    if i < j then
+      dist_flat: append(dist_flat, [[i*10 + j, stop_dist[i][j]]])
+  )
+)$
+
+plot2d([discrete, dist_flat],
+       [style, [impulses, 2, 1]],
+       [color, magenta],
+       [xlabel, "バス停ペア (i,j)"],
+       [ylabel, "距離 [km]"],
+       [title, "バス停間の距離"],
+       [gnuplot_preamble, "set key outside; set grid; set xtics rotate;"],
+       [legend, "距離"])$
+
+/* ===== 結論 ===== */
+print("")$
+print("========================================")$
+print("【結論】")$
+printf(true, "1. デマンドバスの最適ルート: バス停 ~a~%", optimal_route)$
+printf(true, "2. 総走行距離: ~,2f km~%", total_route_dist)$
+printf(true, "3. 乗客乗降を含む総走行距離: ~,2f km~%", total_passenger_dist)$
+print("4. 特徴:")$
+print("   - 乗車はバス停必須、降車は経路沿いどこでも可能")$
+print("   - 料金は一律のため、距離による料金変動なし")$
+print("   - ルートは走りながら動的に最適化")$
+print("5. 考察:")$
+print("   - 降車が自由なため、バス停間の最短ルートから")$
+print("     逸脱して降車地点に立ち寄る柔軟性が重要")$
+print("   - 乗客数が増えると計算量が指数関数的に増加")$
+print("     するため、近似解法が実用的")$
+print("========================================")$
