@@ -1,0 +1,149 @@
+/* HERO-07: 掲示板添付の[1][2]を注意厳守して計算 */
+kill(all);
+
+load("eigen")$
+load("diag")$
+load("linearalgebra")$
+
+/* [1] 行列の定義 */
+A: matrix([2,1,0],[1,2,1],[0,1,2])$
+
+print("=== HERO-07: 行列の固有値・固有ベクトル解析 ===")$
+print("")$
+print("【行列 A】")$
+print(A)$
+print("")$
+
+/* [2] 固有値・固有ベクトル計算 */
+/* eigenvectorsの出力: [[固有値リスト, 重複度リスト], [固有ベクトルリスト]] */
+eig_result: eigenvectors(A)$
+
+/* 固有値と重複度を抽出 */
+eig_vals: eig_result[1][1]$      /* 固有値リスト */
+eig_mults: eig_result[1][2]$     /* 重複度リスト */
+
+/* 固有ベクトルを抽出（正しい方法） */
+/* eigenvectorsの出力形式:
+   [[[λ1, λ2, ...], [m1, m2, ...]], [[v1_vec], [v2_vec], ...]]
+   固有ベクトルは eig_result[2] にリストとして格納 */
+eig_vecs_list: eig_result[2]$    /* 固有ベクトルのリスト */
+
+/* 固有値の表示 */
+printf(true, "【固有値】~%")$
+for i: 1 thru length(eig_vals) do (
+    printf(true, "  λ~d = ~,4f (重複度: ~d)~%", i, eig_vals[i], eig_mults[i])
+)$
+print("")$
+
+/* 固有ベクトルの表示 */
+printf(true, "【固有ベクトル】~%")$
+for i: 1 thru length(eig_vecs_list) do (
+    printf(true, "  v~d = ~a~%", i, eig_vecs_list[i])
+)$
+print("")$
+
+/* 固有ベクトル行列 P の作成（正しい方法） */
+/* 固有ベクトルを列として並べる */
+eig_vec1: eig_vecs_list[1][1]$   /* 1つ目の固有ベクトル */
+eig_vec2: eig_vecs_list[2][1]$   /* 2つ目の固有ベクトル */
+eig_vec3: eig_vecs_list[3][1]$   /* 3つ目の固有ベクトル */
+
+/* 固有ベクトルを列として並べて行列Pを作成 */
+P: transpose(matrix(eig_vec1, eig_vec2, eig_vec3))$
+
+printf(true, "【固有ベクトル行列 P】~%")$
+print(P)$
+print("")$
+
+/* 対角行列 D */
+D: diag(eig_vals)$
+
+printf(true, "【対角行列 D】~%")$
+print(D)$
+print("")$
+
+/* Pの逆行列 */
+P_inv: invert(P)$
+
+printf(true, "【Pの逆行列】~%")$
+print(P_inv)$
+print("")$
+
+/* 検証: A = P D P^-1 */
+check: P . D . P_inv$
+
+printf(true, "【対角化の検証】~%")$
+printf(true, "  P D P^-1 =~%")$
+print(check)$
+printf(true, "  A = P D P^-1 は ~a~%", is(check = A))$
+print("")$
+
+/* HERO-07の計算（例: A^3） */
+A3: A^^3$
+printf(true, "【A^3】~%")$
+print(A3)$
+print("")$
+
+/* 固有値の3乗 */
+eigenvalues_cubed: eig_vals^3$
+printf(true, "【固有値の3乗】~%")$
+print(eigenvalues_cubed)$
+print("")$
+
+/* トレースの計算 */
+trace_A: mat_trace(A)$
+printf(true, "【トレース】~%")$
+printf(true, "  tr(A) = ~d~%", trace_A)$
+printf(true, "  固有値の和 = ~d (検証: ~a)~%", sum(eig_vals[i], i, 1, length(eig_vals)), 
+        is(trace_A = sum(eig_vals[i], i, 1, length(eig_vals))))$
+print("")$
+
+/* 行列式 */
+det_A: determinant(A)$
+printf(true, "【行列式】~%")$
+printf(true, "  det(A) = ~d~%", det_A)$
+printf(true, "  固有値の積 = ~d (検証: ~a)~%", 
+        product(eig_vals[i], i, 1, length(eig_vals)),
+        is(det_A = product(eig_vals[i], i, 1, length(eig_vals))))$
+print("")$
+
+/* 特性多項式 */
+char_poly: charpoly(A, x)$
+printf(true, "【特性多項式】~%")$
+printf(true, "  p(λ) = ~a~%", char_poly)$
+print("")$
+
+/* ケーリー・ハミルトンの定理の検証 */
+/* 正しい方法: charpolyの結果を評価 */
+poly_result: ev(char_poly, x=A)$
+zero_mat: zeromatrix(3,3)$
+
+printf(true, "【ケーリー・ハミルトンの定理の検証】~%")$
+printf(true, "  p(A) =~%")$
+print(poly_result)$
+printf(true, "  p(A) = 0 は ~a~%", is(poly_result = zero_mat))$
+print("")$
+
+/* ---- 追加: 固有値と固有ベクトルの詳細 ---- */
+print("=== 詳細解析 ===")$
+print("")$
+
+/* 各固有値に対する固有ベクトルの確認 */
+for i: 1 thru length(eig_vals) do (
+    printf(true, "【固有値 λ~d = ~,4f の確認】~%", i, eig_vals[i])$
+    printf(true, "  A * v~d =~%", i)$
+    print(A . eig_vecs_list[i][1])$
+    printf(true, "  λ~d * v~d =~%", i, i)$
+    print(eig_vals[i] * eig_vecs_list[i][1])$
+    printf(true, "  一致: ~a~%", is(A . eig_vecs_list[i][1] = eig_vals[i] * eig_vecs_list[i][1]))$
+    print("")$
+)$
+
+/* ---- まとめ ---- */
+print("=== まとめ ===")$
+print("")$
+printf(true, "1. 固有値: ~a~%", eig_vals)$
+printf(true, "2. トレース: ~d (固有値の和: ~d)~%", trace_A, sum(eig_vals[i], i, 1, length(eig_vals)))$
+printf(true, "3. 行列式: ~d (固有値の積: ~d)~%", det_A, product(eig_vals[i], i, 1, length(eig_vals)))$
+printf(true, "4. ケーリー・ハミルトンの定理: ~a~%", is(poly_result = zero_mat))$
+printf(true, "5. 対角化: A = P D P^-1 は ~a~%", is(check = A))$

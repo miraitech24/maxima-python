@@ -1,0 +1,221 @@
+/* ============================================================
+   HZ-05: 温度制御システム
+   目的：オニールシリンダー型人工HZの内部温度を
+         快適範囲（22℃±2℃）に維持するための設計を行う。
+   仕様：
+     - 太陽光入射エネルギーと熱放射のバランスを計算
+     - 必要冷却能力・加熱能力を算出
+     - ヒートポンプの規模を決定
+     - 断熱材の厚さを最適化
+   注意：
+     - set_plot_option([plot_format, gnuplot]); で各グラフを別window表示
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画
+     - 整数は~d、浮動小数点数は~fを使用
+   出力:
+     1. HZ05_results.csv: 温度制御計算結果
+     2. HZ05_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+/* グラフ表示設定 */
+set_plot_option([plot_format, gnuplot]);
+
+print("===== HZ-05: 温度制御システム =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+/* シリンダー形状 */
+R : 5000;                            /* 半径 [m] */
+L : 20000;                           /* 長さ [m] */
+surface_area : 2 * %pi * R * L;      /* 側面積 [m^2] */
+end_area : 2 * %pi * R^2;            /* 端部面積 [m^2] */
+total_area : surface_area + end_area; /* 総表面積 [m^2] */
+
+/* 太陽定数（αCen A） */
+S_solar : 1360;                      /* 太陽定数 [W/m^2] */
+
+/* 温度目標 */
+T_target : 22 + 273;                 /* 目標温度 [K] (22℃) */
+T_min : 20 + 273;                    /* 最低許容温度 [K] */
+T_max : 24 + 273;                    /* 最高許容温度 [K] */
+
+/* 材料パラメータ */
+emissivity : 0.8;                    /* 表面放射率 */
+albedo : 0.3;                        /* アルベド */
+sigma_sb : 5.670374419e-8;           /* ステファン・ボルツマン定数 */
+
+printf(true, "シリンダー半径: ~,0f m~%", R)$
+printf(true, "シリンダー長さ: ~,0f m~%", L)$
+printf(true, "側面積: ~,2e m^2~%", surface_area)$
+printf(true, "端部面積: ~,2e m^2~%", end_area)$
+printf(true, "総表面積: ~,2e m^2~%", total_area)$
+printf(true, "目標温度: ~,1f℃ (~,1f K)~%", T_target-273, T_target)$
+printf(true, "許容範囲: ~,1f℃〜~,1f℃~%~%", T_min-273, T_max-273)$
+
+/* ----- エネルギー収支 ----- */
+print("--- エネルギー収支 ---")$
+
+/* 太陽光入射エネルギー */
+P_solar_in : S_solar * surface_area * (1 - albedo)$
+
+/* 熱放射による放熱 */
+P_rad_out : emissivity * sigma_sb * total_area * T_target^4$
+
+/* 内部発生熱（人間・機器） */
+P_internal : 100 * 1000000;          /* 100W/人 × 100万人 [W] */
+
+/* 正味エネルギー収支 */
+P_net : P_solar_in + P_internal - P_rad_out$
+
+printf(true, "太陽光入射エネルギー: ~,2e W~%", P_solar_in)$
+printf(true, "熱放射による放熱: ~,2e W~%", P_rad_out)$
+printf(true, "内部発生熱: ~,2e W~%", P_internal)$
+printf(true, "正味エネルギー収支: ~,2e W~%~%", P_net)$
+
+/* ----- 温度制御設計 ----- */
+print("--- 温度制御設計 ---")$
+
+/* 必要な冷却/加熱能力 */
+if P_net > 0 then (
+    P_cooling : P_net,
+    P_heating : 0,
+    print("冷却が必要")
+) else (
+    P_cooling : 0,
+    P_heating : -P_net,
+    print("加熱が必要")
+)$
+
+printf(true, "必要な冷却能力: ~,2e W~%", P_cooling)$
+printf(true, "必要な加熱能力: ~,2e W~%", P_heating)$
+printf(true, "1人あたりの冷却/加熱: ~,1f W/人~%~%", max(P_cooling, P_heating)/1000000)$
+
+/* ----- ヒートポンプ設計 ----- */
+print("--- ヒートポンプ設計 ---")$
+
+/* ヒートポンプのCOP（成績係数） */
+COP : 3.5;                           /* ヒートポンプCOP */
+
+/* 必要な電力 */
+P_heat_pump : max(P_cooling, P_heating) / COP$
+
+/* ヒートポンプ台数 */
+heat_pump_capacity : 100000;         /* 1台あたり能力 [W] (100kW) */
+n_heat_pumps_raw : max(P_cooling, P_heating) / heat_pump_capacity;
+n_heat_pumps : float(ceil(n_heat_pumps_raw));
+
+printf(true, "ヒートポンプCOP: ~,1f~%", COP)$
+printf(true, "必要な電力: ~,2e W~%", P_heat_pump)$
+printf(true, "ヒートポンプ1台あたり能力: ~,0f kW~%", heat_pump_capacity/1000)$
+printf(true, "必要台数: ~,0f 台~%~%", n_heat_pumps)$
+
+/* ----- 断熱設計 ----- */
+print("--- 断熱設計 ---")$
+
+/* 断熱材の熱伝導率 */
+k_insulation : 0.04;                 /* 断熱材熱伝導率 [W/m/K] */
+
+/* 外気温度（宇宙空間） */
+T_space : 2.7;                       /* 宇宙背景温度 [K] */
+
+/* 断熱厚さと熱損失の関係 */
+q_loss(t_insulation) := k_insulation / t_insulation * (T_target - T_space) * total_area$
+
+/* 最適断熱厚さ（熱損失が内部発生熱の10%以下になる厚さ） */
+t_insulation_opt : k_insulation * (T_target - T_space) * total_area / (0.1 * P_internal)$
+
+printf(true, "断熱材熱伝導率: ~,3f W/m/K~%", k_insulation)$
+printf(true, "最適断熱厚さ: ~,1f m~%~%", t_insulation_opt)$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 温度vsエネルギー収支 を表示します...")$
+
+/* グラフ1: 温度vs放射放熱 */
+plot2d(
+    emissivity * sigma_sb * total_area * T^4, [T, 200, 400],
+    [xlabel, "Temperature [K]"],
+    [ylabel, "Radiation Loss [W]"],
+    [title, "Radiation Loss vs Temperature"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ2: 断熱厚さvs熱損失 を表示します...")$
+
+/* グラフ2: 断熱厚さvs熱損失 */
+plot2d(
+    q_loss(t), [t, 0.01, 1.0],
+    [xlabel, "Insulation Thickness [m]"],
+    [ylabel, "Heat Loss [W]"],
+    [title, "Heat Loss vs Insulation Thickness"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ3: 人口vs必要エネルギー を表示します...")$
+
+/* グラフ3: 人口vs必要エネルギー */
+plot2d(
+    100 * N + S_solar * surface_area * (1 - albedo) - emissivity * sigma_sb * total_area * T_target^4,
+    [N, 0, 2000000],
+    [xlabel, "Population"],
+    [ylabel, "Net Energy [W]"],
+    [title, "Net Energy vs Population"],
+    [style, [lines, 2]],
+    [color, green])$
+
+/* ----- CSV出力 ----- */
+csv_file : "HZ05_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Solar_Input,~,2e,W~%", P_solar_in)$
+printf(f_csv, "Radiation_Output,~,2e,W~%", P_rad_out)$
+printf(f_csv, "Internal_Heat,~,2e,W~%", P_internal)$
+printf(f_csv, "Net_Energy,~,2e,W~%", P_net)$
+printf(f_csv, "Cooling_Required,~,2e,W~%", P_cooling)$
+printf(f_csv, "Heating_Required,~,2e,W~%", P_heating)$
+printf(f_csv, "Heat_Pump_Power,~,2e,W~%", P_heat_pump)$
+printf(f_csv, "Heat_Pumps_Needed,~,0d,units~%", n_heat_pumps)$
+printf(f_csv, "Insulation_Thickness,~,2f,m~%", t_insulation_opt)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "HZ05_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "HZ-05: 温度制御システム サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【基本パラメータ】~%")$
+printf(f_sum, "  シリンダー半径: ~,0f m~%", R)$
+printf(f_sum, "  シリンダー長さ: ~,0f m~%", L)$
+printf(f_sum, "  総表面積: ~,2e m^2~%", total_area)$
+printf(f_sum, "  目標温度: ~,1f℃~%~%", T_target-273)$
+printf(f_sum, "【エネルギー収支】~%")$
+printf(f_sum, "  太陽光入射: ~,2e W~%", P_solar_in)$
+printf(f_sum, "  放射放熱: ~,2e W~%", P_rad_out)$
+printf(f_sum, "  内部発生熱: ~,2e W~%", P_internal)$
+printf(f_sum, "  正味収支: ~,2e W~%~%", P_net)$
+printf(f_sum, "【温度制御】~%")$
+printf(f_sum, "  冷却能力: ~,2e W~%", P_cooling)$
+printf(f_sum, "  加熱能力: ~,2e W~%", P_heating)$
+printf(f_sum, "  ヒートポンプ電力: ~,2e W~%", P_heat_pump)$
+printf(f_sum, "  ヒートポンプ台数: ~,0d 台~%", n_heat_pumps)$
+printf(f_sum, "  断熱厚さ: ~,2f m~%~%", t_insulation_opt)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "オニールシリンダーの温度制御には、~%")$
+printf(f_sum, "太陽光入射と放射放熱のバランスが重要。~%")$
+printf(f_sum, "ヒートポンプと断熱材の組み合わせで、~%")$
+printf(f_sum, "快適な温度（~,1f℃）を維持できる。~%", T_target-273)$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== HZ-05 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$
+

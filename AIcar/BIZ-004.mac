@@ -1,0 +1,109 @@
+/* BIZ-004: SSの多機能化戦略 - ポートフォリオ最適化 */
+/* 課題: 全固体電池時代を見据えたSSの多機能化 */
+/* 計算内容: 最適投資配分 */
+/* アルゴリズム: グリッドサーチ（簡易版） */
+
+kill(all);
+
+/* ---- 期待リターン ---- */
+ER: [12.0, 8.0, 15.0, 6.0];
+
+/* ---- 共分散行列 ---- */
+COV: matrix(
+  [324.0, 64.8, 198.0, 36.0],
+  [64.8, 144.0, 105.6, 12.0],
+  [198.0, 105.6, 484.0, 66.0],
+  [36.0, 12.0, 66.0, 100.0]
+);
+
+/* ---- リスク回避度 ---- */
+lambda_risk: 2.5;
+
+/* ---- ポートフォリオ関数 ---- */
+portfolio_return(x) := sum(x[i] * ER[i], i, 1, 4);
+portfolio_risk(x) := sum(sum(x[i] * COV[i,j] * x[j], j, 1, 4), i, 1, 4);
+objective(x) := -portfolio_return(x) + lambda_risk * portfolio_risk(x);
+
+/* ---- グリッドサーチ（5%刻み） ---- */
+best_obj: inf;
+best_x: [0, 0, 0, 0];
+
+print("グリッドサーチ実行中...")$
+for a: 0 step 0.05 thru 1 do (
+  for b: 0 step 0.05 thru 1 - a do (
+    for c: 0 step 0.05 thru 1 - a - b do (
+      d: 1 - a - b - c,
+      if d >= 0 then (
+        x: [a, b, c, d],
+        obj_val: objective(x),
+        if obj_val < best_obj then (
+          best_obj: obj_val,
+          best_x: x
+        )
+      )
+    )
+  )
+)$
+
+/* ---- 結果表示 ---- */
+print("")$
+print("=== 最適投資配分 ===")$
+print("  バッテリー交換: ", float(best_x[1] * 100), "%")$
+print("  充電インフラ:   ", float(best_x[2] * 100), "%")$
+print("  全固体電池:     ", float(best_x[3] * 100), "%")$
+print("  その他:         ", float(best_x[4] * 100), "%")$
+
+ret: portfolio_return(best_x);
+risk: portfolio_risk(best_x);
+sharpe: ret / sqrt(risk);
+
+print("")$
+print("期待リターン: ", float(ret), "%")$
+print("ポートフォリオリスク: ", float(sqrt(risk)))$
+print("シャープレシオ: ", float(sharpe))$
+
+/* ---- 詳細分析 ---- */
+print("")$
+print("=== ポートフォリオ分析 ===")$
+print("  バッテリー交換: ", float(best_x[1]*100), "% (リターン ", float(ER[1]), "%, リスク ", float(sqrt(COV[1,1])), ")")$
+print("  充電インフラ:   ", float(best_x[2]*100), "% (リターン ", float(ER[2]), "%, リスク ", float(sqrt(COV[2,2])), ")")$
+print("  全固体電池:     ", float(best_x[3]*100), "% (リターン ", float(ER[3]), "%, リスク ", float(sqrt(COV[3,3])), ")")$
+print("  その他:         ", float(best_x[4]*100), "% (リターン ", float(ER[4]), "%, リスク ", float(sqrt(COV[4,4])), ")")$
+
+/* ---- グラフ ---- */
+set_plot_option([plot_format, gnuplot])$
+
+allocation_vals: best_x * 100;
+bar_data: makelist([i, allocation_vals[i]], i, 1, 4);
+
+plot2d([discrete, bar_data],
+       [style, [impulses, 3, 1]],
+       [color, blue],
+       [xlabel, "Assets"],
+       [ylabel, "Allocation [%]"],
+       [title, "Optimal Investment Allocation"],
+       [gnuplot_preamble, "set grid; set xtics ('Battery' 1, 'Charging' 2, 'Solid' 3, 'Other' 4); set yrange [0:100];"])$
+
+/* ---- 結論 ---- */
+print("")$
+print("=== 戦略的示唆 ===")$
+
+if best_x[3] > best_x[1] and best_x[3] > best_x[2] then
+  print("  - 全固体電池（資産3）が最も高いウェイト")$
+
+if best_x[1] > best_x[2] then
+  msg: "  - バッテリー交換は充電インフラよりも優先"
+else
+  msg: "  - 充電インフラはバッテリー交換よりも優先"$
+print(msg)$
+
+print("  - リスク回避度に応じて配分を調整可能")$
+print("  - ポートフォリオの多様化がリスク軽減に有効")$
+print("  - 全固体電池の技術成熟度が投資判断の鍵")$
+
+print("")$
+print("=== 推奨アクション ===")$
+printf(true, "1. 全固体電池への投資: ~,2f%%~%", best_x[3] * 100)$
+printf(true, "2. バッテリー交換への投資: ~,2f%%~%", best_x[1] * 100)$
+printf(true, "3. 充電インフラへの投資: ~,2f%%~%", best_x[2] * 100)$
+printf(true, "4. その他への投資: ~,2f%%~%", best_x[4] * 100)$

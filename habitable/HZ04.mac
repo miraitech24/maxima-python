@@ -1,0 +1,183 @@
+/* ============================================================
+   HZ-04: 人工重力勾配最適化
+   目的：オニールシリンダー型人工HZの居住区上下での重力差を
+         最小化する設計パラメータを導出する。
+   仕様：
+     - シリンダー半径 R = 5000m
+     - 目標重力 g = 9.81 m/s^2
+     - 回転角速度 ω = sqrt(g/R)
+     - 居住区の高さ方向での重力変化を評価
+     - 快適性指数（重力勾配の許容範囲）を定義
+   注意：
+     - set_plot_option([plot_format, gnuplot]); で各グラフを別window表示
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画
+     - 整数は~d、浮動小数点数は~fを使用
+   出力:
+     1. HZ04_results.csv: 重力勾配計算結果
+     2. HZ04_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+/* グラフ表示設定 */
+set_plot_option([plot_format, gnuplot]);
+
+print("===== HZ-04: 人工重力勾配最適化 =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+R : 5000;                            /* シリンダー半径 [m] */
+g_target : 9.81;                     /* 目標重力 [m/s^2] */
+omega : sqrt(g_target / R);          /* 回転角速度 [rad/s] */
+T_rotation : 2 * %pi / omega;        /* 回転周期 [s] */
+
+/* 居住区の高さ範囲 */
+h_min : 0;                           /* 床面からの最小高さ [m] */
+h_max : 100;                         /* 床面からの最大高さ [m] */
+h_step : 5;                          /* 計算ステップ [m] */
+
+printf(true, "シリンダー半径: ~,0f m~%", R)$
+printf(true, "目標重力: ~,2f m/s^2~%", g_target)$
+printf(true, "回転角速度: ~,6f rad/s~%", omega)$
+printf(true, "回転周期: ~,2f 秒 (~,2f 分)~%~%", T_rotation, T_rotation/60)$
+
+/* ----- 重力勾配の計算 ----- */
+print("--- 重力勾配の計算 ---")$
+
+/* 高さhでの重力: g(h) = ω^2 * (R - h) */
+g_at_height(h) := omega^2 * (R - h)$
+
+/* 床面での重力 */
+g_floor : g_at_height(0)$
+
+/* 高さh_maxでの重力 */
+g_ceiling : g_at_height(h_max)$
+
+/* 重力勾配（高さ1mあたりの重力変化） */
+gradient : (g_floor - g_ceiling) / h_max$
+
+/* 重力変化率（%） */
+gravity_change_percent : (g_floor - g_ceiling) / g_floor * 100$
+
+printf(true, "床面での重力: ~,4f m/s^2~%", g_floor)$
+printf(true, "天井面での重力 (h=~,0fm): ~,4f m/s^2~%", h_max, g_ceiling)$
+printf(true, "重力勾配: ~,6f (m/s^2)/m~%", gradient)$
+printf(true, "重力変化率: ~,3f%~%~%", gravity_change_percent)$
+
+/* ----- 快適性評価 ----- */
+print("--- 快適性評価 ---")$
+
+/* 快適性基準（NASAの基準） */
+/* 重力勾配 < 0.01 (m/s^2)/m が快適 */
+comfort_threshold : 0.01;            /* 快適性閾値 [ (m/s^2)/m ] */
+max_comfort_height : (g_floor - omega^2 * R) / (-omega^2) + R - g_floor / omega^2$
+/* 実際には最大快適高さは以下で計算 */
+max_comfort_height : g_floor / omega^2 - R + R$
+/* 正しくは: g(h) >= g_floor - comfort_threshold * h を解く */
+/* g_floor - ω^2 * h >= g_floor - comfort_threshold * h */
+/* ω^2 * h <= comfort_threshold * h */
+/* これは常に成立するので、別の基準を使う */
+/* 重力変化率 < 5% が快適とされる */
+comfort_change_limit : 5;            /* 快適な重力変化率 [%] */
+max_comfort_height : (comfort_change_limit / 100) * g_floor / omega^2$
+
+printf(true, "快適性基準:~%")$
+printf(true, "  重力変化率 < ~,0f% が快適~%", comfort_change_limit)$
+printf(true, "  快適な最大高さ: ~,1f m~%~%", max_comfort_height)$
+
+/* ----- パラメータスイープ ----- */
+print("--- パラメータスイープ ---")$
+
+printf(true, "半径[m] | 角速度[rad/s] | 周期[分] | 重力勾配[(m/s^2)/m] | 快適高さ[m]~%")$
+printf(true, "--------+-------------+---------+-------------------+------------~%")$
+
+for radius:1000 thru 10000 step 1000 do block(
+    [omega_r, g_floor_r, grad_r, comfort_h],
+    omega_r : sqrt(g_target / radius),
+    g_floor_r : omega_r^2 * radius,
+    grad_r : omega_r^2,
+    comfort_h : (comfort_change_limit / 100) * g_floor_r / omega_r^2,
+    printf(true, "~6,0f  | ~10,6f  | ~7,2f  | ~15,6f  | ~10,1f~%",
+           radius, omega_r, (2*%pi/omega_r)/60, grad_r, comfort_h)
+)$
+print("")$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 高さvs重力 を表示します...")$
+
+/* グラフ1: 高さ方向の重力分布 */
+plot2d(
+    g_at_height(h), [h, 0, h_max],
+    [xlabel, "Height from Floor [m]"],
+    [ylabel, "Gravity [m/s^2]"],
+    [title, "Gravity Distribution in Cylinder"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ2: 半径vs重力勾配 を表示します...")$
+
+/* グラフ2: 半径vs重力勾配 */
+plot2d(
+    g_target / r, [r, 1000, 10000],
+    [xlabel, "Cylinder Radius [m]"],
+    [ylabel, "Gravity Gradient [(m/s^2)/m]"],
+    [title, "Gravity Gradient vs Radius"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ3: 半径vs快適高さ を表示します...")$
+
+/* グラフ3: 半径vs快適高さ */
+plot2d(
+    (comfort_change_limit / 100) * g_target / (g_target / r), [r, 1000, 10000],
+    [xlabel, "Cylinder Radius [m]"],
+    [ylabel, "Comfortable Height [m]"],
+    [title, "Comfortable Height vs Radius"],
+    [style, [lines, 2]],
+    [color, green])$
+
+/* ----- CSV出力 ----- */
+csv_file : "HZ04_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Height_m,Gravity_m_s2~%")$
+for h:0 thru h_max step h_step do
+    printf(f_csv, "~,1f,~,6f~%", h, g_at_height(h))$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "HZ04_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "HZ-04: 人工重力勾配最適化 サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【基本パラメータ】~%")$
+printf(f_sum, "  シリンダー半径: ~,0f m~%", R)$
+printf(f_sum, "  目標重力: ~,2f m/s^2~%", g_target)$
+printf(f_sum, "  回転角速度: ~,6f rad/s~%", omega)$
+printf(f_sum, "  回転周期: ~,2f 秒 (~,2f 分)~%~%", T_rotation, T_rotation/60)$
+printf(f_sum, "【重力勾配結果】~%")$
+printf(f_sum, "  床面重力: ~,4f m/s^2~%", g_floor)$
+printf(f_sum, "  天井重力 (h=~,0fm): ~,4f m/s^2~%", h_max, g_ceiling)$
+printf(f_sum, "  重力勾配: ~,6f (m/s^2)/m~%", gradient)$
+printf(f_sum, "  重力変化率: ~,3f%~%~%", gravity_change_percent)$
+printf(f_sum, "【快適性評価】~%")$
+printf(f_sum, "  快適な重力変化率: < ~,0f%~%", comfort_change_limit)$
+printf(f_sum, "  快適な最大高さ: ~,1f m~%~%", max_comfort_height)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "半径~,0fmのオニールシリンダーでは、~%", R)$
+printf(f_sum, "高さ~,0fmまでの居住区で重力変化率~,2f%となり、~%", h_max, gravity_change_percent)$
+printf(f_sum, "快適性基準(~,0f%)を満たす。~%", comfort_change_limit)$
+printf(f_sum, "より大きな半径にすることで、重力勾配をさらに小さくできる。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== HZ-04 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

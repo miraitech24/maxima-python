@@ -1,0 +1,279 @@
+/* ============================================================
+   HZ-09: 人口収容シミュレーション
+   目的：オニールシリンダー型人工HZに100万人を収容するための
+         生活空間・インフラ設計を行う。
+   仕様：
+     - 100万人の生活に必要な面積を計算
+     - 居住区・公共区・インフラ区の面積配分を最適化
+     - 交通網・上下水道・電力供給などのインフラ規模を算出
+     - 人口密度と快適性のバランスを評価
+   注意：
+     - set_plot_option([plot_format, gnuplot]); で各グラフを別window表示
+     - drawのsubplotはMaximaでエラーになるため使用しない
+     - グラフはplot2dで個別に描画
+     - 整数は~d、浮動小数点数は~fを使用
+   出力:
+     1. HZ09_results.csv: 人口収容計算結果
+     2. HZ09_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+/* グラフ表示設定 */
+set_plot_option([plot_format, gnuplot]);
+
+print("===== HZ-09: 人口収容シミュレーション =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+/* シリンダー形状 */
+R : 5000;                            /* 半径 [m] */
+L : 20000;                           /* 長さ [m] */
+floor_area : 2 * %pi * R * L;        /* 床面積 [m^2] */
+
+/* 人口 */
+N_pop : 1000000;                     /* 収容人口 [人] */
+
+/* 面積配分比率 */
+ratio_living : 0.4;                  /* 居住区比率 */
+ratio_public : 0.3;                  /* 公共区比率 */
+ratio_infra : 0.2;                   /* インフラ区比率 */
+ratio_green : 0.1;                   /* 緑地・公園比率 */
+
+printf(true, "シリンダー半径: ~,0f m~%", R)$
+printf(true, "シリンダー長さ: ~,0f m~%", L)$
+printf(true, "総床面積: ~,2e m^2~%", floor_area)$
+printf(true, "収容人口: ~,0d 人~%~%", N_pop)$
+
+/* ----- 面積配分 ----- */
+print("--- 面積配分 ---")$
+
+A_living : floor_area * ratio_living;
+A_public : floor_area * ratio_public;
+A_infra : floor_area * ratio_infra;
+A_green : floor_area * ratio_green;
+
+printf(true, "居住区面積: ~,2e m^2 (~,0f%)~%", A_living, ratio_living*100)$
+printf(true, "公共区面積: ~,2e m^2 (~,0f%)~%", A_public, ratio_public*100)$
+printf(true, "インフラ区面積: ~,2e m^2 (~,0f%)~%", A_infra, ratio_infra*100)$
+printf(true, "緑地面積: ~,2e m^2 (~,0f%)~%~%", A_green, ratio_green*100)$
+
+/* ----- 居住区設計 ----- */
+print("--- 居住区設計 ---")$
+
+/* 1人あたり居住面積 */
+living_area_per_person : A_living / N_pop;
+
+/* 世帯構成（平均2.5人/世帯） */
+household_size : 2.5;
+n_households : N_pop / household_size;
+
+/* 1世帯あたり住戸面積 */
+apartment_area : living_area_per_person * household_size;
+
+printf(true, "1人あたり居住面積: ~,1f m^2/人~%", living_area_per_person)$
+printf(true, "平均世帯人数: ~,1f 人/世帯~%", household_size)$
+printf(true, "世帯数: ~,0d 世帯~%", n_households)$
+printf(true, "1世帯あたり住戸面積: ~,1f m^2~%~%", apartment_area)$
+
+/* ----- 公共施設設計 ----- */
+print("--- 公共施設設計 ---")$
+
+/* 公共施設の内訳 */
+school_area : A_public * 0.3;        /* 教育施設 */
+hospital_area : A_public * 0.2;      /* 医療施設 */
+commercial_area : A_public * 0.3;    /* 商業施設 */
+office_area : A_public * 0.2;        /* オフィス */
+
+printf(true, "教育施設面積: ~,2e m^2~%", school_area)$
+printf(true, "医療施設面積: ~,2e m^2~%", hospital_area)$
+printf(true, "商業施設面積: ~,2e m^2~%", commercial_area)$
+printf(true, "オフィス面積: ~,2e m^2~%~%", office_area)$
+
+/* 必要学校数 */
+students_per_school : 500;
+n_schools_raw : N_pop * 0.2 / students_per_school;
+n_schools : float(ceil(n_schools_raw));
+
+/* 必要病床数 */
+beds_per_1000 : 10;
+n_beds : N_pop * beds_per_1000 / 1000;
+
+printf(true, "必要学校数: ~,0d 校~%", n_schools)$
+printf(true, "必要病床数: ~,0d 床~%~%", n_beds)$
+
+/* ----- インフラ設計 ----- */
+print("--- インフラ設計 ---")$
+
+/* 電力需要 */
+power_per_person : 1000;             /* 1人あたり電力 [W] */
+total_power : N_pop * power_per_person;
+
+/* 上下水道 */
+water_per_person : 300;              /* 1人あたり水使用量 [L/日] */
+total_water : N_pop * water_per_person;
+
+/* 廃棄物 */
+waste_per_person : 1.0;              /* 1人あたり廃棄物 [kg/日] */
+total_waste : N_pop * waste_per_person;
+
+printf(true, "総電力需要: ~,2e W (~,0f MW)~%", total_power, total_power/1e6)$
+printf(true, "総水使用量: ~,2e L/日 (~,0f トン/日)~%", total_water, total_water/1000)$
+printf(true, "総廃棄物量: ~,2e kg/日 (~,0f トン/日)~%~%", total_waste, total_waste/1000)$
+
+/* ----- 交通網設計 ----- */
+print("--- 交通網設計 ---")$
+
+/* 移動手段の分担 */
+transit_ratio : 0.6;                 /* 公共交通利用率 */
+walk_ratio : 0.3;                    /* 徒歩率 */
+bike_ratio : 0.1;                    /* 自転車率 */
+
+/* 公共交通の必要容量 */
+peak_flow : N_pop * transit_ratio * 0.1;  /* ピーク時流量 [人/時] */
+train_capacity : 1000;               /* 1編成あたり輸送力 [人] */
+n_trains_raw : peak_flow / train_capacity;
+n_trains : float(ceil(n_trains_raw));
+
+printf(true, "公共交通利用率: ~,0f%~%", transit_ratio*100)$
+printf(true, "ピーク時流量: ~,0d 人/時~%", peak_flow)$
+printf(true, "必要列車本数: ~,0d 本/時~%~%", n_trains)$
+
+/* ----- 人口密度評価 ----- */
+print("--- 人口密度評価 ---")$
+
+/* 総人口密度 */
+density_total : N_pop / floor_area;
+
+/* 居住区人口密度 */
+density_living : N_pop / A_living;
+
+printf(true, "総人口密度: ~,1f 人/m^2~%", density_total)$
+printf(true, "居住区人口密度: ~,1f 人/m^2~%", density_living)$
+printf(true, "参考: 東京23区の人口密度: ~,1f 人/m^2~%~%", 15000/1e6)$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 面積配分 を表示します...")$
+
+/* グラフ1: 面積配分（横棒グラフ） */
+draw2d(
+    title = "Area Allocation",
+    xlabel = "Area [m^2]",
+    ylabel = "Zone",
+    grid = true,
+    xrange = [0, floor_area],
+
+    /* 居住区 */
+    fill_color = red,
+    color = red,
+    polygon([[A_living, 1], [0, 1], [0, 0.7], [A_living, 0.7]]),
+    color = black,
+    label(["Living", A_living*0.05, 1]),
+
+    /* 公共区 */
+    fill_color = blue,
+    color = blue,
+    polygon([[A_public, 2], [0, 2], [0, 1.7], [A_public, 1.7]]),
+    color = black,
+    label(["Public", A_public*0.05, 2]),
+
+    /* インフラ区 */
+    fill_color = green,
+    color = green,
+    polygon([[A_infra, 3], [0, 3], [0, 2.7], [A_infra, 2.7]]),
+    color = black,
+    label(["Infrastructure", A_infra*0.05, 3]),
+
+    /* 緑地 */
+    fill_color = orange,
+    color = orange,
+    polygon([[A_green, 4], [0, 4], [0, 3.7], [A_green, 3.7]]),
+    color = black,
+    label(["Green", A_green*0.05, 4])
+)$
+
+print("グラフ2: 人口vs必要面積 を表示します...")$
+
+/* グラフ2: 人口vs必要面積 */
+plot2d(
+    N * (living_area_per_person + 0.5 * living_area_per_person), [N, 0, 2000000],
+    [xlabel, "Population"],
+    [ylabel, "Required Area [m^2]"],
+    [title, "Required Area vs Population"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ3: 人口vsインフラ需要 を表示します...")$
+
+/* グラフ3: 人口vs電力需要 */
+plot2d(
+    N * power_per_person / 1e6, [N, 0, 2000000],
+    [xlabel, "Population"],
+    [ylabel, "Power Demand [MW]"],
+    [title, "Power Demand vs Population"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+/* ----- CSV出力 ----- */
+csv_file : "HZ09_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Population,~,0d,persons~%", N_pop)$
+printf(f_csv, "Total_Floor_Area,~,2e,m^2~%", floor_area)$
+printf(f_csv, "Living_Area,~,2e,m^2~%", A_living)$
+printf(f_csv, "Public_Area,~,2e,m^2~%", A_public)$
+printf(f_csv, "Infra_Area,~,2e,m^2~%", A_infra)$
+printf(f_csv, "Green_Area,~,2e,m^2~%", A_green)$
+printf(f_csv, "Living_Area_Per_Person,~,1f,m^2~%", living_area_per_person)$
+printf(f_csv, "Households,~,0d,units~%", n_households)$
+printf(f_csv, "Schools,~,0d,units~%", n_schools)$
+printf(f_csv, "Hospital_Beds,~,0d,units~%", n_beds)$
+printf(f_csv, "Total_Power,~,2e,W~%", total_power)$
+printf(f_csv, "Total_Water,~,2e,L/day~%", total_water)$
+printf(f_csv, "Total_Waste,~,2e,kg/day~%", total_waste)$
+printf(f_csv, "Trains_Needed,~,0d,units/hour~%", n_trains)$
+printf(f_csv, "Density_Total,~,4f,persons/m^2~%", density_total)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "HZ09_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "HZ-09: 人口収容シミュレーション サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【基本パラメータ】~%")$
+printf(f_sum, "  収容人口: ~,0d 人~%", N_pop)$
+printf(f_sum, "  総床面積: ~,2e m^2~%", floor_area)$
+printf(f_sum, "  1人あたり面積: ~,1f m^2~%~%", living_area_per_person)$
+printf(f_sum, "【面積配分】~%")$
+printf(f_sum, "  居住区: ~,2e m^2 (~,0f%)~%", A_living, ratio_living*100)$
+printf(f_sum, "  公共区: ~,2e m^2 (~,0f%)~%", A_public, ratio_public*100)$
+printf(f_sum, "  インフラ区: ~,2e m^2 (~,0f%)~%", A_infra, ratio_infra*100)$
+printf(f_sum, "  緑地: ~,2e m^2 (~,0f%)~%~%", A_green, ratio_green*100)$
+printf(f_sum, "【インフラ需要】~%")$
+printf(f_sum, "  電力: ~,0f MW~%", total_power/1e6)$
+printf(f_sum, "  水: ~,0f トン/日~%", total_water/1000)$
+printf(f_sum, "  廃棄物: ~,0f トン/日~%", total_waste/1000)$
+printf(f_sum, "  学校: ~,0d 校~%", n_schools)$
+printf(f_sum, "  病床: ~,0d 床~%", n_beds)$
+printf(f_sum, "  列車: ~,0d 本/時~%~%", n_trains)$
+printf(f_sum, "【人口密度】~%")$
+printf(f_sum, "  総密度: ~,4f 人/m^2~%", density_total)$
+printf(f_sum, "  居住区密度: ~,4f 人/m^2~%~%", density_living)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "100万人を収容するオニールシリンダーは、~%")$
+printf(f_sum, "1人あたり~,1f m^2の居住面積で設計可能。~%", living_area_per_person)$
+printf(f_sum, "東京23区の人口密度(~,4f人/m^2)と比較して~%", 15000/1e6)$
+printf(f_sum, "快適な生活空間を確保できる。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== HZ-09 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$

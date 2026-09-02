@@ -1,0 +1,50 @@
+/* BIZ-004: SSの多機能化戦略 - シンプル版 */
+/* ポートフォリオ最適化を手動で計算 */
+
+kill(all);
+
+/* ---- データ ---- */
+ER: [12.0, 8.0, 15.0, 6.0];
+COV: matrix(
+  [324.0, 64.8, 198.0, 36.0],
+  [64.8, 144.0, 105.6, 12.0],
+  [198.0, 105.6, 484.0, 66.0],
+  [36.0, 12.0, 66.0, 100.0]
+);
+
+/* ---- 組み合わせ評価 ---- */
+/* 全ての配分を総当たりで評価（簡易版） */
+best_ret: -inf;
+best_risk: inf;
+best_sharpe: -inf;
+best_x: [0, 0, 0, 0];
+
+/* 簡易的なグリッドサーチ（精度は粗いが概念を示す） */
+for a: 0 step 0.1 thru 1 do (
+  for b: 0 step 0.1 thru 1 - a do (
+    for c: 0 step 0.1 thru 1 - a - b do (
+      d: 1 - a - b - c,
+      if d >= 0 then (
+        x: [a, b, c, d],
+        ret: sum(x[i] * ER[i], i, 1, 4),
+        risk: sqrt(sum(sum(x[i] * COV[i,j] * x[j], j, 1, 4), i, 1, 4)),
+        sharpe: ret / risk,
+        if sharpe > best_sharpe then (
+          best_sharpe: sharpe,
+          best_ret: ret,
+          best_risk: risk,
+          best_x: x
+        )
+      )
+    )
+  )
+)$
+
+print("=== 最適投資配分（グリッドサーチ） ===")$
+printf(true, "  バッテリー交換: ~,2f%%~%", best_x[1] * 100)$
+printf(true, "  充電インフラ:   ~,2f%%~%", best_x[2] * 100)$
+printf(true, "  全固体電池:     ~,2f%%~%", best_x[3] * 100)$
+printf(true, "  その他:         ~,2f%%~%", best_x[4] * 100)$
+printf(true, "期待リターン: ~,2f%%~%", best_ret)$
+printf(true, "リスク: ~,2f~%", best_risk)$
+printf(true, "シャープレシオ: ~,2f~%", best_sharpe)$

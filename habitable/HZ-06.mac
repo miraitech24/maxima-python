@@ -1,0 +1,183 @@
+/* ============================================================
+   HZ-06: 軌道安定性解析
+   目的：αCen A周辺でのオニールシリンダーの軌道摂動と
+         長期安定性を評価する。
+   仕様：
+     - 連星系（αCen A/B）の重力摂動を考慮
+     - 軌道半径1.0 AUでの摂動力を計算
+     - 軌道補正に必要なΔVを算出
+     - 長期的な安定性指標を評価
+   注意：
+     - set_plot_option([plot_format, gnuplot]); で各グラフを別window表示
+     - 整数は~d、浮動小数点数は~fを使用
+   出力:
+     1. HZ06_results.csv: 軌道安定性計算結果
+     2. HZ06_summary.txt: 計算サマリー
+   ============================================================ */
+
+kill(all);
+
+/* グラフ表示設定 */
+set_plot_option([plot_format, gnuplot]);
+
+print("===== HZ-06: 軌道安定性解析 =====")$
+print("")$
+
+/* ----- 基本パラメータ ----- */
+print("--- 基本パラメータ ---")$
+
+/* 軌道パラメータ */
+R_orbit : 1.0;                       /* 軌道半径 [AU] */
+R_orbit_m : R_orbit * 1.496e11;      /* 軌道半径 [m] */
+
+/* αCen Aのパラメータ */
+M_A : 1.08 * 1.989e30;               /* αCen A質量 [kg] */
+G : 6.674e-11;                       /* 重力定数 */
+
+/* αCen Bのパラメータ */
+M_B : 0.91 * 1.989e30;               /* αCen B質量 [kg] */
+D_AB : 23.6 * 1.496e11;              /* A-B間距離 [m] */
+
+/* 軌道速度 */
+v_orbit : sqrt(G * M_A / R_orbit_m)$
+T_orbit : 2 * %pi * R_orbit_m / v_orbit$
+T_orbit_year : T_orbit / (365.25 * 24 * 3600)$
+
+printf(true, "軌道半径: ~,2f AU (~,2e m)~%", R_orbit, R_orbit_m)$
+printf(true, "αCen A質量: ~,2e kg~%", M_A)$
+printf(true, "αCen B質量: ~,2e kg~%", M_B)$
+printf(true, "A-B間距離: ~,2f AU (~,2e m)~%", D_AB/1.496e11, D_AB)$
+printf(true, "軌道速度: ~,0f m/s~%", v_orbit)$
+printf(true, "公転周期: ~,2f 年~%~%", T_orbit_year)$
+
+/* ----- 摂動解析 ----- */
+print("--- 摂動解析 ---")$
+
+/* αCen Bによる重力摂動加速度 */
+a_perturb : G * M_B / D_AB^2$
+
+/* 摂動による軌道速度変化 */
+delta_v_perturb : a_perturb * T_orbit$
+
+/* 摂動の相対強度 */
+perturb_ratio : a_perturb / (G * M_A / R_orbit_m^2)$
+
+printf(true, "αCen Bによる摂動加速度: ~,4e m/s^2~%", a_perturb)$
+printf(true, "摂動による速度変化: ~,2f m/s~%", delta_v_perturb)$
+printf(true, "摂動の相対強度: ~,4f~%~%", perturb_ratio)$
+
+/* ----- 軌道補正ΔV ----- */
+print("--- 軌道補正ΔV ---")$
+
+/* 1年間に必要なΔV（摂動を補正するため） */
+delta_v_annual : delta_v_perturb * (T_orbit_year / 1)$
+
+/* 10年間に必要なΔV */
+delta_v_10yr : delta_v_annual * 10$
+
+/* 100年間に必要なΔV */
+delta_v_100yr : delta_v_annual * 100$
+
+printf(true, "年間必要ΔV: ~,2f m/s~%", delta_v_annual)$
+printf(true, "10年間必要ΔV: ~,2f m/s~%", delta_v_10yr)$
+printf(true, "100年間必要ΔV: ~,2f m/s~%~%", delta_v_100yr)$
+
+/* ----- 安定性評価 ----- */
+print("--- 安定性評価 ---")$
+
+/* 安定性指標（摂動比が0.01以下なら安定） */
+stability_threshold : 0.01$
+is_stable : if perturb_ratio < stability_threshold then true else false$
+
+/* 軌道寿命の推定 */
+/* 摂動により軌道が崩壊するまでの時間 */
+t_lifetime : (v_orbit / delta_v_perturb) * T_orbit_year$
+
+printf(true, "安定性閾値: ~,3f~%", stability_threshold)$
+printf(true, "安定性判定: ~a~%", if is_stable then "安定" else "不安定")$
+printf(true, "推定軌道寿命: ~,2e 年~%~%", t_lifetime)$
+
+/* ----- グラフ描画 ----- */
+print("グラフ1: 軌道半径vs摂動比 を表示します...")$
+
+/* グラフ1: 軌道半径vs摂動比 */
+plot2d(
+    (G * M_B / D_AB^2) / (G * M_A / (r * 1.496e11)^2), [r, 0.5, 2.0],
+    [xlabel, "Orbit Radius [AU]"],
+    [ylabel, "Perturbation Ratio"],
+    [title, "Perturbation Ratio vs Orbit Radius"],
+    [style, [lines, 2]],
+    [color, red])$
+
+print("グラフ2: 時間vs累積ΔV を表示します...")$
+
+/* グラフ2: 時間vs累積ΔV */
+plot2d(
+    delta_v_perturb * t * T_orbit_year, [t, 0, 100],
+    [xlabel, "Time [years]"],
+    [ylabel, "Cumulative Delta-V [m/s]"],
+    [title, "Cumulative Delta-V vs Time"],
+    [style, [lines, 2]],
+    [color, blue])$
+
+print("グラフ3: 連星距離vs摂動比 を表示します...")$
+
+/* グラフ3: 連星距離vs摂動比 */
+plot2d(
+    (G * M_B / (d * 1.496e11)^2) / (G * M_A / R_orbit_m^2), [d, 10, 50],
+    [xlabel, "Binary Distance [AU]"],
+    [ylabel, "Perturbation Ratio"],
+    [title, "Perturbation Ratio vs Binary Distance"],
+    [style, [lines, 2]],
+    [color, green])$
+
+/* ----- CSV出力 ----- */
+csv_file : "HZ06_results.csv"$
+f_csv : openw(csv_file)$
+printf(f_csv, "Item,Value,Unit~%")$
+printf(f_csv, "Orbit_Radius,~,2f,AU~%", R_orbit)$
+printf(f_csv, "Orbit_Velocity,~,0f,m/s~%", v_orbit)$
+printf(f_csv, "Orbit_Period,~,2f,years~%", T_orbit_year)$
+printf(f_csv, "Perturbation_Accel,~,4e,m/s^2~%", a_perturb)$
+printf(f_csv, "Perturbation_Ratio,~,4f,-~%", perturb_ratio)$
+printf(f_csv, "DeltaV_Annual,~,2f,m/s~%", delta_v_annual)$
+printf(f_csv, "DeltaV_10yr,~,2f,m/s~%", delta_v_10yr)$
+printf(f_csv, "DeltaV_100yr,~,2f,m/s~%", delta_v_100yr)$
+printf(f_csv, "Stability,~a,-~%", if is_stable then "Stable" else "Unstable")$
+printf(f_csv, "Lifetime,~,2e,years~%", t_lifetime)$
+close(f_csv)$
+printf(true, "CSV保存: ~a~%", csv_file)$
+
+/* ----- サマリー出力 ----- */
+sum_file : "HZ06_summary.txt"$
+f_sum : openw(sum_file)$
+printf(f_sum, "HZ-06: 軌道安定性解析 サマリー~%")$
+printf(f_sum, "========================================~%~%")$
+printf(f_sum, "【基本パラメータ】~%")$
+printf(f_sum, "  軌道半径: ~,2f AU~%", R_orbit)$
+printf(f_sum, "  公転周期: ~,2f 年~%", T_orbit_year)$
+printf(f_sum, "  軌道速度: ~,0f m/s~%~%", v_orbit)$
+printf(f_sum, "【摂動解析】~%")$
+printf(f_sum, "  摂動加速度: ~,4e m/s^2~%", a_perturb)$
+printf(f_sum, "  摂動比: ~,4f~%", perturb_ratio)$
+printf(f_sum, "  安定性: ~a~%~%", if is_stable then "安定" else "不安定")$
+printf(f_sum, "【軌道補正】~%")$
+printf(f_sum, "  年間ΔV: ~,2f m/s~%", delta_v_annual)$
+printf(f_sum, "  100年ΔV: ~,2f m/s~%", delta_v_100yr)$
+printf(f_sum, "  軌道寿命: ~,2e 年~%~%", t_lifetime)$
+printf(f_sum, "【結論】~%")$
+printf(f_sum, "αCen A周辺の軌道は、αCen Bの重力摂動により~%")$
+printf(f_sum, "長期的には補正が必要。~%")$
+printf(f_sum, "摂動比~,4fは安定性閾値(~,2f)を~a。~%",
+       perturb_ratio, stability_threshold, if is_stable then "下回る" else "上回る")$
+printf(f_sum, "定期的な軌道補正（ΔV）により、長期安定が可能。~%")$
+close(f_sum)$
+printf(true, "サマリー保存: ~a~%", sum_file)$
+
+/* ----- 完了 ----- */
+print("")$
+print("===== HZ-06 計算完了 =====")$
+print("出力ファイル:")$
+printf(true, "  1. ~a~%", csv_file)$
+printf(true, "  2. ~a~%", sum_file)$
+print("  グラフは別windowで表示済み")$
