@@ -1,0 +1,7 @@
+Item,Scenario_A,Scenario_B,Scenario_C,Unit
+Integrity,0.000000,0.000000,0.000000,-
+Cost_factor,1.00,1.80,2.50,-
+Risk_factor,0.30,0.70,0.15,-
+Time_factor,1.00,3.50,2.00,-
+Resource_factor,1.00,2.50,2.80,-
+Total_score,1.1167,0.4797,1.5240,-

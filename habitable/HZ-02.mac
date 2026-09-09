@@ -1,0 +1,79 @@
+/* 
+   ====================================================================
+   【課題ID】HZ-02: ハビタブルゾーン（Habitable Zone）境界距離の導出解析
+   
+   【仕様】
+   ・恒星の光度 L (太陽光度 L_sun 単位) に対する生命居住可能域（Habitable Zone: HZ）
+     の内縁距離 (r_in) および外縁距離 (r_out) を数理モデルに基づき算出する。
+   ・Kopparapu et al. (2013) の実効放射フラックス（S_eff）モデルを適用：
+       内縁限界 (Runaway Greenhouse): S_eff_in = 1.107
+       外縁限界 (Maximum Greenhouse): S_eff_out = 0.356
+       r_in  = sqrt(L / S_eff_in)  [AU]
+       r_out = sqrt(L / S_eff_out) [AU]
+   ・太陽系 (L = 1.0) および M型赤色矮星（プロキシマ・ケンタウリ L = 0.00155）
+     における HZ 領域の数値を比較評価する。
+
+   【グラフの説明】
+   ・横軸: 恒星光度 L (0.001 〜 2.0 L_sun)
+   ・縦軸: 恒星からの距離 r [AU]
+   ・赤線（内縁 r_in）と青線（外縁 r_out）の間に挟まれた領域が HZ（水が液体で存在可能な領域）を表す。
+
+   【結論】
+   ・太陽系 (L = 1.0 L_sun):
+       内縁 r_in  = 約 0.950 AU
+       外縁 r_out = 約 1.676 AU （地球 1.0 AU は HZ 内に包含）
+   ・プロキシマ・ケンタウリ (L = 0.00155 L_sun):
+       内縁 r_in  = 約 0.0374 AU
+       外縁 r_out = 約 0.0660 AU （プロキシマb 0.0485 AU は HZ 内に包含）
+
+   【考察】
+   ・恒星の光度が低下すると、HZ 領域は恒星のきわめて近傍に移動する。
+   ・M型矮星周りの HZ 惑星は軌道半径が小さいため潮汐ロック（自転と公転の同期）が生じやすく、
+     大気循環や磁場防御機構が生命維持に重要な役割を果たす。
+   ====================================================================
+*/
+
+/* 描画レンダラーの設定（別ウィンドウ表示） */
+set_plot_option([plot_format, gnuplot]);
+
+/* 1. パラメータ定義（実効放射フラックス） */
+S_eff_in  : 1.107; /* 暴走温室限界 (Runaway Greenhouse) */
+S_eff_out : 0.356; /* 最大温室限界 (Maximum Greenhouse) */
+
+/* 2. HZ 境界距離関数の定義 [AU] */
+r_in(L)  := sqrt(L / S_eff_in);
+r_out(L) := sqrt(L / S_eff_out);
+
+/* 3. 各恒星系における数値計算 */
+/* 太陽系 (G型主系列星) */
+L_sun_val : 1.0;
+r_in_sun  : float(r_in(L_sun_val));
+r_out_sun : float(r_out(L_sun_val));
+
+/* プロキシマ・ケンタウリ (M型赤色矮星) */
+L_prox_val : 0.00155;
+r_in_prox  : float(r_in(L_prox_val));
+r_out_prox : float(r_out(L_prox_val));
+
+/* 4. 計算結果の出力 */
+print("==========================================");
+print(" [HZ-02] ハビタブルゾーン境界計算結果");
+print("==========================================");
+print("【太陽系 (L = 1.0 L_sun)】");
+print("  HZ 内縁 (r_in)  :", r_in_sun, "AU");
+print("  HZ 外縁 (r_out) :", r_out_sun, "AU");
+print("------------------------------------------");
+print("【プロキシマ・ケンタウリ (L = 0.00155 L_sun)】");
+print("  HZ 内縁 (r_in)  :", r_in_prox, "AU");
+print("  HZ 外縁 (r_out) :", r_out_prox, "AU");
+print("==========================================");
+
+/* 5. 恒星光度に対する HZ 境界プロット（plot2dによる安全な数値評価） */
+plot2d(
+    [r_in(L), r_out(L)],
+    [L, 0.001, 2.0],
+    [xlabel, "Stellar Luminosity (L / L_sun)"],
+    [ylabel, "Habitable Zone Boundary Distance (AU)"],
+    [legend, "Inner Limit (Runaway Greenhouse)", "Outer Limit (Max Greenhouse)"],
+    [title, "HZ-02: Habitable Zone Boundaries vs Stellar Luminosity"]
+);
